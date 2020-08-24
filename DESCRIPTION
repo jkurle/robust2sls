@@ -1,11 +1,26 @@
 Package: r2sls
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Outlier Robust Two-Stage Least Squares (2SLS) Inference and Testing
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Jiao", "Xiyu", email = "xiyu.jiao@nuffield.ox.ac.uk", role = "aut"),
+    person("Kurle", "Jonas", email = "mail@jonaskurle.com", 
+    role = c("aut","cre")))
+Description: This package provides easy tools for outlier robust inference.
+    The user specifies a reference distribution against which observations are
+    judged to determine whether they are outliers or not. After removing the
+    outliers, adjusted standard errors are automatically provided. Furthermore,
+    several staistical tests for the false positive rate can be calculated. The
+    outlier removing algorithm can be iterated a fixed number of times or until
+    the procedure converges.
+URL: https://github.com/jkurle/r2sls
+BugReports: https://github.com/jkurle/r2sls/issues
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Imports: 
+    AER,
+    assertthat
+Suggests: 
+    ggplot2,
+    mvtnorm
