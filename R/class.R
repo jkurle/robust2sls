@@ -1,34 +1,35 @@
-#' Constructor of r2sls class
+#' Constructor of robust2sls class
 #'
-#' \code{new_r2sls} turns a list into an object of \link{class} "\code{r2sls}"
+#' \code{new_robust2sls} turns a list into an object of \link{class}
+#' "\code{robust2sls}"
 #'
 #' @section Warning:
 #' Only checks that the input is a list but not that its components match the
-#' requirements of the "\code{r2sls}" class. Use the validator function
-#' \code{validate_r2sls} for that purpose.
+#' requirements of the "\code{robust2sls}" class. Use the validator function
+#' \code{validate_robust2sls} for that purpose.
 #'
-#' @param x A list with components of the "\code{r2sls}" class.
+#' @param x A list with components of the "\code{robust2sls}" class.
 #'
 #' @examples
 #' \dontrun{
-#' new_r2sls(1:10)
+#' new_robust2sls(1:10)
 #' }
 
-new_r2sls <- function(x = list()) {
+new_robust2sls <- function(x = list()) {
 
   stopifnot(is.list(x))
-  structure(x, class = "r2sls")
+  structure(x, class = "robust2sls")
 
 }
 
-#' Validator of r2sls class
+#' Validator of robust2sls class
 #'
-#' \code{validate_2rsls} checks that the input is a valid object of \link{class}
-#' "\code{r2sls}"
+#' \code{validate_2robustsls} checks that the input is a valid object of
+#' \link{class} "\code{robust2sls}"
 #'
-#' @param x An object whose validity of class "\code{r2sls}" is tested.
+#' @param x An object whose validity of class "\code{robust2sls}" is tested.
 
-validate_r2sls <- function(x) {
+validate_robust2sls <- function(x) {
 
   values <- unclass(x)
 
@@ -52,12 +53,13 @@ validate_r2sls <- function(x) {
 
 }
 
-#' Helper of r2sls class
+#' Helper of robust2sls class
 #'
-#' \code{r2sls} allows the user to create an object of \link{class}
-#' "\code{r2sls}" by specifying the different components of the list. The
-#' validator function \code{validate_r2sls} is called at the end to ensure that
-#' the resulting object is a valid object of \link{class} "\code{r2sls}".
+#' \code{robust2sls} allows the user to create an object of \link{class}
+#' "\code{robust2sls}" by specifying the different components of the list. The
+#' validator function \code{validate_robust2sls} is called at the end to ensure
+#' that the resulting object is a valid object of \link{class}
+#' "\code{robust2sls}".
 #'
 #' @param data A dataframe or matrix containing the original data used in the
 #' estimation.
@@ -70,11 +72,11 @@ validate_r2sls <- function(x) {
 #' @param converged A logical value whether the algorithm has converged.
 
 
-r2sls <- function(data, coefficients, gamma, iterations, converged) {
+robust2sls <- function(data, coefficients, gamma, iterations, converged) {
 
   x <- list(data = data, coefficients = coefficients, gamma = gamma,
             iterations = iterations, converged = converged)
-  x <- new_r2sls(x)
-  validate_r2sls(x)
+  x <- new_robust2sls(x)
+  validate_robust2sls(x)
 
 }
