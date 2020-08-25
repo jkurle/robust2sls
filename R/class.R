@@ -51,3 +51,30 @@ validate_r2sls <- function(x) {
   x
 
 }
+
+#' Helper of r2sls class
+#'
+#' \code{r2sls} allows the user to create an object of \link{class}
+#' "\code{r2sls}" by specifying the different components of the list. The
+#' validator function \code{validate_r2sls} is called at the end to ensure that
+#' the resulting object is a valid object of \link{class} "\code{r2sls}".
+#'
+#' @param data A dataframe or matrix containing the original data used in the
+#' estimation.
+#' @param coefficients A numeric vector of the second stage coefficients.
+#' @param gamma A numeric scalar between 0 and 1 representing the tail quantiles
+#' that determine the cutoff value for judging outliers.
+#' @param iterations Determines the number of iterations of the outlier
+#' detection algorithm. Either an integer >= 0 or a character \code{"inf"}
+#' representing iteration until convergence.
+#' @param converged A logical value whether the algorithm has converged.
+
+
+r2sls <- function(data, coefficients, gamma, iterations, converged) {
+
+  x <- list(data = data, coefficients = coefficients, gamma = gamma,
+            iterations = iterations, converged = converged)
+  x <- new_r2sls(x)
+  validate_r2sls(x)
+
+}
