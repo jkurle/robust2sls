@@ -16,6 +16,6 @@
 #' statistically significant. Furthermore, several different statistical tests
 #' are implemented to test whether the sample actually contains outliers.
 #'
+#' @name r2sls-package
 #' @docType package
-#' @name r2sls
 NULL
