@@ -23,6 +23,12 @@ extract_formula <- function(formula) {
   # split formula into its three party: y, x, z
   fml_split <- strsplit(fml, "~|\\|")
 
+  # ensure that the formula contains three parts
+  if (length(fml_split[[1]] != 1)) {
+    stop("The `formula` does not consist of three parts as in
+         y ~ x1 + x2 | x2 + z3")
+  }
+
   # delete symbols and leading & trailing spaces, collect in character vector
   y_var <- trimws(fml_split[[1]][1])
   x_var <- fml_split[[1]][2]
