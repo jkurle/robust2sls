@@ -24,7 +24,7 @@ extract_formula <- function(formula) {
   fml_split <- strsplit(fml, "~|\\|")
 
   # ensure that the formula contains three parts
-  if (length(fml_split[[1]] != 1)) {
+  if (length(fml_split[[1]]) != 3) {
     stop("The `formula` does not consist of three parts as in
          y ~ x1 + x2 | x2 + z3")
   }
