@@ -25,8 +25,8 @@ extract_formula <- function(formula) {
 
   # ensure that the formula contains three parts
   if (length(fml_split[[1]]) != 3) {
-    stop("The `formula` does not consist of three parts as in
-         y ~ x1 + x2 | x2 + z3")
+    stop(strwrap("The `formula` does not consist of three parts as in
+         y ~ x1 + x2 | x2 + z3", prefix = " ", initial = ""))
   }
 
   # delete symbols and leading & trailing spaces, collect in character vector
@@ -40,6 +40,12 @@ extract_formula <- function(formula) {
   x2_var <- setdiff(x_var, x1_var) # exogenous regressors
   z1_var <- x2_var # included instruments
   z2_var <- setdiff(z_var, z1_var) # outside instruments
+
+  if (length(x1_var) > length(z2_var)) {
+    stop(strwrap("The specified formula does not fulfill the order condition
+      (for 2SLS, the number of outside instruments must be weakly larger than
+      the number of endogenous regressors", prefix = " ", initial = ""))
+  }
 
   vars <- list(y_var = y_var, x1_var = x1_var, x2_var = x2_var, z1_var = z1_var,
                z2_var = z2_var)
