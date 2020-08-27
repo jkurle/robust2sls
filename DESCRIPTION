@@ -23,5 +23,8 @@ Imports:
     assertthat
 Suggests: 
     ggplot2,
-    mvtnorm
+    mvtnorm,
+    testthat
 RoxygenNote: 7.1.1
+Remotes: r-lib/testthat
+Config/testthat/edition: 3
