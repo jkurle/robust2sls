@@ -21,6 +21,12 @@ extract_formula <- function(formula) {
   # use Reduce() to avoid length > 1 if formula is too long
   fml <- Reduce(paste, deparse(formula))
 
+  # check that formula contains both "~" and "|" symbols
+  if (!(grepl("~", fml) && grepl("|", fml))) {
+    stop(strwrap("The `formula` is not of the required format since it does not
+          include both symbols `~` and `|`", prefix = " ", initial = ""))
+  }
+
   # split formula into its three party: y, x, z
   fml_split <- strsplit(fml, "~|\\|")
 
@@ -33,12 +39,17 @@ extract_formula <- function(formula) {
   # delete symbols and leading & trailing spaces, collect in character vector
   y_var <- trimws(fml_split[[1]][1])
   x_var <- fml_split[[1]][2]
-  x_var <- trimws(strsplit(x_var, "\\+")[[1]])
+  x_var <- trimws(strsplit(x_var, "\\+|\\*")[[1]])
   z_var <- fml_split[[1]][3]
-  z_var <- trimws(strsplit(z_var, "\\+")[[1]])
+  z_var <- trimws(strsplit(z_var, "\\+|\\*")[[1]])
 
-  x1_var <- setdiff(x_var, x2_var) # exogenous regressors
+  if (y_var == "") {
+    stop(strwrap("The `formula` does not specify any dependent variable",
+         prefix = " ", initial = ""))
+  }
+
   x2_var <- setdiff(x_var, z_var) # endogenous regressors
+  x1_var <- setdiff(x_var, x2_var) # exogenous regressors
   z1_var <- x1_var # included instruments
   z2_var <- setdiff(z_var, z1_var) # outside instruments
 
