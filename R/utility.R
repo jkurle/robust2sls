@@ -64,3 +64,24 @@ extract_formula <- function(formula) {
   return(vars)
 
 }
+
+res_all <- function(data, yvar, model) {
+
+  # cannot simply extract residuals or fitted values from model object because
+  # it omits all observations where x, z, or y is missing
+  # dta <- mtcars
+  # dta[1, "mpg"] <- NA
+  # dta[2, "cyl"] <- NA
+  # dta[3, "wt"] <- NA
+  # test <- ivreg(mpg ~ cyl + disp | cyl + wt, data = dta)
+  # NROW(mtcars) # 32 observations
+  # NROW(test$residuals) # 29 observations due to NA values in y, x, z
+  # NROW(dta[, "mpg"] - predict(test, dta)) # 32 when calculating manually, NA
+
+  res <- data[, yvar] - predict(model, data)
+
+  return(res)
+
+}
+
+
