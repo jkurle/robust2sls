@@ -65,6 +65,26 @@ extract_formula <- function(formula) {
 
 }
 
+#' Create residuals from model
+#'
+#' \code{res_all} creates a vector of residuals from the data and model object.
+#' Unlike the residuals from the model object (\code{model$residuals}), it does
+#' not exclude observations where any of y, x, or z are missing. Instead, it
+#' includes these observations with a missing value \code{NA} as residual.
+#'
+#' @param data A dataset that contains the dependent variable \code{yvar} for
+#' which the residuals will be calculated.
+#' @param yvar A character vector of length 1 that refers to the name of the
+#' dependent variable in the data set.
+#' @param model A model object of \link{class} \link[AER]{ivreg} whose
+#' parameters are used to calculate the residuals.
+#'
+#' @section Warning:
+#' Unlike the object \code{model$residuals}, this function returns a
+#' vector of the same length as the original data set even if any of the y, x,
+#' or z variables are missing. The residuals for those observations are set to
+#' NA.
+
 res_all <- function(data, yvar, model) {
 
   # cannot simply extract residuals or fitted values from model object because
@@ -78,10 +98,70 @@ res_all <- function(data, yvar, model) {
   # NROW(test$residuals) # 29 observations due to NA values in y, x, z
   # NROW(dta[, "mpg"] - predict(test, dta)) # 32 when calculating manually, NA
 
+  if (typeof(yvar) != "character") {
+    stop(strwrap("The argument `yvar` is not a character vector", prefix = " ",
+      initial = ""))
+  }
+
+  if (!(yvar %in% colnames(mtcars))) {
+    stop(strwrap("The argument `yvar` is not a variable in the dataframe or
+      matrix `data`", prefix = " ", initial = ""))
+  }
+
+  if (class(model) != "ivreg") {
+    stop(strwrap("The `model` is not of class `ivreg`", prefix = " ",
+      initial = ""))
+  }
+
+  # calculate the residuals, will be NA when either y or x missing
   res <- data[, yvar] - predict(model, data)
+  # replace value by NA for observations where only z missing
+  nonmiss <- nonmissing(data = data, formula = model$formula)
+  res[!nonmiss] <- NA
 
   return(res)
 
 }
 
+#' Determine which observations can be used for estimation
+#'
+#' \code{nonmissing} takes a data set and a formula and determines which
+#' observations can principally be used for the estimation of the 2SLS model
+#' that is specified by the formula. Observations where any of the y, x, or z
+#' variables are missing will be set to FALSE. While technically, fitted values
+#' and residuals could be calculated for observations where only any of the
+#' outside instruments is missing, this is often not desirable. This would cause
+#' the sample on which the model is estimated to be different from the sample
+#' on which the outliers are determined.
+#'
+#' @param data A dataframe.
+#' @inheritParams extract_formula
+#'
+#' @return Returns a logical vector with the same length as the number of
+#' observations in the data set that specifies whether an observation has any
+#' missing values in any of y, x, or z variables. TRUE means not missing, FALSE
+#' means at least one of these variables necessary for estimation is missing.
 
+nonmissing <- function(data, formula) {
+
+  vars <- extract_formula(formula = formula)
+  all_vars <- union(union(union(union(vars$y_var, vars$x1_var), vars$x2_var),
+                          vars$z1_var), vars$z2_var)
+
+  # initialise logical vector with all TRUE
+  non_missing <- !logical(length = NROW(data))
+
+  for (i in seq_along(all_vars)) {
+    # keep as TRUE if not missing in any of the vars used for estimation
+    non_missing <- (non_missing & !is.na(data[, all_vars[i]]))
+  }
+
+  # should never trigger but as a fail-safe
+  if (length(non_missing)!= NROW(data)) {
+    stop(strwrap("The returned vector does not have the same length as the
+                 data set", prefix = " ", initial = ""))
+  }
+
+  return(non_missing)
+
+}

@@ -1,3 +1,5 @@
+library(AER)
+
 test_that("extract_formula() works correctly", {
 
   f1 <- y ~ x1 + x2 | x1 + z2 + z3
@@ -34,5 +36,35 @@ test_that("extract_formula() works correctly", {
 
   f3 <- y ~ x1 + x2 + x3 | x1 + z2
   expect_error(extract_formula(f3), "does not fulfill the order condition")
+
+})
+
+test_that("res_all() works correctly", {
+  dta <- mtcars
+  dta[1, "mpg"] <- NA
+  dta[2, "cyl"] <- NA
+  dta[3, "wt"] <- NA
+  test <- AER::ivreg(mpg ~ cyl + disp | cyl + wt, data = dta)
+
+  expect_equal(NROW(dta), 32) # 32 observations
+  expect_equal(NROW(test$residuals), 29) # 29 obs due to NA values in y, x, z
+
+  res <- res_all(data = dta, yvar = "mpg", model = test)
+  res1 <- res2 <- res3 <- as.double(NA)
+  names(res1) <- "Mazda RX4"
+  names(res2) <- "Mazda RX4 Wag"
+  names(res3) <- "Datsun 710"
+
+  expect_equal(NROW(res), 32) # 32 when done manually inside res_all()
+  # check that these residuals with missing y, x, z are NA
+  expect_equal(res[1], res1)
+  expect_equal(res[2], res2)
+  expect_equal(res[3], res3)
+  # check that the model residuals coincide with the res_all(), ignoring NAs
+  expect_equal(res[c(-1,-2,-3)], test$residuals)
+
+  test <- AER::ivreg(mpg ~ cyl + disp | cyl + wt, data = mtcars)
+  res <- res_all(data = mtcars, yvar = "mpg", model = test)
+  expect_equal(res, test$residuals)
 
 })
