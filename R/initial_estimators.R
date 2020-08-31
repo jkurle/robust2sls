@@ -60,15 +60,34 @@ user_init <- function(data, formula, cutoff, user_model) {
 
 }
 
-saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
-                           split) {
+#' Saturated 2SLS (split-sample initial estimator)
+#'
+#' \code{saturated_init} splits the sample into two sub-samples. The 2SLS model
+#' is estimated on both sub-samples and the estimates of one sub-sample are
+#' used to calculate the residuals and hence outliers from the other sub-sample.
+#'
+#'  @inheritParams robustified_init
+#'  @param shuffle A logical value (TRUE or FALSE) whether the sample should be
+#'  split into sub-samples randomly. If FALSE, the sample is simply cut into two
+#'  parts using the original order of the supplied data set.
+#'  @param shuffle_seed A numeric value that sets the seed for shuffling the
+#'  data set before splitting it. Only used if \code{shuffle == TRUE}.
+#'  @param split A numeric value strictly between 0 and 1 that determines
+#'  in which proportions the sample will be split.
+#'
+#'  @section Warning:
+#'  The estimator may have bad properties if the \code{split} is too unequal and
+#'  the sample size is not large enough.
 
-  if (typeof(split) != "numeric") {
+saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
+                           split = 0.5) {
+
+  if (!is.numeric(split)) {
     stop(strwrap("The argument `split`has to be numeric", prefix = " ",
                  initial = ""))
   }
 
-  if (split <= 0 | splot >= 1) {
+  if (split <= 0 | split >= 1) {
     stop(strwrap("The argument `split` has to lie strictly between 0 and 1",
                  prefix = " ", initial = ""))
   }
@@ -78,7 +97,7 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
                     size is not large enough."))
   }
 
-  if (typeof(shuffle) != "logical") {
+  if (!is.logical(shuffle)) {
     stop(strwrap("The argument `shuffle` has to be TRUE or FALSE.",
                  prefix = " ", initial = ""))
   }
@@ -142,18 +161,28 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   }
   remove(i)
 
-  #split1_name <- logical(length = NROW(data))
-
   data[[split1_name]] <- FALSE
   data[[split1_name]][split1] <- TRUE
   data[[split2_name]] <- FALSE
   data[[split2_name]][split2] <- TRUE
 
   # calculating separate models for each split
-  model_split1 <- ivreg(formula = formula, data = data, model = TRUE, y = TRUE,
-                        subset = data[[split1_name]]) # run 2SLS on first split
-  model_split2 <- ivreg(formula = formula, data = data, model = TRUE, y = TRUE,
-                        subset = data[[split2_name]]) # run 2SLS on second split
+  # use the subset argument of ivreg(), which specifies which obs to use
+  # problem: command looks for a variable in dataset to use for selection
+  # need to use the new variables we created with names split1/2_name
+  # cannot access via [[split1_name]] or data$split1_name
+  # have to create the command as a string, then parse it to make it an
+  # expression and then evaluate it
+  # this way, we can use the contents of split1/2_name to refer to the var
+  command1 <- paste("model_split1 <- ivreg(formula = formula, data = data,
+                    model = TRUE, y = TRUE, subset = ", split1_name, ")")
+  expr1 <- parse(text = command1)
+  eval(expr1)
+
+  command2 <- paste("model_split2 <- ivreg(formula = formula, data = data,
+                    model = TRUE, y = TRUE, subset = ", split2_name, ")")
+  expr2 <- parse(text = command2)
+  eval(expr2)
 
   # following code is slightly different from first version
   # first version created more variables in original data set, which is prone
@@ -161,8 +190,10 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   # now rely on selection() function to get the residuals, selection and type
   # have checked that results are identical to first version
 
-  update_info1 <- selection(data = data[split1,], yvar = y_var, model = model_split2, cutoff = cutoff)
-  update_info2 <- selection(data = data[split2,], yvar = y_var, model = model_split1, cutoff = cutoff)
+  update_info1 <- selection(data = data[split1,], yvar = y_var,
+                            model = model_split2, cutoff = cutoff)
+  update_info2 <- selection(data = data[split2,], yvar = y_var,
+                            model = model_split1, cutoff = cutoff)
 
   # put the results together in the original order of the observations
   res <- rep(NA, times = NROW(data))
@@ -182,8 +213,9 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   update_info <- list(res = res, stdres = stdres, sel = sel, type = type)
 
   # remove columns created for indexing and splitting
-  keep <- setdiff(colnames(data), c(split1_name, split2_name))
-  data <- data[, keep]
+  # seems to be unnecessary because of copy-on-modify behaviour
+  # keep <- setdiff(colnames(data), c(split1_name, split2_name))
+  # data <- data[, keep]
 
 }
 
