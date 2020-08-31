@@ -1,0 +1,204 @@
+
+#' Robustified 2SLS (full sample initial estimator)
+#'
+#' \code{robustified_init} estimates the full sample 2SLS model, which is used
+#' as the initial estimator for the iterative procedure.
+#'
+#' @param data A dataframe or matrix containing the data used in the estimation.
+#' @param formula A formula in the format \code{y ~ x1 + x2 | x2 + z2} where
+#' \code{y} is the dependent variable, \code{x1} are the endogenous regressors,
+#' \code{x2} the exogenous regressors, and \code{z2} the outside instruments.
+#' @param cutoff A numeric cutoff value used to judge whether an observation
+#' is an outlier or not. If its absolute value is larger than the cutoff value,
+#' the observations is classified as being an outlier.
+
+robustified_init <- function(data, formula, cutoff) {
+
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE)
+
+  # extract all variables appearing in the regression formula
+  vars <- extract_formula(formula)
+  y_var <- vars$y_var
+
+  # calculate residuals, standardised residuals, selection and type vectors
+  update_info <- selection(data = data, yvar = y_var, model = full,
+                           cutoff = cutoff)
+
+}
+
+#' User-specified initial estimator
+#'
+#' \code{user_init} uses a model supplied by the user as the initial estimator.
+#' Based on this estimator, observations are classified as outliers or not.
+#'
+#' @inheritParams robustified_init
+#' @param user_model A model object of \link{class} \link[AER]{ivreg} whose
+#' parameters are used to calculate the residuals.
+#'
+#' @section Warning:
+#' Check REFERENCE TO PAPER about conditions on the initial estimator that
+#' should be satisfied for the initial estimator (e.g. they have to be Op(1)).
+
+user_init <- function(data, formula, cutoff, user_model) {
+
+  if (class(user_model) != "ivreg") {
+    stop(strwrap("The argument `user_model` is not of class `ivreg`, the model
+                 object class for 2SLS models from package `AER`",
+                 initial = "", prefix = " "))
+  }
+
+  # when given a model, could also extract formula by user_model$formula
+  # vars <- extract_formula(user_model$formula)
+
+  # extract all variables appearing in the regression formula
+  vars <- extract_formula(formula)
+  y_var <- vars$y_var
+
+  # calculate residuals, standardised residuals, selection and type vectors
+  update_info <- selection(data = data, yvar = y_var, model = user_model,
+                           cutoff = cutoff)
+
+}
+
+saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
+                           split) {
+
+  if (typeof(split) != "numeric") {
+    stop(strwrap("The argument `split`has to be numeric", prefix = " ",
+                 initial = ""))
+  }
+
+  if (split <= 0 | splot >= 1) {
+    stop(strwrap("The argument `split` has to lie strictly between 0 and 1",
+                 prefix = " ", initial = ""))
+  }
+
+  if (split < 0.25 | split > 0.75) {
+    warning(strwrap("Very unequal `split`. May have bad properties if the sample
+                    size is not large enough."))
+  }
+
+  if (typeof(shuffle) != "logical") {
+    stop(strwrap("The argument `shuffle` has to be TRUE or FALSE.",
+                 prefix = " ", initial = ""))
+  }
+
+  # extract all variables appearing in the regression formula
+  vars <- extract_formula(formula)
+  y_var <- vars$y_var
+
+  # extract the number of observations that can be used in estimation
+  # i.e. no y, x, z missing
+
+  non_missing <- nonmissing(data = data, formula = formula)
+  num_obs <- sum(non_missing)
+
+  # create index variable to keep track of observations even after shuffling
+  # original data set could contain a variable with the name index
+  # if this is the case, try index1, index2 etc. until this name does not exist
+  # i <- 1
+  # index_name <- "index"
+  # while (index_name %in% colnames(data)) {
+  #   index_name <- paste("index", i, sep = "")
+  #   i <- i + 1
+  # }
+  # remove(i)
+  #
+  # # create this new variable
+  # data[[index_name]] <- 1:NROW(data)
+
+  #extract index variable as vector and store it separately for manipulation
+  ind <- 1:NROW(data)
+
+  if (shuffle == TRUE) {
+
+    # want to draw indices in random order and base the split on random order
+    # since there can be observations with missing y, x, z need to exclude them
+    # create vector with weights 0 if missing, 1 if not missing
+    wght <- as.numeric(non_missing)
+    set.seed(seed = shuffle_seed)
+    ind_nonmissing <- sample(x = ind, size = num_obs, replace = FALSE,
+                             prob = wght)
+
+  } else {
+
+    # keep all indices that correspond to non missing observations
+    ind_nonmissing <- ind[non_missing]
+
+  } # end shuffle
+
+  # splitting the sample
+  # splitpoint is the number where the sample is split
+  # rounding to nearest integer smaller than num_obs * split
+  splitpoint <- floor(num_obs * split)
+
+  split1 <- ind_nonmissing[1:splitpoint] # selection vector for first split
+  split2 <- ind_nonmissing[(splitpoint + 1):num_obs] # vector for second split
+
+  # create two new variables in data set to indicate the subset to be used
+  # TRUE/1 if used in that split, FALSE/0 if not
+  # if these variables exist already in the data set, create new name
+  # split1_1, split1_2, split1_3 etc. and split2_1, split2_2, ...
+
+  i <- 1
+  split1_name <- "split1"
+  while (split1_name %in% colnames(data)) {
+    split1_name <- paste("split1_", i, sep = "")
+    i <- i + 1
+  }
+  remove(i)
+
+  i <- 1
+  split2_name <- "split2"
+  while (split2_name %in% colnames(data)) {
+    split2_name <- paste("split2_", i, sep = "")
+    i <- i + 1
+  }
+  remove(i)
+
+  #split1_name <- logical(length = NROW(data))
+
+  data[[split1_name]] <- FALSE
+  data[[split1_name]][split1] <- TRUE
+  data[[split2_name]] <- FALSE
+  data[[split2_name]][split2] <- TRUE
+
+  # calculating separate models for each split
+  model_split1 <- ivreg(formula = formula, data = data, model = TRUE, y = TRUE,
+                        subset = data[[split1_name]]) # run 2SLS on first split
+  model_split2 <- ivreg(formula = formula, data = data, model = TRUE, y = TRUE,
+                        subset = data[[split2_name]]) # run 2SLS on second split
+
+  # following code is slightly different from first version
+  # first version created more variables in original data set, which is prone
+  # to errors; try to avoid now except for index_name, split1_name, split2_name
+  # now rely on selection() function to get the residuals, selection and type
+  # have checked that results are identical to first version
+
+  update_info1 <- selection(data = data[split1,], yvar = y_var, model = model_split2, cutoff = cutoff)
+  update_info2 <- selection(data = data[split2,], yvar = y_var, model = model_split1, cutoff = cutoff)
+
+  # put the results together in the original order of the observations
+  res <- rep(NA, times = NROW(data))
+  res[split1] <- update_info1$res
+  res[split2] <- update_info2$res
+
+  stdres <- rep(NA, times = NROW(data))
+  stdres[split1] <- update_info1$stdres
+  stdres[split2] <- update_info2$stdres
+
+  sel <- logical(length = NROW(data))
+  sel[split1] <- (abs(stdres[split1]) <= cutoff)
+  sel[split2] <- (abs(stdres[split2]) <= cutoff)
+
+  type <- as.numeric(non_missing) + as.numeric(sel) - 1
+
+  update_info <- list(res = res, stdres = stdres, sel = sel, type = type)
+
+  # remove columns created for indexing and splitting
+  keep <- setdiff(colnames(data), c(index_name, split1_name, split2_name))
+  data <- data[, keep]
+
+}
+
+
