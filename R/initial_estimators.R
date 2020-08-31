@@ -93,21 +93,7 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   non_missing <- nonmissing(data = data, formula = formula)
   num_obs <- sum(non_missing)
 
-  # create index variable to keep track of observations even after shuffling
-  # original data set could contain a variable with the name index
-  # if this is the case, try index1, index2 etc. until this name does not exist
-  # i <- 1
-  # index_name <- "index"
-  # while (index_name %in% colnames(data)) {
-  #   index_name <- paste("index", i, sep = "")
-  #   i <- i + 1
-  # }
-  # remove(i)
-  #
-  # # create this new variable
-  # data[[index_name]] <- 1:NROW(data)
-
-  #extract index variable as vector and store it separately for manipulation
+  # extract index variable as vector
   ind <- 1:NROW(data)
 
   if (shuffle == TRUE) {
@@ -171,7 +157,7 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
 
   # following code is slightly different from first version
   # first version created more variables in original data set, which is prone
-  # to errors; try to avoid now except for index_name, split1_name, split2_name
+  # to errors; try to avoid now except for split1_name, split2_name
   # now rely on selection() function to get the residuals, selection and type
   # have checked that results are identical to first version
 
@@ -196,7 +182,7 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   update_info <- list(res = res, stdres = stdres, sel = sel, type = type)
 
   # remove columns created for indexing and splitting
-  keep <- setdiff(colnames(data), c(index_name, split1_name, split2_name))
+  keep <- setdiff(colnames(data), c(split1_name, split2_name))
   data <- data[, keep]
 
 }
