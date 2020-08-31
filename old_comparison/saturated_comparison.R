@@ -438,7 +438,7 @@ robust2SLS <-
 
 original <- robust2SLS(data = data, regression = formula, sign_level = 0.05, iterations = 1, initial_est = "saturated", shuffle = TRUE, split = 0.5, graph = FALSE)
 
-identical(test$res, original[[2]][[1]])
-identical(test$stdres, original[[3]][[1]])
-identical(test$sel, original[[4]][[1]])
-identical(test$type, original[[5]][[1]])
+identical(test$res, original[[2]][[1]]) # TRUE
+identical(test$stdres, original[[3]][[1]]) # TRUE
+identical(test$sel, original[[4]][[1]]) # TRUE
+identical(test$type, original[[5]][[1]]) # TRUE
