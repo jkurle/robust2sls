@@ -65,27 +65,42 @@ extract_formula <- function(formula) {
 
 }
 
-#' Create residuals from model
+#' Create selection (non-outlying) vector from model
 #'
-#' \code{res_all} creates a vector of residuals from the data and model object.
-#' Unlike the residuals from the model object (\code{model$residuals}), it does
-#' not exclude observations where any of y, x, or z are missing. Instead, it
-#' includes these observations with a missing value \code{NA} as residual.
+#' \code{selection} uses the data and model objects to create a list with four
+#' elements that are used to determine whether the observations are judged as
+#' outliers or not.
 #'
-#' @param data A dataset that contains the dependent variable \code{yvar} for
+#' @param data A dataframe that contains the dependent variable \code{yvar} for
 #' which the residuals will be calculated.
 #' @param yvar A character vector of length 1 that refers to the name of the
 #' dependent variable in the data set.
 #' @param model A model object of \link{class} \link[AER]{ivreg} whose
 #' parameters are used to calculate the residuals.
+#' @param cutoff A numeric cutoff value used to judge whether an observation
+#' is an outlier or not. If its absolute value is larger than the cutoff value,
+#' the observations is classified as being an outlier.
+#'
+#' @return A list with four elements, each of which is a vector whose length
+#' equals the number of observations in the data set. The first element is a
+#' double vector containing the residuals for each observation based on the
+#' model estimates. Unlike \code{model$residuals}, it does not ignore
+#' observations where any of y, x or z are missing. It instead sets their values
+#' to NA.
+#'
+#' The second element contains the standardised residuals, the third one a
+#' logical vector with TRUE if the observation is judged as not outlying,
+#' FALSE if it is an outlier, and NA if any of y, x, or z are missing. The
+#' fourth element of the list is an integer vector with three values: 1 if the
+#' observations is judged to be an outlier, 0 if not, and -1 if missing.
 #'
 #' @section Warning:
-#' Unlike the object \code{model$residuals}, this function returns a
-#' vector of the same length as the original data set even if any of the y, x,
+#' Unlike the object \code{model$residuals}, this function returns vectors
+#' of the same length as the original data set even if any of the y, x,
 #' or z variables are missing. The residuals for those observations are set to
 #' NA.
 
-res_all <- function(data, yvar, model) {
+selection <- function(data, yvar, model, cutoff) {
 
   # cannot simply extract residuals or fitted values from model object because
   # it omits all observations where x, z, or y is missing
@@ -119,7 +134,19 @@ res_all <- function(data, yvar, model) {
   nonmiss <- nonmissing(data = data, formula = model$formula)
   res[!nonmiss] <- NA
 
-  return(res)
+  # calculate the standardised residuals
+  # reverse df correction
+  sigma <- model$sigma * sqrt(model$df.residual / model$nobs)
+  # calculate standardised residuals, also missing if any of y, x, or z missing
+  stdres <- res / sigma
+
+  # create selection vector, if missing before then still missing now
+  sel <- (abs(stdres) <= cutoff)
+  sel[is.na(sel)] <- FALSE # manually exclude all observations that had NA
+  type <- as.numeric(nonmiss) + as.numeric(sel) - 1
+  type <- as.integer(type)
+
+  return(list(res = res, stdres = stdres, sel = sel, type = type))
 
 }
 
@@ -163,5 +190,53 @@ nonmissing <- function(data, formula) {
   }
 
   return(non_missing)
+
+}
+
+#' Calculate constants across estimation
+#'
+#' \code{constants} calculates various values that do not change across the
+#' estimation and records them in a list.
+#'
+#' @param sign_level A numeric value between 0 and 1 that determines the cutoff
+#' in the reference distribution against which observations are judged as
+#' outliers or not.
+#' @param reference A character vector of length 1 that denotes a valid
+#' reference distribution.
+#'
+#' @return Returns a list that stores values that are constant across the
+#' estimation to be accessed throughout the calculations.
+#' The following elements are stored (in order): the significance level to
+#' determine the cutoff value, the reference distribution as a character vector,
+#' the numeric cutoff value to determine outliers, the bias correction factor
+#' to account for the fact that even under the null hypothesis of no outliers,
+#' there will be some false positives that incorrectly classified as outliers.
+#'
+#' @examples
+#' # constant values for a normal distribution with significance level 0.05
+#' # observations with absolute residuals > 1.96 would be classified as outliers
+#' cons <- constants(sign_level = 0.05, reference = "normal")
+#' print(cons)
+
+
+constants <- function(sign_level, reference = c("normal")) {
+
+  ref <- match.arg(reference) # throws error if not in selection
+
+  if (sign_level >= 1 | sign_level <= 0) {
+    stop(strwrap("The argument `sign_level` has to be > 0 and < 1",
+                 prefix = " ", initial = ""))
+  }
+
+  if (ref == "normal") {
+    psi <- 1 - sign_level
+    cutoff <- qnorm(p = 1-(sign_level/2), mean = 0, sd = 1)
+    bias_corr <- 1/(((1-sign_level)-2*cutoff*dnorm(cutoff,mean=0,sd=1))/
+                      (1-sign_level))
+  }
+
+  cons <- list(sign_level = sign_level, reference = ref, cutoff = cutoff,
+               bias_corr = bias_corr)
+  return(cons)
 
 }
