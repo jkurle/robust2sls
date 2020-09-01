@@ -66,18 +66,18 @@ user_init <- function(data, formula, cutoff, user_model) {
 #' is estimated on both sub-samples and the estimates of one sub-sample are
 #' used to calculate the residuals and hence outliers from the other sub-sample.
 #'
-#'  @inheritParams robustified_init
-#'  @param shuffle A logical value (TRUE or FALSE) whether the sample should be
-#'  split into sub-samples randomly. If FALSE, the sample is simply cut into two
-#'  parts using the original order of the supplied data set.
-#'  @param shuffle_seed A numeric value that sets the seed for shuffling the
-#'  data set before splitting it. Only used if \code{shuffle == TRUE}.
-#'  @param split A numeric value strictly between 0 and 1 that determines
-#'  in which proportions the sample will be split.
+#' @inheritParams robustified_init
+#' @param shuffle A logical value (TRUE or FALSE) whether the sample should be
+#' split into sub-samples randomly. If FALSE, the sample is simply cut into two
+#' parts using the original order of the supplied data set.
+#' @param shuffle_seed A numeric value that sets the seed for shuffling the
+#' data set before splitting it. Only used if \code{shuffle == TRUE}.
+#' @param split A numeric value strictly between 0 and 1 that determines
+#' in which proportions the sample will be split.
 #'
-#'  @section Warning:
-#'  The estimator may have bad properties if the \code{split} is too unequal and
-#'  the sample size is not large enough.
+#' @section Warning:
+#' The estimator may have bad properties if the \code{split} is too unequal and
+#' the sample size is not large enough.
 
 saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
                            split = 0.5) {
@@ -174,12 +174,12 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   # have to create the command as a string, then parse it to make it an
   # expression and then evaluate it
   # this way, we can use the contents of split1/2_name to refer to the var
-  command1 <- paste("model_split1 <- ivreg(formula = formula, data = data,
+  command1 <- paste("model_split1 <- AER::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", split1_name, ")")
   expr1 <- parse(text = command1)
   eval(expr1)
 
-  command2 <- paste("model_split2 <- ivreg(formula = formula, data = data,
+  command2 <- paste("model_split2 <- AER::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", split2_name, ")")
   expr2 <- parse(text = command2)
   eval(expr2)
@@ -199,16 +199,21 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   res <- rep(NA, times = NROW(data))
   res[split1] <- update_info1$res
   res[split2] <- update_info2$res
+  names(res) <- rownames(data)
 
   stdres <- rep(NA, times = NROW(data))
   stdres[split1] <- update_info1$stdres
   stdres[split2] <- update_info2$stdres
+  names(stdres) <- rownames(data)
 
   sel <- logical(length = NROW(data))
   sel[split1] <- (abs(stdres[split1]) <= cutoff)
   sel[split2] <- (abs(stdres[split2]) <= cutoff)
+  names(sel) <- rownames(data)
 
   type <- as.numeric(non_missing) + as.numeric(sel) - 1
+  type <- as.integer(type)
+  names(type) <- rownames(data)
 
   update_info <- list(res = res, stdres = stdres, sel = sel, type = type)
 
