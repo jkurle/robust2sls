@@ -201,11 +201,32 @@ nonmissing <- function(data, formula) {
 #' \code{constants} calculates various values that do not change across the
 #' estimation and records them in a list.
 #'
+#' @param call A record of the original function call.
+#' @param formula The regression formula specified in the function call.
+#' @param data The dataframe used in the function call.
+#' @param reference A character vector of length 1 that denotes a valid
+#' reference distribution.
 #' @param sign_level A numeric value between 0 and 1 that determines the cutoff
 #' in the reference distribution against which observations are judged as
 #' outliers or not.
-#' @param reference A character vector of length 1 that denotes a valid
-#' reference distribution.
+#' @param psi A numeric value between 0 and 1 that refers to the probability of
+#' an observation not being an outlier under the null hypothesis of no outliers.
+#' \code{psi} is hence calculated as \code{1 - psi}.
+#' @param estimator A character vector specifying which initial estimator was
+#' used.
+#' @param split A numeric value strictly between 0 and 1 that specifies how the
+#' sample is split in case of saturated 2SLS. \code{NULL} otherwise.
+#' @param shuffle A logical value whether the sample is re-arranged in random
+#' order before splitting the sample in case of saturated 2SLS. \code{NULL}
+#' otherwise.
+#' @param shuffle_seed A numeric value setting the seed for the shuffling of the
+#' sample. Only used if \code{shuffle == TRUE}. NULL otherwise.
+#' @param iter An integer value setting the number of iterations of the
+#' outlier-detection algorithm.
+#' @param criterion A numeric value that determines when the iterated
+#' outlier-detection algorithm stops by comparing it to the sum of squared
+#' differences between the m- and (m-1)-step parameter estimates. NULL if
+#' convergence criterion should not be used.
 #'
 #' @return Returns a list that stores values that are constant across the
 #' estimation to be accessed throughout the calculations.
@@ -222,7 +243,9 @@ nonmissing <- function(data, formula) {
 #' print(cons)
 
 
-constants <- function(sign_level, reference = c("normal")) {
+constants <- function(call, formula, data, reference = c("normal"), sign_level,
+                      estimator, split, shuffle, shuffle_seed, iter,
+                      criterion) {
 
   ref <- match.arg(reference) # throws error if not in selection
 
@@ -238,8 +261,17 @@ constants <- function(sign_level, reference = c("normal")) {
                       (1-sign_level))
   }
 
-  cons <- list(sign_level = sign_level, reference = ref, cutoff = cutoff,
-               bias_corr = bias_corr)
+  initial <- list(estimator = estimator, split = split, shuffle = shuffle,
+                  shuffle_seed = shuffle_seed)
+  convergence <- list(criterion = criterion, difference = NULL,
+                      converged = NULL)
+  iterations <- list(setting = iter, actual = NULL)
+
+  cons <- list(call = call, formula = formula, data = data, reference = ref,
+               sign_level = sign_level, psi = psi, cutoff = cutoff,
+               bias_corr = bias_corr, initial = initial, convergence =
+                 convergence, iterations = iterations)
+
   return(cons)
 
 }
