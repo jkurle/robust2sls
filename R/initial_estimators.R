@@ -174,6 +174,8 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   # have to create the command as a string, then parse it to make it an
   # expression and then evaluate it
   # this way, we can use the contents of split1/2_name to refer to the var
+  model_split1 <- NULL
+  model_split2 <- NULL
   command1 <- paste("model_split1 <- AER::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", split1_name, ")")
   expr1 <- parse(text = command1)
