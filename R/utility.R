@@ -270,3 +270,18 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
   return(cons)
 
 }
+
+
+update_list <- function(current_list, new_info, name) {
+
+  current_list$model[[name]] <- new_info$model
+  current_list$res[[name]] <- new_info$res
+  current_list$stdres[[name]] <- new_info$stdres
+  current_list$sel[[name]] <- new_info$sel
+  current_list$type[[name]] <- new_info$type
+
+  return(current_list)
+
+}
+
+
