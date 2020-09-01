@@ -436,9 +436,13 @@ robust2SLS <-
 
   } # end function robust2SLS
 
-original <- robust2SLS(data = data, regression = formula, sign_level = 0.05, iterations = 1, initial_est = "saturated", shuffle = TRUE, split = 0.5, graph = FALSE)
+original <- robust2SLS(data = data, regression = formula, sign_level = 0.05, iterations = 5, initial_est = "saturated", shuffle = TRUE, split = 0.5, graph = FALSE)
 
 identical(test$res, original[[2]][[1]]) # TRUE
 identical(test$stdres, original[[3]][[1]]) # TRUE
 identical(test$sel, original[[4]][[1]]) # TRUE
 identical(test$type, original[[5]][[1]]) # TRUE
+
+
+
+original <- robust2SLS(data = data, regression = formula, sign_level = 0.05, iterations = 5, initial_est = "robustified", shuffle = TRUE, split = 0.5, graph = FALSE)
