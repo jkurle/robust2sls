@@ -81,7 +81,7 @@ extract_formula <- function(formula) {
 #' is an outlier or not. If its absolute value is larger than the cutoff value,
 #' the observations is classified as being an outlier.
 #'
-#' @return A list with four elements, each of which is a vector whose length
+#' @return A list with five elements. The first four are vectors whose length
 #' equals the number of observations in the data set. The first element is a
 #' double vector containing the residuals for each observation based on the
 #' model estimates. Unlike \code{model$residuals}, it does not ignore
@@ -93,6 +93,9 @@ extract_formula <- function(formula) {
 #' FALSE if it is an outlier, and NA if any of y, x, or z are missing. The
 #' fourth element of the list is an integer vector with three values: 1 if the
 #' observations is judged to be an outlier, 0 if not, and -1 if missing.
+#'
+#' The fifth and last element stores the \link[AER]{ivreg} model object based on
+#' which the four vectors were calculated.
 #'
 #' @section Warning:
 #' Unlike the object \code{model$residuals}, this function returns vectors
@@ -149,7 +152,8 @@ selection <- function(data, yvar, model, cutoff) {
   # if observations are named, should give type these
   names(type) <- names(sel)
 
-  return(list(res = res, stdres = stdres, sel = sel, type = type))
+  return(list(res = res, stdres = stdres, sel = sel, type = type,
+              model = model))
 
 }
 
@@ -209,9 +213,6 @@ nonmissing <- function(data, formula) {
 #' @param sign_level A numeric value between 0 and 1 that determines the cutoff
 #' in the reference distribution against which observations are judged as
 #' outliers or not.
-#' @param psi A numeric value between 0 and 1 that refers to the probability of
-#' an observation not being an outlier under the null hypothesis of no outliers.
-#' \code{psi} is hence calculated as \code{1 - psi}.
 #' @param estimator A character vector specifying which initial estimator was
 #' used.
 #' @param split A numeric value strictly between 0 and 1 that specifies how the
@@ -235,12 +236,6 @@ nonmissing <- function(data, formula) {
 #' the numeric cutoff value to determine outliers, the bias correction factor
 #' to account for the fact that even under the null hypothesis of no outliers,
 #' there will be some false positives that incorrectly classified as outliers.
-#'
-#' @examples
-#' # constant values for a normal distribution with significance level 0.05
-#' # observations with absolute residuals > 1.96 would be classified as outliers
-#' cons <- constants(sign_level = 0.05, reference = "normal")
-#' print(cons)
 
 
 constants <- function(call, formula, data, reference = c("normal"), sign_level,

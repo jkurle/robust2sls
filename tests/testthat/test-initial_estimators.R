@@ -12,7 +12,7 @@ test_that("robustified_init() works correctly", {
 
   r1 <- robustified_init(data = data, formula = formula, cutoff = 1.96)
 
-  expect_length(r1, 4)
+  expect_length(r1, 5)
   expect_length(r1$res, 32)
   expect_length(r1$stdres, 32)
   expect_length(r1$sel, 32)
@@ -115,7 +115,7 @@ test_that("saturated_init() works correctly", {
   r1 <- saturated_init(data = data, formula = formula, cutoff = 1.96, shuffle =
                          TRUE, shuffle_seed = shuffle_seed, split = 0.5)
 
-  expect_length(r1, 4)
+  expect_length(r1, 5)
   expect_length(r1$res, 32)
   expect_length(r1$stdres, 32)
   expect_length(r1$sel, 32)

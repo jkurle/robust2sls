@@ -132,16 +132,16 @@ test_that("nonmissing() works correctly", {
 
 })
 
-test_that("constants() works correctly", {
-
-  expect_error(constants(sign_level = 0.05, reference = "notexist"))
-  expect_error(constants(sign_level = -0.01, reference = "normal"),
-               "has to be > 0 and < 1")
-  expect_error(constants(sign_level = 1, reference = "normal"),
-               "has to be > 0 and < 1")
-  expect_error(constants(sign_level = "a", reference = "normal"))
-
-  expect_equal(constants(sign_level = 0.05, reference = "normal")$cutoff, 1.96,
-               tolerance = 0.01)
-
-})
+# test_that("constants() works correctly", {
+#
+#   expect_error(constants(sign_level = 0.05, reference = "notexist"))
+#   expect_error(constants(sign_level = -0.01, reference = "normal"),
+#                "has to be > 0 and < 1")
+#   expect_error(constants(sign_level = 1, reference = "normal"),
+#                "has to be > 0 and < 1")
+#   expect_error(constants(sign_level = "a", reference = "normal"))
+#
+#   expect_equal(constants(sign_level = 0.05, reference = "normal")$cutoff, 1.96,
+#                tolerance = 0.01)
+#
+# })

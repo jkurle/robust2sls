@@ -4,15 +4,54 @@
 \alias{constants}
 \title{Calculate constants across estimation}
 \usage{
-constants(sign_level, reference = c("normal"))
+constants(
+  call,
+  formula,
+  data,
+  reference = c("normal"),
+  sign_level,
+  estimator,
+  split,
+  shuffle,
+  shuffle_seed,
+  iter,
+  criterion
+)
 }
 \arguments{
+\item{call}{A record of the original function call.}
+
+\item{formula}{The regression formula specified in the function call.}
+
+\item{data}{The dataframe used in the function call.}
+
+\item{reference}{A character vector of length 1 that denotes a valid
+reference distribution.}
+
 \item{sign_level}{A numeric value between 0 and 1 that determines the cutoff
 in the reference distribution against which observations are judged as
 outliers or not.}
 
-\item{reference}{A character vector of length 1 that denotes a valid
-reference distribution.}
+\item{estimator}{A character vector specifying which initial estimator was
+used.}
+
+\item{split}{A numeric value strictly between 0 and 1 that specifies how the
+sample is split in case of saturated 2SLS. \code{NULL} otherwise.}
+
+\item{shuffle}{A logical value whether the sample is re-arranged in random
+order before splitting the sample in case of saturated 2SLS. \code{NULL}
+otherwise.}
+
+\item{shuffle_seed}{A numeric value setting the seed for the shuffling of the
+sample. Only used if \code{shuffle == TRUE}. NULL otherwise.}
+
+\item{iter}{An integer value setting the number of iterations of the
+outlier-detection algorithm.}
+
+\item{criterion}{A numeric value that determines when the iterated
+outlier-detection algorithm stops by comparing it to the sum of squared
+differences between the m- and (m-1)-step parameter estimates. NULL if
+convergence criterion should not be used.}
 }
 \value{
 Returns a list that stores values that are constant across the
@@ -26,10 +65,4 @@ there will be some false positives that incorrectly classified as outliers.
 \description{
 \code{constants} calculates various values that do not change across the
 estimation and records them in a list.
-}
-\examples{
-# constant values for a normal distribution with significance level 0.05
-# observations with absolute residuals > 1.96 would be classified as outliers
-cons <- constants(sign_level = 0.05, reference = "normal")
-print(cons)
 }

@@ -217,7 +217,10 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   type <- as.integer(type)
   names(type) <- rownames(data)
 
-  update_info <- list(res = res, stdres = stdres, sel = sel, type = type)
+  model <- list(split1 = update_info1$model, split2 = update_info2$model)
+
+  update_info <- list(res = res, stdres = stdres, sel = sel, type = type,
+                      model = model)
 
   # remove columns created for indexing and splitting
   # seems to be unnecessary because of copy-on-modify behaviour

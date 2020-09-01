@@ -21,7 +21,7 @@ is an outlier or not. If its absolute value is larger than the cutoff value,
 the observations is classified as being an outlier.}
 }
 \value{
-A list with four elements, each of which is a vector whose length
+A list with five elements. The first four are vectors whose length
 equals the number of observations in the data set. The first element is a
 double vector containing the residuals for each observation based on the
 model estimates. Unlike \code{model$residuals}, it does not ignore
@@ -33,6 +33,9 @@ logical vector with TRUE if the observation is judged as not outlying,
 FALSE if it is an outlier, and NA if any of y, x, or z are missing. The
 fourth element of the list is an integer vector with three values: 1 if the
 observations is judged to be an outlier, 0 if not, and -1 if missing.
+
+The fifth and last element stores the \link[AER]{ivreg} model object based on
+which the four vectors were calculated.
 }
 \description{
 \code{selection} uses the data and model objects to create a list with four
