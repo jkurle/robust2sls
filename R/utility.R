@@ -146,6 +146,9 @@ selection <- function(data, yvar, model, cutoff) {
   type <- as.numeric(nonmiss) + as.numeric(sel) - 1
   type <- as.integer(type)
 
+  # if observations are named, should give type these
+  names(type) <- names(sel)
+
   return(list(res = res, stdres = stdres, sel = sel, type = type))
 
 }
