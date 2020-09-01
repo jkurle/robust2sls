@@ -39,6 +39,13 @@ out$stdres[[iteration]] <- update_info1$stdres
 out$sel[[iteration]] <- update_info1$sel
 out$type[[iteration]] <- update_info1$type
 
+# capture call test
+fprint <- function(x) {
+  a <- sys.call()
+  print(x)
+  return(a)
+}
+
 
 
 
