@@ -6,8 +6,8 @@
 #'
 #' @param data A dataframe or matrix containing the data used in the estimation.
 #' @param formula A formula in the format \code{y ~ x1 + x2 | x2 + z2} where
-#' \code{y} is the dependent variable, \code{x1} are the endogenous regressors,
-#' \code{x2} the exogenous regressors, and \code{z2} the outside instruments.
+#' \code{y} is the dependent variable, \code{x1} are the exogenous regressors,
+#' \code{x2} the endogenous regressors, and \code{z2} the outside instruments.
 #' @param cutoff A numeric cutoff value used to judge whether an observation
 #' is an outlier or not. If its absolute value is larger than the cutoff value,
 #' the observations is classified as being an outlier.
