@@ -230,13 +230,38 @@ nonmissing <- function(data, formula) {
 #' convergence criterion should not be used.
 #'
 #' @return Returns a list that stores values that are constant across the
-#' estimation to be accessed throughout the calculations.
-#' The following elements are stored (in order): the significance level to
-#' determine the cutoff value, the reference distribution as a character vector,
-#' the numeric cutoff value to determine outliers, the bias correction factor
-#' to account for the fact that even under the null hypothesis of no outliers,
-#' there will be some false positives that incorrectly classified as outliers.
-
+#' estimation. It is used to fill parts of the \code{"robust2sls"} class object,
+#' which is returned by \link{outlier_detection}.
+#' \describe{
+#'   \item{\code{$call}}{The captured function call.}
+#'   \item{\code{$formula}}{The formula argument.}
+#'   \item{\code{$data}}{The original data set.}
+#'   \item{\code{$reference}}{The chosen reference distribution to classify
+#'   outliers.}
+#'   \item{\code{$sign_level}}{The significance level determining the cutoff.}
+#'   \item{\code{$psi}}{The probability that an observation is not classified as
+#'   an outlier under the null hypothesis of no outliers.}
+#'   \item{\code{$cutoff}}{The cutoff used to classify outliers if
+#'   their standardised residuals are larger than that value.}
+#'   \item{\code{$bias_corr}}{A numeric bias correction factor to account for
+#'   potential false positives (observations classified as outliers even though
+#'   they are not).}
+#'   \item{\code{$initial}}{A list storing settings about the initial estimator:
+#'   \code{$estimator} is the type of the initial estimator (e.g. robustified or
+#'   saturated), \code{$split} how the sample is split (\code{NULL} if argument
+#'   not used), \code{$shuffle} whether the sample is shuffled before splitting
+#'   (\code{NULL} if argument not used), \code{$shuffle_seed} the value of the
+#'   random seed (\code{NULL} if argument not used).}
+#'   \item{\code{$convergence}}{A list storing information about the convergence
+#'   of the outlier-detection algorithm: \code{$criterion} is the user-specified
+#'   convergence criterion (\code{NULL} if argument not used),
+#'   \code{$difference} is initialised as \code{NULL}. \code{$converged} is
+#'   initialised as \code{NULL}.}
+#'   \item{\code{$iterations}}{A list storing information about the iterations
+#'   of the algorithm. \code{$setting} stores the user-specified
+#'   \code{iterations} argument. \code{$actual} is initialised as \code{NULL}
+#'   and will store the actual number of iterations done.}
+#' }
 
 constants <- function(call, formula, data, reference = c("normal"), sign_level,
                       estimator, split, shuffle, shuffle_seed, iter,
@@ -256,6 +281,10 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
                       (1-sign_level))
   }
 
+  if (estimator != "saturated") { # following args not used if not "saturated"
+    split <- shuffle <- shuffle_seed <- NULL
+  }
+
   initial <- list(estimator = estimator, split = split, shuffle = shuffle,
                   shuffle_seed = shuffle_seed)
   convergence <- list(criterion = criterion, difference = NULL,
@@ -272,6 +301,23 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
 }
 
 
+#' Append new iteration results to \code{"robust2sls"} object
+#'
+#' \code{update_list} takes an existing \code{"robust2sls"} object and appends
+#' the estimation results (\link[AER]{ivreg} model object, residuals,
+#' standardised residuals, selection and type vectors) of a new iteration.
+#'
+#' @param current_list A list object of class \code{"robust2sls"}.
+#' @param new_info A list with named components \code{$model}, \code{$res},
+#' \code{$stdres}, \code{$sel}, and \code{$type}.
+#' @param name A character vector of length one naming the appended iteration
+#' results. Convention is \code{"m0"}, \code{"m1"}, \code{"m2"} etc. for
+#' iterations 0 (initial), 1, 3...
+#'
+#' @return An object of class \code{"robust2sls"} whose components
+#' \code{$model}, \code{$res}, \code{$stdres}, \code{$sel}, and \code{$type} are
+#' no appended with the new iteration results.
+
 update_list <- function(current_list, new_info, name) {
 
   current_list$model[[name]] <- new_info$model
@@ -283,5 +329,45 @@ update_list <- function(current_list, new_info, name) {
   return(current_list)
 
 }
+
+#' L2 norm between two most recent estimates
+#'
+#' \code{conv_diff} uses an object of class \code{"robust2sls"} to calculate the
+#' L2 norm (sum of squared differences) between the most recent outlier-robust
+#' iteration and the previous iteration estimates.
+#'
+#' @param current A list object of class \code{"robust2sls"}.
+#' @param counter An integer denoting the number of the current iteration.
+#'
+#' @return \code{conv_diff} returns a numeric value, which is the L2 norm
+#' of the difference between the most recent and the previous parameter
+#' estimates. The L2 norm is the sum of squared differences of the estimates.
+
+conv_diff <- function(current, counter) {
+
+  if (current$cons$iterations$setting == 0) { # cannot calculate comparison
+
+  } else { # can calculate
+
+    if (current$cons$initial$estimator == "saturated" & counter == 1) {
+      # we now have two initial estimates, one for each split
+      # define the difference as the larger difference of the two estimates
+      diff1 <- sum((current$model[[2]]$coefficients -
+                      current$model[[1]][[1]]$coefficients)^2) # diff 1st split
+      diff2 <- sum((current$model[[2]]$coefficients -
+                      current$model[[1]][[2]]$coefficients)^2) # diff 2nd split
+      diff <- max(diff1, diff2) # take the maximum of the two differences
+    } else {
+      diff <- sum((current$model[[length(current$model)]]$coefficients -
+                     current$model[[length(current$model)-1]]$coefficients)^2)
+    }
+
+    return(diff)
+
+  } # end can calculate
+
+}
+
+
 
 

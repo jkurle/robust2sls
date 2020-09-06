@@ -55,12 +55,38 @@ convergence criterion should not be used.}
 }
 \value{
 Returns a list that stores values that are constant across the
-estimation to be accessed throughout the calculations.
-The following elements are stored (in order): the significance level to
-determine the cutoff value, the reference distribution as a character vector,
-the numeric cutoff value to determine outliers, the bias correction factor
-to account for the fact that even under the null hypothesis of no outliers,
-there will be some false positives that incorrectly classified as outliers.
+estimation. It is used to fill parts of the \code{"robust2sls"} class object,
+which is returned by \link{outlier_detection}.
+\describe{
+  \item{\code{$call}}{The captured function call.}
+  \item{\code{$formula}}{The formula argument.}
+  \item{\code{$data}}{The original data set.}
+  \item{\code{$reference}}{The chosen reference distribution to classify
+  outliers.}
+  \item{\code{$sign_level}}{The significance level determining the cutoff.}
+  \item{\code{$psi}}{The probability that an observation is not classified as
+  an outlier under the null hypothesis of no outliers.}
+  \item{\code{$cutoff}}{The cutoff used to classify outliers if
+  their standardised residuals are larger than that value.}
+  \item{\code{$bias_corr}}{A numeric bias correction factor to account for
+  potential false positives (observations classified as outliers even though
+  they are not).}
+  \item{\code{$initial}}{A list storing settings about the initial estimator:
+  \code{$estimator} is the type of the initial estimator (e.g. robustified or
+  saturated), \code{$split} how the sample is split (\code{NULL} if argument
+  not used), \code{$shuffle} whether the sample is shuffled before splitting
+  (\code{NULL} if argument not used), \code{$shuffle_seed} the value of the
+  random seed (\code{NULL} if argument not used).}
+  \item{\code{$convergence}}{A list storing information about the convergence
+  of the outlier-detection algorithm: \code{$criterion} is the user-specified
+  convergence criterion (\code{NULL} if argument not used),
+  \code{$difference} is initialised as \code{NULL}. \code{$converged} is
+  initialised as \code{NULL}.}
+  \item{\code{$iterations}}{A list storing information about the iterations
+  of the algorithm. \code{$setting} stores the user-specified
+  \code{iterations} argument. \code{$actual} is initialised as \code{NULL}
+  and will store the actual number of iterations done.}
+}
 }
 \description{
 \code{constants} calculates various values that do not change across the
