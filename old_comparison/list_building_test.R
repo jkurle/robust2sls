@@ -46,6 +46,17 @@ fprint <- function(x) {
   return(a)
 }
 
+# test seq_len()
 
+l <- list()
+iteration <- 0
+
+for (i in 1:iteration) {
+  l[i] <- i
+}
+
+for (i in seq_len(iteration)) {
+  l[i] <- i
+}
 
 
