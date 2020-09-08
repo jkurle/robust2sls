@@ -7,13 +7,12 @@
 selection(data, yvar, model, cutoff)
 }
 \arguments{
-\item{data}{A dataframe that contains the dependent variable \code{yvar} for
-which the residuals will be calculated.}
+\item{data}{A dataframe.}
 
 \item{yvar}{A character vector of length 1 that refers to the name of the
 dependent variable in the data set.}
 
-\item{model}{A model object of \link{class} \link[AER]{ivreg} whose
+\item{model}{A model object of \link{class} \code{\link[AER]{ivreg}} whose
 parameters are used to calculate the residuals.}
 
 \item{cutoff}{A numeric cutoff value used to judge whether an observation
@@ -22,20 +21,20 @@ the observations is classified as being an outlier.}
 }
 \value{
 A list with five elements. The first four are vectors whose length
-equals the number of observations in the data set. The first element is a
-double vector containing the residuals for each observation based on the
-model estimates. Unlike \code{model$residuals}, it does not ignore
-observations where any of y, x or z are missing. It instead sets their values
-to NA.
+equals the number of observations in the data set. Unlike the residuals
+stored in a model object (usually accessible via \code{model$residuals}), it
+does not ignore observations where any of y, x or z are missing. It instead
+sets their values to NA.
 
-The second element contains the standardised residuals, the third one a
-logical vector with TRUE if the observation is judged as not outlying,
-FALSE if it is an outlier, and NA if any of y, x, or z are missing. The
-fourth element of the list is an integer vector with three values: 1 if the
-observations is judged to be an outlier, 0 if not, and -1 if missing.
-
-The fifth and last element stores the \link[AER]{ivreg} model object based on
-which the four vectors were calculated.
+The first element is a double vector containing the residuals for each
+observation based on the model estimates. The second element contains the
+standardised residuals, the third one a logical vector with TRUE if the
+observation is judged as not outlying, FALSE if it is an outlier, and NA if
+any of y, x, or z are missing. The fourth element of the list is an integer
+vector with three values: 1 if the observations is judged to be an outlier,
+0 if not, and -1 if missing. The fifth and last element stores the
+\code{\link[AER]{ivreg}} model object based on which the four vectors were
+calculated.
 }
 \description{
 \code{selection} uses the data and model objects to create a list with four
@@ -44,9 +43,10 @@ outliers or not.
 }
 \section{Warning}{
 
-Unlike the object \code{model$residuals}, this function returns vectors
-of the same length as the original data set even if any of the y, x,
-or z variables are missing. The residuals for those observations are set to
-NA.
+Unlike the residuals stored in a model object (usually accessible via
+\code{model$residuals}), this function returns vectors of the same length as
+the original data set even if any of the y, x, or z variables are missing.
+The residuals for those observations are set to NA.
 }
 
+\keyword{internal}

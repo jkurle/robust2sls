@@ -10,7 +10,7 @@ nonmissing(data, formula)
 \item{data}{A dataframe.}
 
 \item{formula}{A formula for the \code{\link[AER]{ivreg}} function, i.e. in
-format \code{y ~ x | z}.}
+format \code{y ~ x1 + x2 | z1 + z2}.}
 }
 \value{
 Returns a logical vector with the same length as the number of

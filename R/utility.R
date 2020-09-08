@@ -1,16 +1,25 @@
 #' Extract the elements of ivreg formula
 #'
-#' \code{extract_formula} takes a formula object for \code{ivreg}, i.e. in a
-#' format of \code{y ~ x1 + x2 | z1 + z2} and extracts the different elements
-#' in a list. Each element is a character vector storing the different types of
-#' regressors. Element \code{y_var} refers to the dependent variable,
+#' \code{extract_formula} takes a formula object for \code{\link[AER]{ivreg}},
+#' i.e. in a format of \code{y ~ x1 + x2 | x1 + z2} and extracts the different
+#' elements in a list. Each element is a character vector storing the different
+#' types of regressors. Element \code{y_var} refers to the dependent variable,
 #' \code{x1_var} to the exogenous regressors, \code{x2_var} to the endogenous
 #' regressors, \code{z1_var} to the exogenous regressors (which have to be
 #' included again as instruments and hence coincide with \code{x1_var}), and
 #' \code{z2_var} refers to the outside instruments.
 #'
 #' @param formula A formula for the \code{\link[AER]{ivreg}} function, i.e. in
-#' format \code{y ~ x | z}.
+#' format \code{y ~ x1 + x2 | z1 + z2}.
+#'
+#' @return \code{extract_formula} returns a list with five named components,
+#' each of which is a character vector: \code{$y_var} refers to the dependent
+#' variable, \code{$x1_var} to the exogenous regressors, \code{$x2_var} to the
+#' endogenous regressors, \code{$z1_var} to the exogenous regressors (which have
+#' to be included again as instruments and hence coincide with \code{$x1_var}),
+#' and \code{$z2_var} refers to the outside instruments.
+#'
+#' @keywords internal
 
 extract_formula <- function(formula) {
 
@@ -68,37 +77,38 @@ extract_formula <- function(formula) {
 #' elements that are used to determine whether the observations are judged as
 #' outliers or not.
 #'
-#' @param data A dataframe that contains the dependent variable \code{yvar} for
-#' which the residuals will be calculated.
+#' @param data A dataframe.
 #' @param yvar A character vector of length 1 that refers to the name of the
 #' dependent variable in the data set.
-#' @param model A model object of \link{class} \link[AER]{ivreg} whose
+#' @param model A model object of \link{class} \code{\link[AER]{ivreg}} whose
 #' parameters are used to calculate the residuals.
 #' @param cutoff A numeric cutoff value used to judge whether an observation
 #' is an outlier or not. If its absolute value is larger than the cutoff value,
 #' the observations is classified as being an outlier.
 #'
 #' @return A list with five elements. The first four are vectors whose length
-#' equals the number of observations in the data set. The first element is a
-#' double vector containing the residuals for each observation based on the
-#' model estimates. Unlike \code{model$residuals}, it does not ignore
-#' observations where any of y, x or z are missing. It instead sets their values
-#' to NA.
+#' equals the number of observations in the data set. Unlike the residuals
+#' stored in a model object (usually accessible via \code{model$residuals}), it
+#' does not ignore observations where any of y, x or z are missing. It instead
+#' sets their values to NA.
 #'
-#' The second element contains the standardised residuals, the third one a
-#' logical vector with TRUE if the observation is judged as not outlying,
-#' FALSE if it is an outlier, and NA if any of y, x, or z are missing. The
-#' fourth element of the list is an integer vector with three values: 1 if the
-#' observations is judged to be an outlier, 0 if not, and -1 if missing.
-#'
-#' The fifth and last element stores the \link[AER]{ivreg} model object based on
-#' which the four vectors were calculated.
+#' The first element is a double vector containing the residuals for each
+#' observation based on the model estimates. The second element contains the
+#' standardised residuals, the third one a logical vector with TRUE if the
+#' observation is judged as not outlying, FALSE if it is an outlier, and NA if
+#' any of y, x, or z are missing. The fourth element of the list is an integer
+#' vector with three values: 1 if the observations is judged to be an outlier,
+#' 0 if not, and -1 if missing. The fifth and last element stores the
+#' \code{\link[AER]{ivreg}} model object based on which the four vectors were
+#' calculated.
 #'
 #' @section Warning:
-#' Unlike the object \code{model$residuals}, this function returns vectors
-#' of the same length as the original data set even if any of the y, x,
-#' or z variables are missing. The residuals for those observations are set to
-#' NA.
+#' Unlike the residuals stored in a model object (usually accessible via
+#' \code{model$residuals}), this function returns vectors of the same length as
+#' the original data set even if any of the y, x, or z variables are missing.
+#' The residuals for those observations are set to NA.
+#'
+#' @keywords internal
 
 selection <- function(data, yvar, model, cutoff) {
 
