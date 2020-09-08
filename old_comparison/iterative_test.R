@@ -60,3 +60,13 @@ t <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
                        iterations = "convergence", convergence_criterion = 0.1,
                        shuffle = TRUE, shuffle_seed = 42, split = 0.5)
 
+t <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                       sign_level = 0.05, initial_est = "saturated",
+                       iterations = 0, convergence_criterion = NULL,
+                       shuffle = TRUE, shuffle_seed = 42, split = 0.5)
+
+t <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                       sign_level = 0.05, initial_est = "saturated",
+                       iterations = 10, convergence_criterion = 1,
+                       shuffle = TRUE, shuffle_seed = 42, split = 0.5)
+
