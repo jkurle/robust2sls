@@ -11,7 +11,7 @@ new_robust2sls(x = list())
 }
 \description{
 \code{new_robust2sls} turns a list into an object of \link{class}
-"\code{robust2sls}"
+\code{"robust2sls"}
 }
 \section{Warning}{
 
