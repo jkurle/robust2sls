@@ -20,6 +20,3 @@ regressors, \code{z1_var} to the exogenous regressors (which have to be
 included again as instruments and hence coincide with \code{x1_var}), and
 \code{z2_var} refers to the outside instruments.
 }
-\examples{
-extract_formula(y ~ x1 + x2 + x3 | x1 + x2 + z3)
-}

@@ -11,9 +11,6 @@
 #'
 #' @param formula A formula for the \code{\link[AER]{ivreg}} function, i.e. in
 #' format \code{y ~ x | z}.
-#'
-#' @examples
-#' extract_formula(y ~ x1 + x2 + x3 | x1 + x2 + z3)
 
 extract_formula <- function(formula) {
 
