@@ -23,6 +23,11 @@ outliers <- function(robust2sls_object, iteration) {
                  initial = ""))
   }
 
+  if (iteration < 0) {
+    stop(strwrap("The argument `iteration` has to be >= 0", prefix = " ",
+                 initial = ""))
+  }
+
   if (iteration > robust2sls_object$cons$iterations$actual) {
     stop(strwrap("The 'robust2sls' object has fewer iterations than argument
                  `iteration` specifies.", prefix = " ", initial = ""))
@@ -83,4 +88,37 @@ outliers_prop <- function(robust2sls_object, iteration) {
   return(prop)
 
 }
+
+#' Outlier history of single observation
+#'
+#' \code{outlier} takes a \code{"robust2sls"} object and the index of a specific
+#' observation and returns its history of classification across the different
+#' iterations contained in the \code{"robust2sls"} object.
+#'
+#' @inheritParams outliers
+#' @param obs An index (row number) of an observation
+#'
+
+outlier <- function(robust2sls_object, obs) {
+
+  iterations <- robust2sls_object$cons$iterations$actual
+  hist <- numeric(length = 0)
+  coln <- character(length = 0)
+
+  for (i in seq_len(iterations + 1)) {
+
+    acc <- paste("m", i-1, sep = "")
+    hist <- c(hist, robust2sls_object$type[[acc]][[obs]])
+    coln <- c(coln, acc)
+
+  }
+
+  hist <- t(as.matrix(hist, nrow = 1))
+  rownames(hist) <- rownames(robust2sls_object$cons$data)[[obs]]
+  colnames(hist) <- coln
+
+  return(hist)
+
+}
+
 
