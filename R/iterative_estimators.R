@@ -117,6 +117,8 @@
 #' @section Warning:
 #' Check REFERENCE TO PAPER about conditions on the initial estimator that
 #' should be satisfied for the initial estimator (e.g. they have to be Op(1)).
+#'
+#' @export
 
 outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   initial_est = c("robustified", "saturated", "user"), user_model = NULL,
@@ -138,10 +140,13 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
                         iter = iterations, criterion = convergence_criterion)
   out$cons <- constant
   out <- new_robust2sls(x = out) # turn into object of class "robust2sls"
+  cutoff <- constant$cutoff
 
   # extract dependent variable
   vars <- extract_formula(formula)
   y_var <- vars$y_var
+
+  cat("Estimating iteration: 0")
 
   # initial estimation
   if (initial_est == "robustified") {
@@ -182,6 +187,9 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
     while (difference > convergence_criterion) {
 
+      # print progress
+      cat(", ", counter, sep = "")
+
       # add latest selection vector as new variable to dataframe
       data[[selection_name]] <- out$sel[[length(out$sel)]]
 
@@ -208,6 +216,10 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
       # calculate difference
       difference <- conv_diff(current = out, counter = counter)
 
+      if (difference <= convergence_criterion) {
+        cat("\n Algorithm converged successfully. Exit iterations.")
+      }
+
       # update counter
       counter <- counter + 1
 
@@ -216,6 +228,9 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   } else if (is.numeric(iterations)) { # end convergence, else numeric iter
 
     for (i in seq_len(iterations)) {
+
+      # print progress
+      cat(", ", counter, sep = "")
 
       # add latest selection vector as new variable to dataframe
       data[[selection_name]] <- out$sel[[length(out$sel)]]
@@ -250,8 +265,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
       # this is only done when a convergence_criterion is specified (not NULL)
       if (!is.null(convergence_criterion)) {
         if (difference <= convergence_criterion) {
-          print("convergence according to convergence_criterion was reached;
-                exit iterations")
+          cat("\n Algorithm converged successfully. Exit iterations.")
           break
         }
       } # end if break
