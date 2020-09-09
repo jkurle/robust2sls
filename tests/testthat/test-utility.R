@@ -130,18 +130,209 @@ test_that("nonmissing() works correctly", {
   expect_equal(nonmissing(data = dta, formula = mpg ~ cyl + disp | cyl + wt),
                nm)
 
+  expect_error(nonmissing(data = as.matrix(dta),
+      formula = mpg ~ cyl + disp | cyl + wt), "must be a dataframe")
+  expect_error(nonmissing(data = dta, formula = mpg ~ cyl + disp), "does not
+               include both symbols `~` and `|`")
+  expect_error(nonmissing(data = dta, formula = ~ cyl | disp), "does not
+               include both symbols `~` and `|`")
+  expect_error(nonmissing(data = dta, formula = nonexist ~ cyl + disp))
+
 })
 
-# test_that("constants() works correctly", {
-#
-#   expect_error(constants(sign_level = 0.05, reference = "notexist"))
-#   expect_error(constants(sign_level = -0.01, reference = "normal"),
-#                "has to be > 0 and < 1")
-#   expect_error(constants(sign_level = 1, reference = "normal"),
-#                "has to be > 0 and < 1")
-#   expect_error(constants(sign_level = "a", reference = "normal"))
-#
-#   expect_equal(constants(sign_level = 0.05, reference = "normal")$cutoff, 1.96,
-#                tolerance = 0.01)
-#
-# })
+test_that("constants() works correctly", {
+
+  # function to suppress output until outlier_detection has arg to turn off
+  # progress messages
+  hush=function(code){
+    sink("NUL")
+    tmp = code
+    sink()
+    return(tmp)
+  }
+
+  # working values
+  data <- mtcars
+  # since formula has an environment, whose memory address changes each time
+  # it is run, it differs by snapshot. So here remove environment.
+  formula <- mpg ~ cyl + disp | cyl + wt
+  attr(formula, which = ".Environment") <- NULL
+  test1 <- hush(outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
+            iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
+            shuffle_seed = 42, split = 0.5))
+  call1 <- sys.call()
+  test2 <- hush(outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
+            iterations = 5, convergence_criterion = 0, shuffle = NULL,
+            shuffle_seed = NULL, split = NULL))
+  call2 <- sys.call()
+  test3 <- hush(outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
+            iterations = "convergence", convergence_criterion = 0.5,
+            shuffle = TRUE, shuffle_seed = 42, split = 0.5))
+  call3 <- sys.call()
+  test4 <- hush(outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
+            iterations = "convergence", convergence_criterion = 1,
+            shuffle = FALSE, shuffle_seed = 42, split = 0.5))
+  call4 <- sys.call()
+
+  c1 <- constants(call = call1, formula = formula, data = data,
+                  reference = "normal", sign_level = 0.05,
+                  estimator = "robustified", split = 0.5, shuffle = FALSE,
+                  shuffle_seed = 42, iter = 5, criterion = NULL)
+  c2 <- constants(call = call2, formula = formula, data = data,
+                  reference = "normal", sign_level = 0.05,
+                  estimator = "robustified", split = NULL, shuffle = NULL,
+                  shuffle_seed = NULL, iter = 5, criterion = 0)
+  c3 <- constants(call = call3, formula = formula, data = data,
+                  reference = "normal", sign_level = 0.05,
+                  estimator = "saturated", split = 0.5, shuffle = TRUE,
+                  shuffle_seed = 42, iter = 5, criterion = 0.5)
+  c4 <- constants(call = call4, formula = formula, data = data,
+                  reference = "normal", sign_level = 0.05,
+                  estimator = "saturated", split = 0.5, shuffle = FALSE,
+                  shuffle_seed = 42, iter = "convergence", criterion = 1)
+
+  names <- c("call", "formula", "data", "reference", "sign_level", "psi",
+             "cutoff", "bias_corr", "initial", "convergence", "iterations")
+
+  expect_equal(length(c1), 11)
+  expect_equal(length(c2), 11)
+  expect_equal(length(c3), 11)
+  expect_equal(length(c4), 11)
+  expect_equal(class(c1), "list")
+  expect_equal(class(c2), "list")
+  expect_equal(class(c3), "list")
+  expect_equal(class(c4), "list")
+  expect_equal(names(c1), names)
+  expect_equal(names(c2), names)
+  expect_equal(names(c3), names)
+  expect_equal(names(c4), names)
+  expect_equal(length(c1$initial), 4)
+  expect_equal(length(c2$initial), 4)
+  expect_equal(length(c3$initial), 4)
+  expect_equal(length(c4$initial), 4)
+  expect_equal(class(c1$initial), "list")
+  expect_equal(class(c2$initial), "list")
+  expect_equal(class(c3$initial), "list")
+  expect_equal(class(c4$initial), "list")
+  expect_equal(names(c1$initial),
+               c("estimator", "split", "shuffle", "shuffle_seed"))
+  expect_equal(names(c2$initial),
+               c("estimator", "split", "shuffle", "shuffle_seed"))
+  expect_equal(names(c3$initial),
+               c("estimator", "split", "shuffle", "shuffle_seed"))
+  expect_equal(names(c4$initial),
+               c("estimator", "split", "shuffle", "shuffle_seed"))
+  expect_equal(length(c1$convergence), 3)
+  expect_equal(length(c2$convergence), 3)
+  expect_equal(length(c3$convergence), 3)
+  expect_equal(length(c4$convergence), 3)
+  expect_equal(class(c1$convergence), "list")
+  expect_equal(class(c2$convergence), "list")
+  expect_equal(class(c3$convergence), "list")
+  expect_equal(class(c4$convergence), "list")
+  expect_equal(names(c1$convergence), c("criterion", "difference", "converged"))
+  expect_equal(names(c2$convergence), c("criterion", "difference", "converged"))
+  expect_equal(names(c3$convergence), c("criterion", "difference", "converged"))
+  expect_equal(names(c4$convergence), c("criterion", "difference", "converged"))
+  expect_equal(length(c1$iterations), 2)
+  expect_equal(length(c2$iterations), 2)
+  expect_equal(length(c3$iterations), 2)
+  expect_equal(length(c4$iterations), 2)
+  expect_equal(class(c1$iterations), "list")
+  expect_equal(class(c2$iterations), "list")
+  expect_equal(class(c3$iterations), "list")
+  expect_equal(class(c4$iterations), "list")
+  expect_equal(names(c1$iterations), c("setting", "actual"))
+  expect_equal(names(c2$iterations), c("setting", "actual"))
+  expect_equal(names(c3$iterations), c("setting", "actual"))
+  expect_equal(names(c4$iterations), c("setting", "actual"))
+
+  expect_snapshot(c1)
+  expect_snapshot(c2)
+  expect_snapshot(c3)
+  expect_snapshot(c4)
+
+  expect_equal(c1$formula, formula)
+  expect_equal(c2$formula, formula)
+  expect_equal(c3$formula, formula)
+  expect_equal(c4$formula, formula)
+
+  expect_equal(c1$data, mtcars)
+  expect_equal(c2$data, mtcars)
+  expect_equal(c3$data, mtcars)
+  expect_equal(c4$data, mtcars)
+
+  expect_equal(c1$reference, "normal")
+  expect_equal(c2$reference, "normal")
+  expect_equal(c3$reference, "normal")
+  expect_equal(c4$reference, "normal")
+
+  expect_equal(c1$sign_level, 0.05)
+  expect_equal(c2$sign_level, 0.05)
+  expect_equal(c3$sign_level, 0.05)
+  expect_equal(c4$sign_level, 0.05)
+
+  expect_equal(c1$psi, 0.95)
+  expect_equal(c2$psi, 0.95)
+  expect_equal(c3$psi, 0.95)
+  expect_equal(c4$psi, 0.95)
+
+  expect_equal(c1$cutoff, 1.959964)
+  expect_equal(c2$cutoff, 1.959964)
+  expect_equal(c3$cutoff, 1.959964)
+  expect_equal(c4$cutoff, 1.959964)
+
+  expect_equal(c1$bias_corr, 1.317798, tolerance = 0.0000001)
+  expect_equal(c2$bias_corr, 1.317798, tolerance = 0.0000001)
+  expect_equal(c3$bias_corr, 1.317798, tolerance = 0.0000001)
+  expect_equal(c4$bias_corr, 1.317798, tolerance = 0.0000001)
+
+  expect_equal(c1$initial$estimator, "robustified")
+  expect_equal(c2$initial$estimator, "robustified")
+  expect_equal(c3$initial$estimator, "saturated")
+  expect_equal(c4$initial$estimator, "saturated")
+
+  expect_equal(c1$initial$split, NULL)
+  expect_equal(c2$initial$split, NULL)
+  expect_equal(c3$initial$split, 0.5)
+  expect_equal(c4$initial$split, 0.5)
+
+  expect_equal(c1$initial$shuffle, NULL)
+  expect_equal(c2$initial$shuffle, NULL)
+  expect_equal(c3$initial$shuffle, TRUE)
+  expect_equal(c4$initial$shuffle, FALSE)
+
+  expect_equal(c1$initial$shuffle_seed, NULL)
+  expect_equal(c2$initial$shuffle_seed, NULL)
+  expect_equal(c3$initial$shuffle_seed, 42)
+  expect_equal(c4$initial$shuffle_seed, NULL)
+
+  expect_equal(c1$iterations$setting, 5)
+  expect_equal(c2$iterations$setting, 5)
+  expect_equal(c3$iterations$setting, 5)
+  expect_equal(c4$iterations$setting, "convergence")
+
+  expect_equal(c1$iterations$actual, NULL)
+  expect_equal(c2$iterations$actual, NULL)
+  expect_equal(c3$iterations$actual, NULL)
+  expect_equal(c4$iterations$actual, NULL)
+
+  expect_equal(c1$convergence$difference, NULL)
+  expect_equal(c2$convergence$difference, NULL)
+  expect_equal(c3$convergence$difference, NULL)
+  expect_equal(c4$convergence$difference, NULL)
+
+  expect_equal(c1$convergence$converged, NULL)
+  expect_equal(c2$convergence$converged, NULL)
+  expect_equal(c3$convergence$converged, NULL)
+  expect_equal(c4$convergence$converged, NULL)
+
+
+
+
+
+})
