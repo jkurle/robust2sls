@@ -276,6 +276,8 @@ nonmissing <- function(data, formula) {
 #'   \code{iterations} argument. \code{$actual} is initialised as \code{NULL}
 #'   and will store the actual number of iterations done.}
 #' }
+#'
+#' @keywords internal
 
 constants <- function(call, formula, data, reference = c("normal"), sign_level,
                       estimator, split, shuffle, shuffle_seed, iter,
@@ -334,7 +336,7 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
 #'
 #' @return An object of class \code{"robust2sls"} whose components
 #' \code{$model}, \code{$res}, \code{$stdres}, \code{$sel}, and \code{$type} are
-#' no appended with the new iteration results.
+#' now appended with the new iteration results.
 
 update_list <- function(current_list, new_info, name) {
 

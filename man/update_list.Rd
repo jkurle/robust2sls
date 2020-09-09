@@ -19,7 +19,7 @@ iterations 0 (initial), 1, 3...}
 \value{
 An object of class \code{"robust2sls"} whose components
 \code{$model}, \code{$res}, \code{$stdres}, \code{$sel}, and \code{$type} are
-no appended with the new iteration results.
+now appended with the new iteration results.
 }
 \description{
 \code{update_list} takes an existing \code{"robust2sls"} object and appends

@@ -92,3 +92,4 @@ which is returned by \link{outlier_detection}.
 \code{constants} calculates various values that do not change across the
 estimation and records them in a list.
 }
+\keyword{internal}
