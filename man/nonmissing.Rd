@@ -19,7 +19,7 @@ missing values in any of y, x, or z variables. TRUE means not missing, FALSE
 means at least one of these variables necessary for estimation is missing.
 }
 \description{
-\code{nonmissing} takes a data set and a formula and determines which
+\code{nonmissing} takes a dataframe and a formula and determines which
 observations can principally be used for the estimation of the 2SLS model
 that is specified by the formula. Observations where any of the y, x, or z
 variables are missing will be set to FALSE. While technically, fitted values
@@ -28,3 +28,4 @@ outside instruments is missing, this is often not desirable. This would cause
 the sample on which the model is estimated to be different from the sample
 on which the outliers are determined.
 }
+\keyword{internal}

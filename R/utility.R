@@ -39,7 +39,7 @@ extract_formula <- function(formula) {
   # ensure that the formula contains three parts
   if (length(fml_split[[1]]) != 3) {
     stop(strwrap("The `formula` does not consist of three parts as in
-         y ~ x1 + x2 | z1 + z2", prefix = " ", initial = ""))
+         y ~ x1 + x2 | x1 + z2", prefix = " ", initial = ""))
   }
 
   # delete symbols and leading & trailing spaces, collect in character vector
@@ -166,7 +166,7 @@ selection <- function(data, yvar, model, cutoff) {
 
 #' Determine which observations can be used for estimation
 #'
-#' \code{nonmissing} takes a data set and a formula and determines which
+#' \code{nonmissing} takes a dataframe and a formula and determines which
 #' observations can principally be used for the estimation of the 2SLS model
 #' that is specified by the formula. Observations where any of the y, x, or z
 #' variables are missing will be set to FALSE. While technically, fitted values
@@ -182,8 +182,15 @@ selection <- function(data, yvar, model, cutoff) {
 #' observations in the data set that specifies whether an observation has any
 #' missing values in any of y, x, or z variables. TRUE means not missing, FALSE
 #' means at least one of these variables necessary for estimation is missing.
+#'
+#' @keywords internal
 
 nonmissing <- function(data, formula) {
+
+  if (!is.data.frame(data)) {
+    stop(strwrap("The argument 'data' must be a dataframe", prefix = " ",
+                 initial = ""))
+  }
 
   vars <- extract_formula(formula = formula)
   all_vars <- union(union(union(union(vars$y_var, vars$x1_var), vars$x2_var),
@@ -281,22 +288,26 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
                  prefix = " ", initial = ""))
   }
 
-  if (ref == "normal") {
+  if (identical(ref, "normal")) {
     psi <- 1 - sign_level
     cutoff <- qnorm(p = 1-(sign_level/2), mean = 0, sd = 1)
     bias_corr <- 1/(((1-sign_level)-2*cutoff*dnorm(cutoff,mean=0,sd=1))/
                       (1-sign_level))
   }
 
-  if (estimator != "saturated") { # following args not used if not "saturated"
+  if (!identical(estimator, "saturated")) { # args not used if not "saturated"
     split <- shuffle <- shuffle_seed <- NULL
   }
 
   initial <- list(estimator = estimator, split = split, shuffle = shuffle,
-                  shuffle_seed = shuffle_seed)
+                  shuffle_seed = NULL)
   convergence <- list(criterion = criterion, difference = NULL,
                       converged = NULL)
   iterations <- list(setting = iter, actual = NULL)
+
+  if (identical(estimator, "saturated") & identical(shuffle, TRUE)) {
+    initial$shuffle_seed <- shuffle_seed
+  }
 
   cons <- list(call = call, formula = formula, data = data, reference = ref,
                sign_level = sign_level, psi = psi, cutoff = cutoff,
