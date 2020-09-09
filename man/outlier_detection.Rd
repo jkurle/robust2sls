@@ -15,7 +15,8 @@ outlier_detection(
   convergence_criterion = NULL,
   shuffle = FALSE,
   shuffle_seed,
-  split = 0.5
+  split = 0.5,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -72,6 +73,9 @@ sample or \code{NULL}. Only used if \code{initial_est == "saturated"} and
 
 \item{split}{A numeric value strictly between 0 and 1 that determines
 in which proportions the sample will be split.}
+
+\item{verbose}{A logical value whether progress during estimation should be
+reported.}
 }
 \value{
 \code{outlier_detection} returns an object of class

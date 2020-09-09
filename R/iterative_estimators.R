@@ -55,6 +55,8 @@
 #' \code{shuffle == TRUE}.
 #' @param split A numeric value strictly between 0 and 1 that determines
 #' in which proportions the sample will be split.
+#' @param verbose A logical value whether progress during estimation should be
+#' reported.
 #'
 #' @return \code{outlier_detection} returns an object of class
 #' \code{"robust2sls"}, which is a list with the following components:
@@ -123,7 +125,7 @@
 outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   initial_est = c("robustified", "saturated", "user"), user_model = NULL,
   iterations = 1, convergence_criterion = NULL, shuffle = FALSE, shuffle_seed,
-  split = 0.5) {
+  split = 0.5, verbose = FALSE) {
 
   # capture the original function call
   cll <- sys.call()
@@ -146,7 +148,9 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   vars <- extract_formula(formula)
   y_var <- vars$y_var
 
-  cat("Estimating iteration: 0")
+  if (verbose == TRUE) {
+    cat("Estimating iteration: 0")
+  }
 
   # initial estimation
   if (initial_est == "robustified") {
@@ -187,8 +191,10 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
     while (difference > convergence_criterion) {
 
-      # print progress
-      cat(", ", counter, sep = "")
+      # print progress if turned on
+      if (verbose == TRUE) {
+        cat(", ", counter, sep = "")
+      }
 
       # add latest selection vector as new variable to dataframe
       data[[selection_name]] <- out$sel[[length(out$sel)]]
@@ -217,7 +223,9 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
       difference <- conv_diff(current = out, counter = counter)
 
       if (difference <= convergence_criterion) {
-        cat("\n Algorithm converged successfully. Exit iterations.")
+        if (verbose == TRUE) {
+          cat("\n Algorithm converged successfully. Exit iterations.")
+        }
       }
 
       # update counter
@@ -229,8 +237,10 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
     for (i in seq_len(iterations)) {
 
-      # print progress
-      cat(", ", counter, sep = "")
+      # print progress if turned on
+      if (verbose == TRUE) {
+        cat(", ", counter, sep = "")
+      }
 
       # add latest selection vector as new variable to dataframe
       data[[selection_name]] <- out$sel[[length(out$sel)]]
