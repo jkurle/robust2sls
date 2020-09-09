@@ -142,40 +142,32 @@ test_that("nonmissing() works correctly", {
 
 test_that("constants() works correctly", {
 
-  # function to suppress output until outlier_detection has arg to turn off
-  # progress messages
-  hush=function(code){
-    sink("NUL")
-    tmp = code
-    sink()
-    return(tmp)
-  }
-
   # working values
   data <- mtcars
   # since formula has an environment, whose memory address changes each time
   # it is run, it differs by snapshot. So here remove environment.
   formula <- mpg ~ cyl + disp | cyl + wt
   attr(formula, which = ".Environment") <- NULL
-  test1 <- hush(outlier_detection(data = data, formula = formula,
+  # attention: call
+  test1 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
             iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
-            shuffle_seed = 42, split = 0.5))
+            shuffle_seed = 42, split = 0.5)
   call1 <- sys.call()
-  test2 <- hush(outlier_detection(data = data, formula = formula,
+  test2 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
             iterations = 5, convergence_criterion = 0, shuffle = NULL,
-            shuffle_seed = NULL, split = NULL))
+            shuffle_seed = NULL, split = NULL)
   call2 <- sys.call()
-  test3 <- hush(outlier_detection(data = data, formula = formula,
+  test3 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
             iterations = "convergence", convergence_criterion = 0.5,
-            shuffle = TRUE, shuffle_seed = 42, split = 0.5))
+            shuffle = TRUE, shuffle_seed = 42, split = 0.5)
   call3 <- sys.call()
-  test4 <- hush(outlier_detection(data = data, formula = formula,
+  test4 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
             iterations = "convergence", convergence_criterion = 1,
-            shuffle = FALSE, shuffle_seed = 42, split = 0.5))
+            shuffle = FALSE, shuffle_seed = 42, split = 0.5)
   call4 <- sys.call()
 
   c1 <- constants(call = call1, formula = formula, data = data,
@@ -331,6 +323,20 @@ test_that("constants() works correctly", {
   expect_equal(c3$convergence$converged, NULL)
   expect_equal(c4$convergence$converged, NULL)
 
+  # test error messages
+
+  expect_error(constants(call = call1, formula = formula, data = data,
+      reference = "nonexist", sign_level = 0.05,
+      estimator = "robustified", split = 0.5, shuffle = FALSE,
+      shuffle_seed = 42, iter = 5, criterion = NULL))
+  expect_error(constants(call = call1, formula = formula, data = data,
+      reference = "normal", sign_level = 1.1,
+      estimator = "robustified", split = 0.5, shuffle = FALSE,
+      shuffle_seed = 42, iter = 5, criterion = NULL), "has to be > 0 and < 1")
+  expect_error(constants(call = call1, formula = formula, data = data,
+      reference = "normal", sign_level = -0.05,
+      estimator = "robustified", split = 0.5, shuffle = FALSE,
+      shuffle_seed = 42, iter = 5, criterion = NULL), "has to be > 0 and < 1")
 
 
 
