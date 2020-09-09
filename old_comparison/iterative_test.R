@@ -12,7 +12,7 @@ data[4, "wt"] <- NA
 testr <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
                           sign_level = 0.05, initial_est = "robustified",
                           iterations = 1, convergence_criterion = NULL,
-                          shuffle = FALSE, shuffle_seed = 42, split = 0.5)
+                          shuffle = FALSE, shuffle_seed = 42, split = 0.5, verbose = TRUE)
 
 tests <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
                            sign_level = 0.05, initial_est = "saturated",
@@ -22,7 +22,7 @@ tests <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
 testr <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
                            sign_level = 0.05, initial_est = "robustified",
                            iterations = "convergence", convergence_criterion = 1,
-                           shuffle = FALSE, shuffle_seed = 42, split = 0.5)
+                           shuffle = FALSE, shuffle_seed = 42, split = 0.5, verbose = TRUE)
 
 tests <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
                            sign_level = 0.05, initial_est = "saturated",
