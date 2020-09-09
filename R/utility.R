@@ -337,6 +337,8 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
 #' @return An object of class \code{"robust2sls"} whose components
 #' \code{$model}, \code{$res}, \code{$stdres}, \code{$sel}, and \code{$type} are
 #' now appended with the new iteration results.
+#'
+#' @keywords internal
 
 update_list <- function(current_list, new_info, name) {
 
@@ -362,6 +364,8 @@ update_list <- function(current_list, new_info, name) {
 #' @return \code{conv_diff} returns a numeric value, which is the L2 norm
 #' of the difference between the most recent and the previous parameter
 #' estimates. The L2 norm is the sum of squared differences of the estimates.
+#'
+#' @keywords internal
 
 conv_diff <- function(current, counter) {
 

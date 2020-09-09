@@ -374,3 +374,129 @@
       
       
 
+# update_list() works correctly
+
+    Output
+      $other
+       [1]  1  2  3  4  5  6  7  8  9 10
+      
+      $model
+      $model$m0
+      [1] "a"
+      
+      
+      $res
+      $res$m0
+      [1] "b"
+      
+      
+      $stdres
+      $stdres$m0
+      [1] "c"
+      
+      
+      $sel
+      $sel$m0
+      [1] "d"
+      
+      
+      $type
+      $type$m0
+      [1] "e"
+      
+      
+
+---
+
+    Output
+      $other
+       [1]  1  2  3  4  5  6  7  8  9 10
+      
+      $model
+      $model$m1
+      [1] "a"
+      
+      
+      $res
+      $res$m1
+      [1] "b"
+      
+      
+      $stdres
+      $stdres$m1
+      [1] "c"
+      
+      
+      $sel
+      $sel$m1
+      [1] "d"
+      
+      
+      $type
+      $type$m1
+      [1] "e"
+      
+      
+
+---
+
+    Output
+      $other
+       [1]  1  2  3  4  5  6  7  8  9 10
+      
+      $model
+      $model$m0
+      [1] "a"
+      
+      $model$m1
+      [1] "a"
+      
+      $model$m2
+      [1] "a"
+      
+      
+      $res
+      $res$m0
+      [1] "b"
+      
+      $res$m1
+      [1] "b"
+      
+      $res$m2
+      [1] "b"
+      
+      
+      $stdres
+      $stdres$m0
+      [1] "c"
+      
+      $stdres$m1
+      [1] "c"
+      
+      $stdres$m2
+      [1] "c"
+      
+      
+      $sel
+      $sel$m0
+      [1] "d"
+      
+      $sel$m1
+      [1] "d"
+      
+      $sel$m2
+      [1] "d"
+      
+      
+      $type
+      $type$m0
+      [1] "e"
+      
+      $type$m1
+      [1] "e"
+      
+      $type$m2
+      [1] "e"
+      
+      
+
