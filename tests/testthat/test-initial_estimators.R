@@ -13,11 +13,13 @@ test_that("robustified_init() works correctly", {
   r1 <- robustified_init(data = data, formula = formula, cutoff = 1.96)
 
   expect_length(r1, 5)
+  expect_length(r1$model, 19)
   expect_length(r1$res, 32)
   expect_length(r1$stdres, 32)
   expect_length(r1$sel, 32)
   expect_length(r1$type, 32)
 
+  expect_type(r1$model, "list")
   expect_type(r1$res, "double")
   expect_type(r1$stdres, "double")
   expect_type(r1$sel, "logical")
@@ -27,6 +29,12 @@ test_that("robustified_init() works correctly", {
   expect_named(r1$stdres)
   expect_named(r1$sel)
   expect_named(r1$type)
+
+  expect_equal(class(r1$model), "ivreg")
+  expect_equal(r1$model$coefficients[[1]], 29.57671472)
+  expect_equal(r1$model$coefficients[[2]], 0.64358782)
+  expect_equal(r1$model$coefficients[[3]], -0.05744568)
+  expect_equal(r1$model$nobs, 28)
 
   res1 <- res2 <- res3 <- res4 <- as.double(NA)
   names(res1) <- "Mazda RX4"
@@ -116,6 +124,36 @@ test_that("saturated_init() works correctly", {
                          TRUE, shuffle_seed = shuffle_seed, split = 0.5)
 
   expect_length(r1, 5)
+  expect_length(r1$model, 2)
+  expect_equal(names(r1$model), c("split1", "split2"))
+  expect_type(r1$model, "list")
+  expect_type(r1$model$split1, "list")
+  expect_type(r1$model$split2, "list")
+
+  # length of models in full case is 19 because has an additional element called
+  # "na.action", which lists the obs that are omitted b/c they have missing
+  # since I exclude these obs in the selection vector already, they don't have
+  # to be excluded by the model estimation command -> 1 fewer element
+  expect_length(r1$model$split1, 18)
+  expect_length(r1$model$split2, 18)
+
+  expect_equal(class(r1$model$split1), "ivreg")
+  expect_equal(class(r1$model$split2), "ivreg")
+  expect_equal(r1$model$split1$coefficients[[1]], 25.00242247,
+               tolerance = 0.000001)
+  expect_equal(r1$model$split1$coefficients[[2]], 0.19528941,
+               tolerance = 0.000001)
+  expect_equal(r1$model$split1$coefficients[[3]], -0.03178598,
+               tolerance = 0.000001)
+  expect_equal(r1$model$split2$coefficients[[1]], 21.2315540,
+               tolerance = 0.000001)
+  expect_equal(r1$model$split2$coefficients[[2]], 6.3640406,
+               tolerance = 0.000001)
+  expect_equal(r1$model$split2$coefficients[[3]], -0.1920017,
+               tolerance = 0.000001)
+  expect_equal(r1$model$split1$nobs, 14)
+  expect_equal(r1$model$split2$nobs, 14)
+
   expect_length(r1$res, 32)
   expect_length(r1$stdres, 32)
   expect_length(r1$sel, 32)
