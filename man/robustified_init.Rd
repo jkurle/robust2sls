@@ -7,7 +7,7 @@
 robustified_init(data, formula, cutoff)
 }
 \arguments{
-\item{data}{A dataframe or matrix containing the data used in the estimation.}
+\item{data}{A dataframe.}
 
 \item{formula}{A formula in the format \code{y ~ x1 + x2 | x2 + z2} where
 \code{y} is the dependent variable, \code{x1} are the exogenous regressors,
@@ -15,7 +15,24 @@ robustified_init(data, formula, cutoff)
 
 \item{cutoff}{A numeric cutoff value used to judge whether an observation
 is an outlier or not. If its absolute value is larger than the cutoff value,
-the observations is classified as being an outlier.}
+the observations is classified as an outlier.}
+}
+\value{
+\code{robustified_init} returns a list with five elements. The first
+four are vectors whose length equals the number of observations in the data
+set. Unlike the residuals stored in a model object (usually accessible via
+\code{model$residuals}), it does not ignore observations where any of y, x
+or z are missing. It instead sets their values to \code{NA}.
+
+The first element is a double vector containing the residuals for each
+observation based on the model estimates. The second element contains the
+standardised residuals, the third one a logical vector with \code{TRUE} if
+the observation is judged as not outlying, \code{FALSE} if it is an outlier,
+and \code{NA} if any of y, x, or z are missing. The fourth element of the
+list is an integer vector with three values: 1 if the observations is judged
+to be an outlier, 0 if not, and -1 if missing. The fifth and last element
+stores the \code{\link[AER]{ivreg}} model object based on which the four
+vectors were calculated.
 }
 \description{
 \code{robustified_init} estimates the full sample 2SLS model, which is used

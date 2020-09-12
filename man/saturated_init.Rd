@@ -7,7 +7,7 @@
 saturated_init(data, formula, cutoff, shuffle, shuffle_seed, split = 0.5)
 }
 \arguments{
-\item{data}{A dataframe or matrix containing the data used in the estimation.}
+\item{data}{A dataframe.}
 
 \item{formula}{A formula in the format \code{y ~ x1 + x2 | x2 + z2} where
 \code{y} is the dependent variable, \code{x1} are the exogenous regressors,
@@ -15,11 +15,12 @@ saturated_init(data, formula, cutoff, shuffle, shuffle_seed, split = 0.5)
 
 \item{cutoff}{A numeric cutoff value used to judge whether an observation
 is an outlier or not. If its absolute value is larger than the cutoff value,
-the observations is classified as being an outlier.}
+the observations is classified as an outlier.}
 
-\item{shuffle}{A logical value (TRUE or FALSE) whether the sample should be
-split into sub-samples randomly. If FALSE, the sample is simply cut into two
-parts using the original order of the supplied data set.}
+\item{shuffle}{A logical value (\code{TRUE} or \code{FALSE}) whether the
+sample should be split into sub-samples randomly. If \code{FALSE}, the sample
+is simply cut into two parts using the original order of the supplied data
+set.}
 
 \item{shuffle_seed}{A numeric value that sets the seed for shuffling the
 data set before splitting it. Only used if \code{shuffle == TRUE}.}

@@ -7,7 +7,7 @@
 user_init(data, formula, cutoff, user_model)
 }
 \arguments{
-\item{data}{A dataframe or matrix containing the data used in the estimation.}
+\item{data}{A dataframe.}
 
 \item{formula}{A formula in the format \code{y ~ x1 + x2 | x2 + z2} where
 \code{y} is the dependent variable, \code{x1} are the exogenous regressors,
@@ -15,7 +15,7 @@ user_init(data, formula, cutoff, user_model)
 
 \item{cutoff}{A numeric cutoff value used to judge whether an observation
 is an outlier or not. If its absolute value is larger than the cutoff value,
-the observations is classified as being an outlier.}
+the observations is classified as an outlier.}
 
 \item{user_model}{A model object of \link{class} \link[AER]{ivreg} whose
 parameters are used to calculate the residuals.}
