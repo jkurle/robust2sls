@@ -17,7 +17,7 @@ whether detailed (\code{TRUE}) or shortened (\code{FALSE}) should be printed.}
 }
 \description{
 \code{robust2sls} allows the user to create an object of \link{class}
-"\code{robust2sls}" by specifying the different components of the list. The
+\code{"robust2sls"} by specifying the different components of the list. The
 validator function \code{validate_robust2sls} is called at the end to ensure
 that the resulting object is a valid object of \link{class}
 \code{"robust2sls"}.

@@ -466,7 +466,7 @@ validate_robust2sls <- function(x) {
 ##' Helper of robust2sls class
 ##'
 ##' \code{robust2sls} allows the user to create an object of \link{class}
-##' "\code{robust2sls}" by specifying the different components of the list. The
+##' \code{"robust2sls"} by specifying the different components of the list. The
 ##' validator function \code{validate_robust2sls} is called at the end to ensure
 ##' that the resulting object is a valid object of \link{class}
 ##' \code{"robust2sls"}.
@@ -504,7 +504,8 @@ print.robust2sls <- function(x, verbose = FALSE, ...) {
     cat("Initial estimator: ", x$cons$initial$estimator, "\n")
     cat("Reference distribution: ", x$cons$reference, "\n")
     cat("Two-stage Least-Squares Model: ")
-    print(x$cons$formula)
+    cat(paste(deparse(x$cons$formula, width.cutoff=getOption("width")),
+              collapse="\n"), "\n")
     cat("Iterations: ", x$cons$iterations$actual, "\n")
     cat("Final selection: ", "Outliers found: ",
         outliers(x, x$cons$iterations$actual), "    Outliers proportion: ",

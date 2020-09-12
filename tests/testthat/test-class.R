@@ -491,5 +491,42 @@ test_that("validate_robust2sls() works correctly", {
 
 })
 
+test_that("print-robust2sls() works correctly", {
 
+  # since this is all output, we use snapshot tests
+  # when print method changes, all of these will probably fail but that's ok
+  # have to check and then accept that all new output is okay
+
+  data <- mtcars
+  formula <- mpg ~ cyl + disp | cyl + wt
+
+  test1 <- outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
+            iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
+            shuffle_seed = 42, split = 0.5)
+  test2 <- outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
+            iterations = 10, convergence_criterion = 3, shuffle = NULL,
+            shuffle_seed = NULL, split = NULL)
+  test3 <- outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
+            iterations = "convergence", convergence_criterion = 0.5,
+            shuffle = TRUE, shuffle_seed = 42, split = 0.5)
+  test4 <- outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
+            iterations = "convergence", convergence_criterion = 1,
+            shuffle = FALSE, shuffle_seed = 42, split = 0.5)
+  test5 <- outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
+            iterations = 0, convergence_criterion = NULL,
+            shuffle = FALSE, shuffle_seed = 42, split = 0.5)
+
+  expect_snapshot(test1)
+  expect_snapshot(test2)
+  expect_snapshot(test3)
+  expect_snapshot(test4)
+  expect_snapshot(test5)
+
+
+})
 
