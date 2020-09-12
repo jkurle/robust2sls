@@ -275,7 +275,9 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
       # this is only done when a convergence_criterion is specified (not NULL)
       if (!is.null(convergence_criterion)) {
         if (difference <= convergence_criterion) {
-          cat("\n Algorithm converged successfully. Exit iterations.")
+          if (verbose == TRUE) {
+            cat("\n Algorithm converged successfully. Exit iterations.")
+          }
           break
         }
       } # end if break
