@@ -7,7 +7,11 @@
 new_robust2sls(x = list())
 }
 \arguments{
-\item{x}{A list with components of the "\code{robust2sls}" class.}
+\item{x}{A list with components of the \code{"robust2sls"} class.}
+}
+\value{
+\code{new_robust2sls} returns an object of class \code{"robust2sls"},
+which is a list with a special structure of named components.
 }
 \description{
 \code{new_robust2sls} turns a list into an object of \link{class}
@@ -16,12 +20,8 @@ new_robust2sls(x = list())
 \section{Warning}{
 
 Only checks that the input is a list but not that its components match the
-requirements of the "\code{robust2sls}" class. Use the validator function
+requirements of the \code{"robust2sls"} class. Use the validator function
 \code{validate_robust2sls} for that purpose.
 }
 
-\examples{
-\dontrun{
-new_robust2sls(1:10)
-}
-}
+\keyword{internal}

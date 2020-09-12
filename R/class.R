@@ -3,17 +3,17 @@
 #' \code{new_robust2sls} turns a list into an object of \link{class}
 #' \code{"robust2sls"}
 #'
+#' @param x A list with components of the \code{"robust2sls"} class.
+#'
+#' @return \code{new_robust2sls} returns an object of class \code{"robust2sls"},
+#' which is a list with a special structure of named components.
+#'
 #' @section Warning:
 #' Only checks that the input is a list but not that its components match the
-#' requirements of the "\code{robust2sls}" class. Use the validator function
+#' requirements of the \code{"robust2sls"} class. Use the validator function
 #' \code{validate_robust2sls} for that purpose.
 #'
-#' @param x A list with components of the "\code{robust2sls}" class.
-#'
-#' @examples
-#' \dontrun{
-#' new_robust2sls(1:10)
-#' }
+#' @keywords internal
 
 new_robust2sls <- function(x = list()) {
 
@@ -25,9 +25,9 @@ new_robust2sls <- function(x = list()) {
 #' Validator of robust2sls class
 #'
 #' \code{validate_robust2sls} checks that the input is a valid object of
-#' \link{class} \code{"robust2sls"}
+#' \link{class} \code{"robust2sls"}.
 #'
-#' @param x An object whose validity of class "\code{robust2sls}" is tested.
+#' @param x An object whose validity of class \code{"robust2sls"} is tested.
 #'
 #' @export
 
@@ -196,7 +196,7 @@ validate_robust2sls <- function(x) {
     stop(strwrap("Component $cons$data must be a data frame", prefix = " ",
                  initial = ""))
   }
-  if (!is.character(x$cons$reference) &
+  if (!is.character(x$cons$reference) |
       !identical(length(x$cons$reference), 1L)) {
     stop(strwrap("Component $cons$reference must be a character vector of length
                  1", prefix = " ", initial = ""))
@@ -275,7 +275,7 @@ validate_robust2sls <- function(x) {
     }
     if (!is.logical(x$cons$initial$shuffle) |
         !identical(length(x$cons$initial$shuffle), 1L)) {
-      stop(strwrap("Component $cons$initial$shuffle must be a numeric vector of
+      stop(strwrap("Component $cons$initial$shuffle must be a logical vector of
                    length 1, i.e. TRUE or FALSE, when the initial estimator is
                    'saturated'", prefix = " ", initial = ""))
     }
@@ -301,21 +301,36 @@ validate_robust2sls <- function(x) {
   }
   if (identical(x$cons$iterations$setting, "convergence")) {
     # when iterations == "convergence" then need to specify conv criterion
+    if (is.null(x$cons$convergence$criterion)) {
+      stop(strwrap("Component $cons$convergence$criterion must be numeric >= 0",
+                   prefix = " ", initial = ""))
+    }
     if (!is.numeric(x$cons$convergence$criterion) |
         !(x$cons$convergence$criterion >= 0)) {
       stop(strwrap("Component $cons$convergence$criterion must be numeric >= 0",
                    prefix = " ", initial = ""))
     }
   } # end if iterations == "convergence"
-  if (is.numeric(x$cons$convergence$criterion)) {
+  if (is.numeric(x$cons$convergence$criterion) &
+      (x$cons$iterations$actual > 0)) {
     # if a convergence criterion has been specified (irrespective of whether
     # iterations == "convergence" or some numeric) then need a calculated
     # value for $difference and a logical value for $converged
+    if (is.null(x$cons$convergence$difference)) {
+      stop(strwrap("Component $cons$convergence$difference must be a numeric
+                   value >= 0 when a convergence criterion has been specified",
+                   prefix = " ", initial = ""))
+    }
     if (!is.numeric(x$cons$convergence$difference) |
         !(x$cons$convergence$difference >= 0)) {
       stop(strwrap("Component $cons$convergence$difference must be a numeric
                    value >= 0 when a convergence criterion has been specified",
                    prefix = " ", initial = ""))
+    }
+    if (is.null(x$cons$convergence$converged)) {
+      stop(strwrap("Component $cons$convergence$converged must be a logical
+                   vector of length 1, i.e. TRUE or FALSE, when a convergence
+                   criterion has been specified", prefix = " ", initial = ""))
     }
     if (!is.logical(x$cons$convergence$converged) |
         !identical(length(x$cons$convergence$converged), 1L)) {
@@ -335,8 +350,8 @@ validate_robust2sls <- function(x) {
                    initial = ""))
     }
   } # end convergence criterion
-  if (!identical(x$cons$iterations$setting, "convergence") &
-      !is.numeric(x$cons$iterations$setting)) {
+  if (!(identical(x$cons$iterations$setting, "convergence") |
+      is.numeric(x$cons$iterations$setting))) {
     stop(strwrap("Component x$cons$iterations$setting must either be numeric or
                  the character 'convergence'", prefix = " ", initial = ""))
   }
@@ -387,42 +402,49 @@ validate_robust2sls <- function(x) {
   if (!identical(x$cons$initial$estimator, "saturated") &
       (x$cons$iterations$actual >= 0)) {
     if (!("ivreg" %in% class(x$model$m0))) {
-      stop(strwrap(paste("Element 1 of list $model must be of class
+      stop(strwrap(paste("Element m0 of list $model must be of class
                          'ivreg'", sep = " "), prefix = " ", initial = ""))
     }
   } # check model$m0 when NOT saturated
 
   for (i in seq_len(length(iter.names) - 1)) {
     if (!("ivreg" %in% class(x$model[[i+1]]))) {
-      stop(strwrap(paste("Element", i+1, "of list $model must be of class
+      # can reference either by "Element i+1" or "Element mi"
+      mi <- paste("m", i, sep = "")
+      stop(strwrap(paste("Element", mi, "of list $model must be of class
                          'ivreg'", sep = " "), prefix = " ", initial = ""))
     }
   }
   n <- as.integer(NROW(x$cons$data))
   for (i in seq_along(iter.names)) {
     if (!is.numeric(x$res[[i]]) | !identical(length(x$res[[i]]), n)) {
-      stop(strwrap(paste("Element", i, "of list $res must be a numeric vector
+      mi <- paste("m", i-1, sep = "")
+      stop(strwrap(paste("Element", mi, "of list $res must be a numeric vector
                          with length equal to the number of observations in the
                          dataframe", sep = " "), prefix = " ", initial = ""))
     }
   }
   for (i in seq_along(iter.names)) {
     if (!is.numeric(x$stdres[[i]]) | !identical(length(x$stdres[[i]]), n)) {
-      stop(strwrap(paste("Element", i, "of list $stdres must be a numeric vector
-                         with length equal to the number of observations in the
-                         dataframe", sep = " "), prefix = " ", initial = ""))
+      mi <- paste("m", i-1, sep = "")
+      stop(strwrap(paste("Element", mi, "of list $stdres must be a numeric
+                         vector with length equal to the number of observations
+                         in the dataframe", sep = " "),
+                   prefix = " ", initial = ""))
     }
   }
   for (i in seq_along(iter.names)) {
     if (!is.logical(x$sel[[i]]) | !identical(length(x$sel[[i]]), n)) {
-      stop(strwrap(paste("Element", i, "of list $sel must be a logical vector
+      mi <- paste("m", i-1, sep = "")
+      stop(strwrap(paste("Element", mi, "of list $sel must be a logical vector
                          with length equal to the number of observations in the
                          dataframe", sep = " "), prefix = " ", initial = ""))
     }
   }
   for (i in seq_along(iter.names)) {
     if (!is.numeric(x$type[[i]]) | !identical(length(x$type[[i]]), n)) {
-      stop(strwrap(paste("Element", i, "of list $type must be a numeric vector
+      mi <- paste("m", i-1, sep = "")
+      stop(strwrap(paste("Element", mi, "of list $type must be a numeric vector
                          with length equal to the number of observations in the
                          dataframe", sep = " "), prefix = " ", initial = ""))
     }
@@ -430,7 +452,8 @@ validate_robust2sls <- function(x) {
   for (i in seq_along(iter.names)) {
     if (!identical(setdiff(unique(x$type[[i]]), as.integer(c(-1, 0, 1))),
                   integer(0))) {
-      stop(strwrap(paste("Element", i, "of list $type must be a numeric vector
+      mi <- paste("m", i-1, sep = "")
+      stop(strwrap(paste("Element", mi, "of list $type must be a numeric vector
                    that only contains the values -1, 0, or 1", sep = " "),
                    prefix = " ", initial = ""))
     }

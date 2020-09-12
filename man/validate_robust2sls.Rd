@@ -7,9 +7,9 @@
 validate_robust2sls(x)
 }
 \arguments{
-\item{x}{An object whose validity of class "\code{robust2sls}" is tested.}
+\item{x}{An object whose validity of class \code{"robust2sls"} is tested.}
 }
 \description{
 \code{validate_robust2sls} checks that the input is a valid object of
-\link{class} \code{"robust2sls"}
+\link{class} \code{"robust2sls"}.
 }
