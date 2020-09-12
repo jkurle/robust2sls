@@ -40,7 +40,7 @@ robustified_init <- function(data, formula, cutoff) {
 
   # calculate residuals, standardised residuals, selection and type vectors
   update_info <- selection(data = data, yvar = y_var, model = full,
-                           cutoff = cutoff)
+                           cutoff = cutoff, bias_correction = NULL)
 
 }
 
@@ -76,7 +76,7 @@ user_init <- function(data, formula, cutoff, user_model) {
 
   # calculate residuals, standardised residuals, selection and type vectors
   update_info <- selection(data = data, yvar = y_var, model = user_model,
-                           cutoff = cutoff)
+                           cutoff = cutoff, bias_correction = NULL)
 
 }
 
@@ -216,9 +216,11 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   # have checked that results are identical to first version
 
   update_info1 <- selection(data = data[split1,], yvar = y_var,
-                            model = model_split2, cutoff = cutoff)
+                            model = model_split2, cutoff = cutoff,
+                            bias_correction = NULL)
   update_info2 <- selection(data = data[split2,], yvar = y_var,
-                            model = model_split1, cutoff = cutoff)
+                            model = model_split1, cutoff = cutoff,
+                            bias_correction = NULL)
 
   # put the results together in the original order of the observations
   res <- rep(NA, times = NROW(data))

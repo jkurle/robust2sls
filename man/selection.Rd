@@ -4,7 +4,7 @@
 \alias{selection}
 \title{Create selection (non-outlying) vector from model}
 \usage{
-selection(data, yvar, model, cutoff)
+selection(data, yvar, model, cutoff, bias_correction = NULL)
 }
 \arguments{
 \item{data}{A dataframe.}
@@ -18,6 +18,10 @@ parameters are used to calculate the residuals.}
 \item{cutoff}{A numeric cutoff value used to judge whether an observation
 is an outlier or not. If its absolute value is larger than the cutoff value,
 the observations is classified as being an outlier.}
+
+\item{bias_correction}{A numeric factor used to correct the estimate of
+sigma under the null hypothesis of no outliers or \code{NULL} if no
+correction should be done.}
 }
 \value{
 A list with five elements. The first four are vectors whose length

@@ -85,6 +85,9 @@ extract_formula <- function(formula) {
 #' @param cutoff A numeric cutoff value used to judge whether an observation
 #' is an outlier or not. If its absolute value is larger than the cutoff value,
 #' the observations is classified as being an outlier.
+#' @param bias_correction A numeric factor used to correct the estimate of
+#' sigma under the null hypothesis of no outliers or \code{NULL} if no
+#' correction should be done.
 #'
 #' @return A list with five elements. The first four are vectors whose length
 #' equals the number of observations in the data set. Unlike the residuals
@@ -110,7 +113,7 @@ extract_formula <- function(formula) {
 #'
 #' @keywords internal
 
-selection <- function(data, yvar, model, cutoff) {
+selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
 
   # cannot simply extract residuals or fitted values from model object because
   # it omits all observations where x, z, or y is missing
@@ -145,8 +148,14 @@ selection <- function(data, yvar, model, cutoff) {
   res[!nonmiss] <- NA
 
   # calculate the standardised residuals
-  # reverse df correction
-  sigma <- model$sigma * sqrt(model$df.residual / model$nobs)
+  # reverse df correction and potentially bias correction
+  if (is.null(bias_correction)) {
+    sigma <- model$sigma * sqrt(model$df.residual / model$nobs)
+  } else {
+    sigma <- model$sigma * sqrt(model$df.residual / model$nobs) *
+      sqrt(bias_correction)
+  }
+
   # calculate standardised residuals, also missing if any of y, x, or z missing
   stdres <- res / sigma
 

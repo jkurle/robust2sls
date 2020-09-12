@@ -208,7 +208,8 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
       # calculate the res, stdres, sel, type & return model
       update_info <- selection(data = data, yvar = y_var, model = new,
-                               cutoff = cutoff)
+                               cutoff = cutoff,
+                               bias_correction = out$cons$bias_corr)
 
       # create new name and store results under this name
       iter_name <- paste("m", counter, sep = "")
@@ -254,7 +255,8 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
       # calculate the res, stdres, sel, type & return model
       update_info <- selection(data = data, yvar = y_var, model = new,
-                               cutoff = cutoff)
+                               cutoff = cutoff,
+                               bias_correction = out$cons$bias_corr)
 
       # create new name and store results under this name
       iter_name <- paste("m", counter, sep = "")
