@@ -572,7 +572,7 @@ plot.robust2sls <- function(x, iteration = NULL, ...) {
     ggplot2::scale_color_manual(name="critical values",values=c("darkgrey")) +
     ggplot2::theme(legend.position="top")
 
-  return(plot)
+  print(plot)
 
 }
 

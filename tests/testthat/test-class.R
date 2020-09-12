@@ -527,6 +527,44 @@ test_that("print-robust2sls() works correctly", {
   expect_snapshot(test4)
   expect_snapshot(test5)
 
-
 })
 
+test_that("plot.robust2sls() works correctly", {
+
+  library(ggplot2)
+
+  # this is a plotting function, so we need to compare graphs
+  # use expect_snapshot_file() from package 'testthat, edition 3'
+  # helper function creating a file from code and returning a path
+  save_png <- function(code, width = 1000, height = 600) {
+    path <- tempfile(fileext = ".png")
+    png(path, width = width, height = height)
+    on.exit(dev.off())
+    code
+
+    path
+  }
+  # models
+  data <- mtcars
+  formula <- mpg ~ cyl + disp | cyl + wt
+
+  test1 <- outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
+            iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
+            shuffle_seed = 42, split = 0.5)
+  test2 <- outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
+            iterations = 10, convergence_criterion = 3, shuffle = NULL,
+            shuffle_seed = NULL, split = NULL)
+  test3 <- outlier_detection(data = data, formula = formula,
+            ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
+            iterations = "convergence", convergence_criterion = 0.5,
+            shuffle = TRUE, shuffle_seed = 42, split = 0.5)
+
+  expect_snapshot_file(path = save_png(plot(test1)), name = "test1_default.png")
+  expect_snapshot_file(path = save_png(plot(test1, iteration = 0)), name = "test1_m0.png")
+  expect_snapshot_file(path = save_png(plot(test1, iteration = 4)), name = "test1_m4.png")
+  expect_snapshot_file(path = save_png(plot(test2)), name = "test2_default.png")
+  expect_snapshot_file(path = save_png(plot(test3)), name = "test3_default.png")
+
+})
