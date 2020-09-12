@@ -90,23 +90,23 @@ extract_formula <- function(formula) {
 #' equals the number of observations in the data set. Unlike the residuals
 #' stored in a model object (usually accessible via \code{model$residuals}), it
 #' does not ignore observations where any of y, x or z are missing. It instead
-#' sets their values to NA.
+#' sets their values to \code{NA}.
 #'
 #' The first element is a double vector containing the residuals for each
 #' observation based on the model estimates. The second element contains the
-#' standardised residuals, the third one a logical vector with TRUE if the
-#' observation is judged as not outlying, FALSE if it is an outlier, and NA if
-#' any of y, x, or z are missing. The fourth element of the list is an integer
-#' vector with three values: 1 if the observations is judged to be an outlier,
-#' 0 if not, and -1 if missing. The fifth and last element stores the
-#' \code{\link[AER]{ivreg}} model object based on which the four vectors were
-#' calculated.
+#' standardised residuals, the third one a logical vector with \code{TRUE} if
+#' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
+#' and \code{NA} if any of y, x, or z are missing. The fourth element of the
+#' list is an integer vector with three values: 1 if the observations is judged
+#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
+#' stores the \code{\link[AER]{ivreg}} model object based on which the four
+#' vectors were calculated.
 #'
 #' @section Warning:
 #' Unlike the residuals stored in a model object (usually accessible via
 #' \code{model$residuals}), this function returns vectors of the same length as
 #' the original data set even if any of the y, x, or z variables are missing.
-#' The residuals for those observations are set to NA.
+#' The residuals for those observations are set to \code{NA}.
 #'
 #' @keywords internal
 
