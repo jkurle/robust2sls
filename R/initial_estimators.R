@@ -5,7 +5,7 @@
 #' as the initial estimator for the iterative procedure.
 #'
 #' @param data A dataframe.
-#' @param formula A formula in the format \code{y ~ x1 + x2 | x2 + z2} where
+#' @param formula A formula in the format \code{y ~ x1 + x2 | x1 + z2} where
 #' \code{y} is the dependent variable, \code{x1} are the exogenous regressors,
 #' \code{x2} the endogenous regressors, and \code{z2} the outside instruments.
 #' @param cutoff A numeric cutoff value used to judge whether an observation
@@ -32,7 +32,7 @@
 
 robustified_init <- function(data, formula, cutoff) {
 
-  full <- AER::ivreg(formula = formula, data = data, model = TRUE)
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
 
   # extract all variables appearing in the regression formula
   vars <- extract_formula(formula)

@@ -9,7 +9,7 @@ robustified_init(data, formula, cutoff)
 \arguments{
 \item{data}{A dataframe.}
 
-\item{formula}{A formula in the format \code{y ~ x1 + x2 | x2 + z2} where
+\item{formula}{A formula in the format \code{y ~ x1 + x2 | x1 + z2} where
 \code{y} is the dependent variable, \code{x1} are the exogenous regressors,
 \code{x2} the endogenous regressors, and \code{z2} the outside instruments.}
 
