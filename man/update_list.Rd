@@ -26,3 +26,4 @@ now appended with the new iteration results.
 the estimation results (\link[AER]{ivreg} model object, residuals,
 standardised residuals, selection and type vectors) of a new iteration.
 }
+\keyword{internal}

@@ -21,3 +21,4 @@ estimates. The L2 norm is the sum of squared differences of the estimates.
 L2 norm (sum of squared differences) between the most recent outlier-robust
 iteration and the previous iteration estimates.
 }
+\keyword{internal}
