@@ -131,7 +131,7 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
       initial = ""))
   }
 
-  if (!(yvar %in% colnames(mtcars))) {
+  if (!(yvar %in% colnames(data))) {
     stop(strwrap("The argument `yvar` is not a variable in the dataframe or
       matrix `data`", prefix = " ", initial = ""))
   }
@@ -142,7 +142,7 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
   }
 
   # calculate the residuals, will be NA when either y or x missing
-  res <- data[, yvar] - predict(model, data)
+  res <- data[, yvar] - stats::predict(model, data)
   # replace value by NA for observations where only z missing
   nonmiss <- nonmissing(data = data, formula = model$formula)
   res[!nonmiss] <- NA
@@ -301,8 +301,8 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
 
   if (identical(ref, "normal")) {
     psi <- 1 - sign_level
-    cutoff <- qnorm(p = 1-(sign_level/2), mean = 0, sd = 1)
-    bias_corr <- 1/(((1-sign_level)-2*cutoff*dnorm(cutoff,mean=0,sd=1))/
+    cutoff <- stats::qnorm(p = 1-(sign_level/2), mean = 0, sd = 1)
+    bias_corr <- 1/(((1-sign_level)-2*cutoff*stats::dnorm(cutoff,mean=0,sd=1))/
                       (1-sign_level))
   }
 
