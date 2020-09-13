@@ -11,6 +11,12 @@ outlier(robust2sls_object, obs)
 
 \item{obs}{An index (row number) of an observation}
 }
+\value{
+\code{outlier} returns a vector that contains the 'type' value for
+the given obsverations across the different iterations. There are three
+possible values: 1 if the observations is judged to be an outlier, 0 if not,
+and -1 if any of its x, y, or z values required for estimation is missing.
+}
 \description{
 \code{outlier} takes a \code{"robust2sls"} object and the index of a specific
 observation and returns its history of classification across the different

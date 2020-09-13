@@ -2,7 +2,10 @@
 
 S3method(plot,robust2sls)
 S3method(print,robust2sls)
+export(outlier)
 export(outlier_detection)
+export(outliers)
+export(outliers_prop)
 export(robustified_init)
 export(saturated_init)
 export(user_init)

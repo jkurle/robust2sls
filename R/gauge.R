@@ -10,6 +10,8 @@
 #'
 #' @return \code{outliers} returns the number of outliers  for a given iteration
 #' as determined by the outlier-detection algorithm.
+#'
+#' @export
 
 outliers <- function(robust2sls_object, iteration) {
 
@@ -56,6 +58,8 @@ outliers <- function(robust2sls_object, iteration) {
 #'
 #' @return \code{outliers_prop} returns the proportion of outliers for a given
 #' iteration as determined by the outlier-detection algorithm.
+#'
+#' @export
 
 outliers_prop <- function(robust2sls_object, iteration) {
 
@@ -98,6 +102,12 @@ outliers_prop <- function(robust2sls_object, iteration) {
 #' @inheritParams outliers
 #' @param obs An index (row number) of an observation
 #'
+#' @return \code{outlier} returns a vector that contains the 'type' value for
+#' the given obsverations across the different iterations. There are three
+#' possible values: 1 if the observations is judged to be an outlier, 0 if not,
+#' and -1 if any of its x, y, or z values required for estimation is missing.
+#'
+#' @export
 
 outlier <- function(robust2sls_object, obs) {
 
