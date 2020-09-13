@@ -64,9 +64,10 @@ test_that("outliers() works correctly", {
               shuffle_seed = 24, split = 0.5)
 
   expect_equal(outliers(model6, 0), 2)
-  expect_equal(outliers(model6, 1), 2)
-  expect_equal(outliers(model6, 2), 2)
-  expect_error(outliers(model6, 3), "fewer iterations than argument")
+  expect_equal(outliers(model6, 1), 1)
+  expect_equal(outliers(model6, 2), 1)
+  expect_equal(outliers(model6, 3), 1)
+  expect_error(outliers(model6, 4), "fewer iterations than argument")
 
   model7 <- outlier_detection(data = data, formula = formula,
               ref_dist = "normal", sign_level = 0.01,
@@ -162,9 +163,10 @@ test_that("outliers_prop() works correctly", {
               shuffle_seed = 24, split = 0.5)
 
   expect_equal(outliers_prop(model6, 0), 2/28)
-  expect_equal(outliers_prop(model6, 1), 2/28)
-  expect_equal(outliers_prop(model6, 2), 2/28)
-  expect_error(outliers_prop(model6, 3), "fewer iterations than argument")
+  expect_equal(outliers_prop(model6, 1), 1/28)
+  expect_equal(outliers_prop(model6, 2), 1/28)
+  expect_equal(outliers_prop(model6, 3), 1/28)
+  expect_error(outliers_prop(model6, 4), "fewer iterations than argument")
 
   model7 <- outlier_detection(data = data, formula = formula,
               ref_dist = "normal", sign_level = 0.01,

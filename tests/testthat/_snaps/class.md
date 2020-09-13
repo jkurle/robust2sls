@@ -6,7 +6,7 @@
       Reference distribution:  normal 
       Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
       Iterations:  5 
-      Final selection:  Outliers found:  7     Outliers proportion:  0.2188 
+      Final selection:  Outliers found:  1     Outliers proportion:  0.0312 
 
 ---
 
@@ -15,8 +15,18 @@
       Initial estimator:  robustified 
       Reference distribution:  normal 
       Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
-      Iterations:  5 
-      Final selection:  Outliers found:  7     Outliers proportion:  0.2188 
+      Iterations:  2 
+      Final selection:  Outliers found:  1     Outliers proportion:  0.0312 
+
+---
+
+    Output
+      Outlier-Robust 2SLS Model 
+      Initial estimator:  saturated 
+      Reference distribution:  normal 
+      Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
+      Iterations:  4 
+      Final selection:  Outliers found:  1     Outliers proportion:  0.0312 
 
 ---
 
@@ -26,17 +36,7 @@
       Reference distribution:  normal 
       Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
       Iterations:  3 
-      Final selection:  Outliers found:  7     Outliers proportion:  0.2188 
-
----
-
-    Output
-      Outlier-Robust 2SLS Model 
-      Initial estimator:  saturated 
-      Reference distribution:  normal 
-      Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
-      Iterations:  3 
-      Final selection:  Outliers found:  8     Outliers proportion:  0.25 
+      Final selection:  Outliers found:  6     Outliers proportion:  0.1875 
 
 ---
 
@@ -66,7 +66,7 @@
       Reference distribution:  normal 
       Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
       Iterations:  5 
-      Final selection:  Outliers found:  7     Outliers proportion:  0.2188 
+      Final selection:  Outliers found:  1     Outliers proportion:  0.0312 
 
 ---
 
@@ -76,7 +76,17 @@
       Reference distribution:  normal 
       Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
       Iterations:  1 
-      Final selection:  Outliers found:  2     Outliers proportion:  0.0625 
+      Final selection:  Outliers found:  1     Outliers proportion:  0.0312 
+
+---
+
+    Output
+      Outlier-Robust 2SLS Model 
+      Initial estimator:  saturated 
+      Reference distribution:  normal 
+      Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
+      Iterations:  4 
+      Final selection:  Outliers found:  1     Outliers proportion:  0.0312 
 
 ---
 
@@ -86,17 +96,7 @@
       Reference distribution:  normal 
       Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
       Iterations:  3 
-      Final selection:  Outliers found:  7     Outliers proportion:  0.2188 
-
----
-
-    Output
-      Outlier-Robust 2SLS Model 
-      Initial estimator:  saturated 
-      Reference distribution:  normal 
-      Two-stage Least-Squares Model: mpg ~ cyl + disp | cyl + wt 
-      Iterations:  3 
-      Final selection:  Outliers found:  8     Outliers proportion:  0.25 
+      Final selection:  Outliers found:  6     Outliers proportion:  0.1875 
 
 ---
 

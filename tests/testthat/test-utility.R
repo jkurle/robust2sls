@@ -430,20 +430,16 @@ test_that("conv_difference() works correctly", {
   # I calculated the values manually from the objects and inserted these as the
   # 'expected' values for the tests
 
-  expect_equal(conv_diff(current = test1, counter = 1), 0.8030425,
-               tolerance = 0.000001)
-  expect_equal(conv_diff(current = test2, counter = 1), 0.8030425,
-               tolerance = 0.000001)
-  expect_equal(conv_diff(current = test3, counter = 3), 0.1096473,
-               tolerance = 0.000001)
+  expect_equal(conv_diff(current = test1, counter = 1), 0)
+  expect_equal(conv_diff(current = test2, counter = 1), 0)
+  expect_equal(conv_diff(current = test3, counter = 3), 0)
   # when counter == 1 and initial == 'saturated' then calculate L2 norm between
   # m1 and both initial m0 models -> get larger one
   # sum((test3$model$m1$coefficients-test3$model$m0$split2$coefficients)^2)
   # sum((test3$model$m1$coefficients-test3$model$m0$split1$coefficients)^2)
   expect_equal(conv_diff(current = test3, counter = 1), 7.269473,
                tolerance = 0.000001)
-  expect_equal(conv_diff(current = test4, counter = 3), 0.04603035,
-               tolerance = 0.000001)
+  expect_equal(conv_diff(current = test4, counter = 3), 0)
   expect_equal(conv_diff(current = test4, counter = 1), 14.18946,
                tolerance = 0.000001)
 
