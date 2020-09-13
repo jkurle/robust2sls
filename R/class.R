@@ -559,15 +559,19 @@ plot.robust2sls <- function(x, iteration = NULL, ...) {
     title_name <- paste(title_name, "(Final)", collapse = " ")
   }
 
+  # for R CMD check need a binding for variables "index", "stdres", "sel"
+  # so initialise them as NULL but ggplot() actually uses the vars in dataset gr
+  index <- stdres <- sel <- NULL
+
   plot <- ggplot2::ggplot(data = gr) +
     ggplot2::geom_col(ggplot2::aes(x = index, y = stdres, fill = factor(sel)),
                       width = 0.05, na.rm = TRUE) +
     ggplot2::scale_fill_manual(values = c("red","blue"), name="non-outlying",
                       guide = ggplot2::guide_legend(reverse=TRUE)) +
-    ggplot2::geom_segment(aes(x=1, y=critical, xend=NROW(gr), yend=critical,
-                              color=""), size=1) +
-    ggplot2::geom_segment(aes(x=1, y=-critical, xend=NROW(gr), yend=-critical,
-                              color=""), size=1) +
+    ggplot2::geom_segment(ggplot2::aes(x=1, y=critical, xend=NROW(gr),
+                                       yend=critical, color=""), size=1) +
+    ggplot2::geom_segment(ggplot2::aes(x=1, y=-critical, xend=NROW(gr),
+                                       yend=-critical, color=""), size=1) +
     ggplot2::labs(x="index",y="standardised residuals",title=title_name) +
     ggplot2::scale_color_manual(name="critical values",values=c("darkgrey")) +
     ggplot2::theme(legend.position="top")
