@@ -18,13 +18,12 @@ BugReports: https://github.com/jkurle/r2sls/issues
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Imports: 
-    AER,
-    assertthat
 Suggests: 
     ggplot2,
-    mvtnorm,
     testthat
 RoxygenNote: 7.1.1
 Remotes: r-lib/testthat
 Config/testthat/edition: 3
+Imports: 
+    stats,
+    AER
