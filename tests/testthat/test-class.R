@@ -483,12 +483,12 @@ test_that("validate_robust2sls() works correctly", {
                "Element m0 of list \\$type must be a numeric vector that only contains the values -1, 0, or 1")
 
   skip_on_cran()
-  expect_snapshot(test1)
-  expect_snapshot(test2)
-  expect_snapshot(test3)
-  expect_snapshot(test4)
-  expect_snapshot(test5)
-  expect_snapshot(test6)
+  expect_snapshot_output(test1)
+  expect_snapshot_output(test2)
+  expect_snapshot_output(test3)
+  expect_snapshot_output(test4)
+  expect_snapshot_output(test5)
+  expect_snapshot_output(test6)
 
 })
 
