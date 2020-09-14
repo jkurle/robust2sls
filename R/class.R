@@ -538,6 +538,11 @@ print.robust2sls <- function(x, verbose = FALSE, ...) {
 
 plot.robust2sls <- function(x, iteration = NULL, ...) {
 
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop(strwrap("Package \"ggplot2\" needed for this function to work.
+                Please install it.", prefix = " ", initial = ""), call. = FALSE)
+  }
+
   # create accessor
   if (is.null(iteration)) { # default: take final model
     iteration <- x$cons$iterations$actual
