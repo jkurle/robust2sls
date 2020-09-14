@@ -241,10 +241,10 @@ test_that("constants() works correctly", {
   expect_equal(names(c3$iterations), c("setting", "actual"))
   expect_equal(names(c4$iterations), c("setting", "actual"))
 
-  expect_snapshot(c1)
-  expect_snapshot(c2)
-  expect_snapshot(c3)
-  expect_snapshot(c4)
+  expect_snapshot_output(c1)
+  expect_snapshot_output(c2)
+  expect_snapshot_output(c3)
+  expect_snapshot_output(c4)
 
   expect_equal(c1$formula, formula)
   expect_equal(c2$formula, formula)
@@ -392,9 +392,9 @@ test_that("update_list() works correctly", {
   expect_equal(u2$sel$m2, "d")
   expect_equal(u2$type$m2, "e")
 
-  expect_snapshot(u0)
-  expect_snapshot(u1)
-  expect_snapshot(u2)
+  expect_snapshot_output(u0)
+  expect_snapshot_output(u1)
+  expect_snapshot_output(u2)
 
 })
 
