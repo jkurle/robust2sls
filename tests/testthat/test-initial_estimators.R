@@ -1,14 +1,13 @@
 
 test_that("robustified_init() works correctly", {
 
-  data <- mtcars
+  data <- datasets::mtcars
   data[1, "mpg"] <- NA # y missing
   data[2, "cyl"] <- NA # x1 missing
   data[3, "disp"] <- NA # x2 missing
   data[4, "wt"] <- NA # z2 missing
   data[5, "hp"] <- NA # not relevant for estimation missing
   formula <- mpg ~ cyl + disp | cyl + wt
-  shuffle_seed <- 42
 
   r1 <- robustified_init(data = data, formula = formula, cutoff = 1.96)
 
@@ -111,7 +110,7 @@ test_that("robustified_init() works correctly", {
 
 test_that("saturated_init() works correctly", {
 
-  data <- mtcars
+  data <- datasets::mtcars
   data[1, "mpg"] <- NA # y missing
   data[2, "cyl"] <- NA # x1 missing
   data[3, "disp"] <- NA # x2 missing

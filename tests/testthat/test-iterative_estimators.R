@@ -1,7 +1,7 @@
 
 test_that("outlier_detection() produces correct output", {
 
-  data <- mtcars
+  data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
   data[1, "mpg"] <- NA
   data[2, "cyl"] <- NA

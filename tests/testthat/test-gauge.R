@@ -1,6 +1,6 @@
 test_that("outliers() works correctly", {
 
-  data <- mtcars
+  data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
   data[1, "mpg"] <- NA
   data[2, "cyl"] <- NA
@@ -99,7 +99,7 @@ test_that("outliers() works correctly", {
 
 test_that("outliers_prop() works correctly", {
 
-  data <- mtcars
+  data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
   data[1, "mpg"] <- NA
   data[2, "cyl"] <- NA
@@ -198,7 +198,7 @@ test_that("outliers_prop() works correctly", {
 
 test_that("outlier() works correctly", {
 
-  data <- mtcars
+  data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
   data[1, "mpg"] <- NA
   data[2, "cyl"] <- NA

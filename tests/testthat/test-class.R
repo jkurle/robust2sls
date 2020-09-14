@@ -1,7 +1,7 @@
 test_that("new_robust2sls() works correctly", {
 
   # create test lists and see whether class allocation works
-  l1 <- list(a = "a", b = 1:5, c = mtcars)
+  l1 <- list(a = "a", b = 1:5, c = datasets::mtcars)
   l2 <- list(a = "a", b = "b")
   structure(l2, class = "already")
 
@@ -21,7 +21,7 @@ test_that("validate_robust2sls() works correctly", {
   # but also when outlier_detection() or print.robust2sls() change
 
   # working values
-  data <- mtcars
+  data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
   attr(formula, which = ".Environment") <- NULL
 
@@ -49,13 +49,6 @@ test_that("validate_robust2sls() works correctly", {
             ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
             iterations = 0, convergence_criterion = 0,
             shuffle = FALSE, shuffle_seed = 42, split = 0.5)
-
-  expect_snapshot(test1)
-  expect_snapshot(test2)
-  expect_snapshot(test3)
-  expect_snapshot(test4)
-  expect_snapshot(test5)
-  expect_snapshot(test6)
 
   # check that the correct error messages are displayed
   t <- test1
@@ -489,6 +482,14 @@ test_that("validate_robust2sls() works correctly", {
   expect_error(validate_robust2sls(t),
                "Element m0 of list \\$type must be a numeric vector that only contains the values -1, 0, or 1")
 
+  skip_on_ci()
+  expect_snapshot(test1)
+  expect_snapshot(test2)
+  expect_snapshot(test3)
+  expect_snapshot(test4)
+  expect_snapshot(test5)
+  expect_snapshot(test6)
+
 })
 
 test_that("print-robust2sls() works correctly", {
@@ -497,7 +498,7 @@ test_that("print-robust2sls() works correctly", {
   # when print method changes, all of these will probably fail but that's ok
   # have to check and then accept that all new output is okay
 
-  data <- mtcars
+  data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
 
   test1 <- outlier_detection(data = data, formula = formula,
@@ -531,21 +532,19 @@ test_that("print-robust2sls() works correctly", {
 
 test_that("plot.robust2sls() works correctly", {
 
-  library(ggplot2)
-
   # this is a plotting function, so we need to compare graphs
   # use expect_snapshot_file() from package 'testthat, edition 3'
   # helper function creating a file from code and returning a path
   save_png <- function(code, width = 1000, height = 600) {
     path <- tempfile(fileext = ".png")
-    png(path, width = width, height = height)
+    grDevices::png(path, width = width, height = height)
     on.exit(dev.off())
     code
 
     path
   }
   # models
-  data <- mtcars
+  data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
 
   test1 <- outlier_detection(data = data, formula = formula,

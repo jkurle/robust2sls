@@ -1,5 +1,3 @@
-library(AER)
-
 test_that("extract_formula() works correctly", {
 
   f1 <- y ~ x1 + x2 | x1 + z2 + z3
@@ -40,7 +38,7 @@ test_that("extract_formula() works correctly", {
 })
 
 test_that("selection() works correctly", {
-  dta <- mtcars
+  dta <- datasets::mtcars
   dta[1, "mpg"] <- NA
   dta[2, "cyl"] <- NA
   dta[3, "wt"] <- NA
@@ -117,7 +115,7 @@ test_that("nonmissing() works correctly", {
   expect_equal(nonmissing(data = mtcars, formula = mpg ~ cyl + disp | cyl + wt),
                !logical(length = 32))
 
-  dta <- mtcars
+  dta <- datasets::mtcars
   dta[1, "mpg"] <- NA
   dta[2, "cyl"] <- NA
   dta[3, "wt"] <- NA
@@ -143,7 +141,7 @@ test_that("nonmissing() works correctly", {
 test_that("constants() works correctly", {
 
   # working values
-  data <- mtcars
+  data <- datasets::mtcars
   # since formula has an environment, whose memory address changes each time
   # it is run, it differs by snapshot. So here remove environment.
   formula <- mpg ~ cyl + disp | cyl + wt
@@ -403,7 +401,7 @@ test_that("update_list() works correctly", {
 test_that("conv_difference() works correctly", {
 
   # working values
-  data <- mtcars
+  data <- datasets::mtcars
   # since formula has an environment, whose memory address changes each time
   # it is run, it differs by snapshot. So here remove environment.
   formula <- mpg ~ cyl + disp | cyl + wt
