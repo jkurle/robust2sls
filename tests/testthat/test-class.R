@@ -482,13 +482,13 @@ test_that("validate_robust2sls() works correctly", {
   expect_error(validate_robust2sls(t),
                "Element m0 of list \\$type must be a numeric vector that only contains the values -1, 0, or 1")
 
-  skip_on_cran()
-  expect_snapshot(print(test1))
-  expect_snapshot(print(test2))
-  expect_snapshot(print(test3))
-  expect_snapshot(print(test4))
-  expect_snapshot(print(test5))
-  expect_snapshot(print(test6))
+  skip_on_ci()
+  expect_snapshot(test1)
+  expect_snapshot(test2)
+  expect_snapshot(test3)
+  expect_snapshot(test4)
+  expect_snapshot(test5)
+  expect_snapshot(test6)
 
 })
 
@@ -522,7 +522,6 @@ test_that("print-robust2sls() works correctly", {
             iterations = 0, convergence_criterion = NULL,
             shuffle = FALSE, shuffle_seed = 42, split = 0.5)
 
-  skip_on_cran()
   expect_snapshot(test1)
   expect_snapshot(test2)
   expect_snapshot(test3)
