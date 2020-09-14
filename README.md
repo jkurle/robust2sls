@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+![R-CMD-check](https://github.com/jkurle/r2sls/workflows/R-CMD-check/badge.svg?branch=master)
 <!-- badges: end -->
 
 The goal of r2sls is to provide easy-to-use tools for outlier-robust
