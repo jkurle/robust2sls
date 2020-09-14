@@ -7,53 +7,36 @@
 
 <!-- badges: end -->
 
-The goal of r2sls is to …
+The goal of r2sls is to provide easy-to-use tools for outlier-robust
+inference and outlier testing in two-stage least-squares (2SLS) models.
 
 ## Installation
 
-You can install the released version of r2sls from
-[CRAN](https://CRAN.R-project.org) with:
+There is no released version on [CRAN](https://CRAN.R-project.org) yet.
 
-``` r
-install.packages("r2sls")
-```
-
-And the development version from [GitHub](https://github.com/) with:
+You can install the development version from
+[GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("jkurle/r2sls")
 ```
 
-## Example
+## Note about Versions of Dependencies
 
-This is a basic example which shows you how to solve a common problem:
+The `Depends:` and `Suggests:` fields in the `DESCRIPTION` file have no
+minimum or maximum version because we cannot test how far our package is
+compatible with older versions of the dependencies. However, we also did
+not want to require the versions that were used during the development
+to not force users to update their packages and potentially break their
+other existing code.
 
-``` r
-library(r2sls)
-## basic example code
-```
+For your information, r2sls was developed under the following versions:
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub\!
+  - R: version 4.0.2 (2020-06-22)
+  - datasets: version 4.0.2
+  - grDevices: version 4.0.2
+  - stats: version 4.0.2
+  - AER: version 1.2.9
+  - ggplot2: 3.3.2
+  - testthat: 2.99.0.9000 (development version using edition 3)
