@@ -561,6 +561,8 @@ test_that("plot.robust2sls() works correctly", {
             iterations = "convergence", convergence_criterion = 0.5,
             shuffle = TRUE, shuffle_seed = 42, split = 0.5)
 
+  skip_on_cran()
+  skip_on_ci()
   expect_snapshot_file(path = save_png(plot(test1)), name = "test1_default.png")
   expect_snapshot_file(path = save_png(plot(test1, iteration = 0)), name = "test1_m0.png")
   expect_snapshot_file(path = save_png(plot(test1, iteration = 4)), name = "test1_m4.png")
