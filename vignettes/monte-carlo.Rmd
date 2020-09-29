@@ -74,6 +74,7 @@ end-user. For example, both the packages
 used.
 
 ```{r}
+library(r2sls)
 library(doParallel)
 ncores <- min(max(detectCores() - 1, 1), 2)
 cl <- makeCluster(ncores)
@@ -86,6 +87,7 @@ stopCluster(cl)
 ```
 
 ```{r}
+library(r2sls)
 library(doFuture)
 ncores <- min(max(detectCores() - 1, 1), 2)
 registerDoFuture()
@@ -97,6 +99,7 @@ sim2 <- mc_grid(M = 100, n = 100, seed = 42, parameters = p,
 ```
 
 ```{r}
+library(r2sls)
 library(doFuture)
 ncores <- min(max(detectCores() - 1, 1), 2)
 registerDoFuture()
