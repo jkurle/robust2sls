@@ -131,4 +131,181 @@ outlier <- function(robust2sls_object, obs) {
 
 }
 
+#' Asymptotic variance of gauge (MC)
+#'
+#' \code{gauge_avar_mc} calculates the asymptotic variance of the gauge for a
+#' given iteration using the true parameters from the Monte Carlo setup.
+#'
+#' @param ref_dist A character vector that specifies the reference distribution
+#' against which observations are classified as outliers. \code{"normal"} refers
+#' to the normal distribution.
+#' @param sign_level A numeric value between 0 and 1 that determines the cutoff
+#' in the reference distribution against which observations are judged as
+#' outliers or not.
+#' @param initial_est A character vector that specifies the initial estimator
+#' for the outlier detection algorithm. \code{"robustified"} means that the full
+#' sample 2SLS is used as initial estimator. \code{"saturated"} splits the
+#' sample into two parts and estimates a 2SLS on each subsample. The
+#' coefficients of one subsample are used to calculate residuals and determine
+#' outliers in the other subsample.
+#' @param iteration An integer >= 0 representing the iteration for which the
+#' outliers are calculated.
+#' @param parameters A list created by \link{generate_param} that stores the
+#' true parameters of the data-generating process.
+#' @param split A numeric value strictly between 0 and 1 that determines
+#' in which proportions the sample will be split.
+#'
+#' @export
 
+gauge_avar_mc <- function(ref_dist = c("normal"), sign_level,
+                          initial_est = c("robustified", "saturated"),
+                          iteration, parameters, split) {
+
+  if (!is.numeric(sign_level) | !identical(length(sign_level), 1L)) {
+    stop(strwrap("Argument 'sign_level' must be a numeric vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!(sign_level > 0) | !(sign_level < 1)) {
+    stop(strwrap("Argument 'sign_level' must lie strictly between 0 and 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!is.character(ref_dist) | !identical(length(ref_dist), 1L)) {
+    stop(strwrap("Argument 'ref_dist' must be a character vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  # available reference distributions (so far only "normal"):
+  ref_dist_avail <- c("normal")
+  if (!(ref_dist %in% ref_dist_avail)) {
+    stop(strwrap(paste(c("Argument 'ref_dist' must be one of the available
+                 reference distributions:", ref_dist_avail), collapse = " "),
+                 prefix = " ", initial = ""))
+  }
+  if (!is.numeric(iteration) | !identical(length(iteration), 1L)) {
+    stop(strwrap("Argument 'iteration' must be a numeric vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!(iteration %% 1 == 0)) {
+    stop(strwrap("Argument 'iteration' must be an integer", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration >= 0)) {
+    stop(strwrap("Argument 'iteration' must be weakly larger than 0",
+                 prefix = " ", initial = ""))
+  }
+  if (!is.numeric(split) | !identical(length(split), 1L)) {
+    stop(strwrap("Argument 'split' must be a numeric vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!(split > 0) | !(split < 1)) {
+    stop(strwrap("Argument 'split' must lie strictly between 0 and 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
+    stop(strwrap("Argument 'initial_est' must be a character vector of
+                 length 1", prefix = " ", initial = ""))
+  }
+  # available initial estimators:
+  initial_avail <- c("robustified", "saturated")
+  if (!(initial_est %in% initial_avail)) {
+    stop(strwrap(paste(c("Argument 'initial_est' must be one of the available
+                 initial estimators:", initial_avail), collapse = " "),
+                 prefix = " ", initial = ""))
+  }
+
+  if (initial_est == "robustified") {
+    if (ref_dist == "normal") {
+
+      # create parameters needed for calculating asymptotic variance
+      gamma <- sign_level
+      c <- stats::qnorm(gamma/2, mean=0, sd=1, lower.tail = FALSE)
+      phi <- 1 - gamma
+      f <- stats::dnorm(c, mean=0, sd=1)
+      tau_c_2 <- phi - 2 * c * f
+      tau_c_4 <- 3 * phi - 2 * c * (c^2 + 3) * f
+      tau_2 <- 1
+      tau_4 <- 3
+      varsigma_c_2 <- tau_c_2 / phi
+      Omega <- parameters$params$Omega
+      zeta_c_minus <- 2 * Omega * c
+      Sigma_half <- parameters$params$Sigma_half
+      Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
+
+      if (iteration == 0) {
+
+        # calculate asymptotic variance
+        term1 <- gamma * (1 - gamma)
+        term2 <- (c * f)^2 * (tau_4 - 1)
+        term3 <- -2 * c * f * (1 - gamma - tau_c_2)
+        term4 <- f^2 * t((2*c*Omega - zeta_c_minus)) %*% Sigma_half %*%
+          Mxx_tilde_inv %*% Sigma_half %*% (2*c*Omega - zeta_c_minus)
+        avar <- term1 + term2 + term3 + term4
+
+      } else { # m >= 1
+
+        # calculate varrho parameters, already for iteration
+        m <- iteration
+        v <- varrho(sign_level = gamma, ref_dist = "normal",
+                    iteration = iteration)
+        vbb <- v$c$vbb
+        vss <- v$c$vss
+        vbxu <- v$c$vbxu
+        vsuu <- v$c$vsuu
+        vsb <- v$c$vsb
+        vsxu <- v$c$vsxu
+
+        # calculate asymptotic variance
+        term1 <- gamma*(1-gamma) - 2*c*f*vss*(1-gamma-tau_c_2) +
+          (c*f)^2 * vss^2 * (tau_4-1)
+        term2 <- (c*f)^2 * vsuu * (2*vss + vsuu) *
+          (tau_c_4 - tau_c_2 * varsigma_c_2)
+        term3 <- f^2 * t(((vbb + vsb)*zeta_c_minus - 2*c*vss*Omega)) %*%
+          Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*%
+          ((vbb+vsb)*zeta_c_minus - 2*c*vss*Omega)
+        term4 <- tau_c_2*f^2 * (vbxu + vsxu) *
+          t(((2*(vbb + vsb) + (vbxu + vsxu))*zeta_c_minus - 4*c*vss*Omega)) %*%
+          Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*% zeta_c_minus
+        avar <- term1 + term2 + term3 + term4
+
+      } # end m >= 1
+    } # end normal
+  } else if (initial_est == "saturated") { # end robustified
+    if (ref_dist == "normal") {
+      if (iteration == 0) {
+
+        # create parameters needed for calculating asymptotic variance
+        gamma <- sign_level
+        c <- stats::qnorm(gamma/2, mean=0, sd=1, lower.tail = FALSE)
+        phi <- 1 - gamma
+        f <- stats::dnorm(c, mean=0, sd=1)
+        tau_c_2 <- phi - 2 * c * f
+        tau_c_4 <- 3 * phi - 2 * c * (c^2 + 3) * f
+        tau_2 <- 1
+        tau_4 <- 3
+        varsigma_c_2 <- tau_c_2 / phi
+        Omega <- parameters$params$Omega
+        zeta_c_minus <- 2 * Omega * c
+        Sigma_half <- parameters$params$Sigma_half
+        Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
+
+        # calculate asymptotic variance
+        term1 <- gamma * (1 - gamma)
+        term2 <- (c * f)^2 * (tau_4 - 1) *
+          ((split^2 / (1-split)) + ((1-split)^2 / split))
+        term3 <- -2 * c * f * (1 - gamma - tau_c_2)
+        term4 <- f^2 * t((2*c*Omega - zeta_c_minus)) %*% Sigma_half %*%
+          Mxx_tilde_inv %*% Sigma_half %*% (2*c*Omega - zeta_c_minus) *
+          ((split^2 / (1-split)) + ((1-split)^2 / split))
+        avar <- term1 + term2 + term3 + term4
+
+      } else { # m >= 1
+
+        stop(strwrap("No theory for m >= 1 and saturated initial estimator
+                     available", prefix = " ", initial = ""))
+
+      } # end m >= 1
+    } # end normal
+  } # end saturated
+
+  return(avar)
+
+}
