@@ -200,7 +200,7 @@ test_that("generate_data() works correctly", {
 test_that("mc_grid() works correctly", {
 
   skip_on_cran() # probably too long and might have problems with parallel
-  skip_on_ci() # causes trouble on Windows server
+  # skip_on_ci() # causes trouble on Windows server
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
