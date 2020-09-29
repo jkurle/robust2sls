@@ -3,3 +3,5 @@
 ^old_comparison$
 ^\.github$
 ^README\.Rmd$
+^doc$
+^Meta$
