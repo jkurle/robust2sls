@@ -38,7 +38,7 @@
 #' detection algorithm is iterated, or the character vector
 #' \code{"convergence"}. In the former case, the value \code{0} means that only
 #' outlier classification based on the initial estimator is done. In the latter,
-#' the alfgorithm is iterated until it converges, i.e. when the difference in
+#' the algorithm is iterated until it converges, i.e. when the difference in
 #' coefficient estimates between the most recent model and the previous one is
 #' smaller than some user-specified convergence criterion.
 #' @param convergence_criterion A numeric value or NULL. The algorithm stops as
@@ -48,7 +48,7 @@
 #' value but \code{iterations} is an integer > 0 then the algorithm stops either
 #' when it converged or when \code{iterations} is reached.
 #' @param shuffle A logical value or \code{NULL}. Only used if
-#' c. If \code{TRUE} then the sample is shuffled
+#' \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled
 #' before creating the subsamples.
 #' @param shuffle_seed An integer value that will set the seed for shuffling the
 #' sample or \code{NULL}. Only used if \code{initial_est == "saturated"} and
