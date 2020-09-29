@@ -457,3 +457,80 @@ test_that("conv_difference() works correctly", {
   expect_equal(conv_diff(current = test6, counter = 3), NULL)
 
 })
+
+
+
+test_that("varrho() works correctly", {
+
+  # set some parameters
+  sign_level <- 0.05
+  ref_dist = "normal"
+  iteration = 2
+
+  # calculate the terms manually then compare to function result
+  gamma <- sign_level
+  c <- stats::qnorm(gamma/2, mean=0, sd=1, lower.tail = FALSE)
+  phi <- 1 - gamma
+  f <- stats::dnorm(c, mean=0, sd=1)
+  tau_c_2 <- phi - 2 * c * f
+  tau_c_4 <- 3 * phi - 2 * c * (c^2 + 3) * f
+  tau_2 <- 1
+  tau_4 <- 3
+  varsigma_c_2 <- tau_c_2 / phi
+
+  vbb <- (2 * c * f / phi)^iteration
+  vss <- (c * (c^2 - varsigma_c_2) * f / tau_c_2)^iteration
+  vbxu <- (phi^iteration - (2 * c * f)^iteration) /
+    (phi^iteration * (phi - 2 * c * f))
+  vsuu <- (tau_c_2^iteration - (c*(c^2-varsigma_c_2)*f)^iteration) /
+    (tau_c_2^iteration*(tau_c_2 - c*(c^2 - varsigma_c_2)*f))
+
+  vsb0 <- (2*c*f/phi) * c * (c^2 - varsigma_c_2) * f / tau_c_2
+  vsb1 <- 1 * (c * (c^2 - varsigma_c_2) * f / tau_c_2)^2
+  vsb <- vsb0 + vsb1
+
+  vsxu0 <- (2*c*f/phi) * 1
+  vsxu1 <- 1 * c * (c^2 - varsigma_c_2) * f / tau_c_2
+  vsxuterm1 <- (tau_c_2^iteration - (c*(c^2 - varsigma_c_2)*f)^iteration) /
+    (tau_c_2^(iteration-1) * (tau_c_2 - c*(c^2 - varsigma_c_2)*f))
+  vsxuterm2 <- vsxu0 + vsxu1
+  vsxuterm3 <- c*(c^2 - varsigma_c_2)*f / (tau_c_2*(phi - 2*c*f))
+  vsxu <- (vsxuterm1 - vsxuterm2) * vsxuterm3
+
+  res <- varrho(sign_level = sign_level, ref_dist = ref_dist,
+                iteration = iteration)
+
+  expect_equal(res$c$vbb, vbb)
+  expect_equal(res$c$vss, vss)
+  expect_equal(res$c$vbxu, vbxu)
+  expect_equal(res$c$vsuu, vsuu)
+  expect_equal(res$c$vsb, vsb)
+  expect_equal(res$c$vsxu, vsxu)
+
+  # test correct error messages
+  expect_error(varrho("a", "normal", 1),
+               "'sign_level' must be a numeric vector of length 1")
+  expect_error(varrho(c(0.01, 0.05), "normal", 1),
+               "'sign_level' must be a numeric vector of length 1")
+  expect_error(varrho(1.3, "normal", 1),
+               "'sign_level' must lie strictly between 0 and 1")
+  expect_error(varrho(-0.05, "normal", 1),
+               "'sign_level' must lie strictly between 0 and 1")
+  expect_error(varrho(0.01, 1, 1),
+               "'ref_dist' must be a character vector of length 1")
+  expect_error(varrho(0.01, c("normal", "normal"), 1),
+               "'ref_dist' must be a character vector of length 1")
+  expect_error(varrho(0.05, "nonexistent", 1),
+               "'ref_dist' must be one of the available reference")
+  expect_error(varrho(0.05, "normal", "3"),
+               "'iteration' must be a numeric vector of length 1")
+  expect_error(varrho(0.05, "normal", c(1,5)),
+               "'iteration' must be a numeric vector of length 1")
+  expect_error(varrho(0.05, "normal", 1.2),
+               "'iteration' must be an integer")
+  expect_error(varrho(0.05, "normal", 0),
+               "'iteration' must be weakly larger than 1")
+  expect_error(varrho(0.05, "normal", -1),
+               "'iteration' must be weakly larger than 1")
+
+})

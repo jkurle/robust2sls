@@ -402,5 +402,249 @@ conv_diff <- function(current, counter) {
 }
 
 
+#' Calculate varrho coefficients
+#'
+#' \code{varrho} calculates the coefficients for the asymptotic variance of the
+#' gauge (false positive rate) for a specific iteration m >= 1.
+#'
+#' @param sign_level A numeric value between 0 and 1 that determines the cutoff
+#' in the reference distribution against which observations are judged as
+#' outliers or not.
+#' @param ref_dist A character vector that specifies the reference distribution
+#' against which observations are classified as outliers. \code{"normal"} refers
+#' to the normal distribution.
+#' @param iteration An integer >= 1 that specifies the iteration of the outlier
+#' detection algorithm.
+#'
+#' @return \code{varrho} returns a list with two components, both of which are
+#' lists themselves. \code{$setting} stores the arguments with which the
+#' function was called. \code{$c} stores the values of the six different
+#' coefficients.
+#'
+#' @export
+
+varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
+
+  if (!is.numeric(sign_level) | !identical(length(sign_level), 1L)) {
+    stop(strwrap("Argument 'sign_level' must be a numeric vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!(sign_level > 0) | !(sign_level < 1)) {
+    stop(strwrap("Argument 'sign_level' must lie strictly between 0 and 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!is.character(ref_dist) | !identical(length(ref_dist), 1L)) {
+    stop(strwrap("Argument 'ref_dist' must be a character vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  # available reference distributions (so far only "normal"):
+  ref_dist_avail <- c("normal")
+  if (!(ref_dist %in% ref_dist_avail)) {
+    stop(strwrap(paste(c("Argument 'ref_dist' must be one of the available
+                 reference distributions:", ref_dist_avail), collapse = " "),
+                 prefix = " ", initial = ""))
+  }
+  if (!is.numeric(iteration) | !identical(length(iteration), 1L)) {
+    stop(strwrap("Argument 'iteration' must be a numeric vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!(iteration %% 1 == 0)) {
+    stop(strwrap("Argument 'iteration' must be an integer", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration >= 1)) {
+    stop(strwrap("Argument 'iteration' must be weakly larger than 1",
+                 prefix = " ", initial = ""))
+  }
+
+  if (ref_dist == "normal") {
+
+    gamma <- sign_level
+    c <- stats::qnorm(gamma/2, mean=0, sd=1, lower.tail = FALSE)
+    phi <- 1 - gamma
+    f <- stats::dnorm(c, mean=0, sd=1)
+    tau_c_2 <- phi - 2 * c * f
+    tau_c_4 <- 3 * phi - 2 * c * (c^2 + 3) * f
+    tau_2 <- 1
+    tau_4 <- 3
+    varsigma_c_2 <- tau_c_2 / phi
+    m <- iteration
+
+    # varrho beta beta
+    vbb <- (2 * c * f / phi)^m
+    # varrho sigma sigma
+    vss <- (c * (c^2 - varsigma_c_2) * f / tau_c_2)^m
+    # varrho beta tildex u
+    vbxu <- (phi^m - (2 * c * f)^m) / (phi^m * (phi - 2 * c * f))
+    # varrho sigma u u
+    vsuu <- (tau_c_2^m - (c * (c^2 - varsigma_c_2) * f)^m) /
+      (tau_c_2^m * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))
+    # varrho sigma beta
+    vsb_fun <- function(m, l, c, f, phi, varsigma_c_2, tau_c_2) {
+      ele <- (2*c*f/phi)^(m-l-1) * ((c*(c^2 - varsigma_c_2)*f) / tau_c_2)^(l+1)
+      return(ele)
+    }
+    vsb_parts <- vapply(X = 0:(m-1), FUN = vsb_fun, FUN.VALUE = double(1),
+                        m = m, c = c, f = f, phi = phi, varsigma_c_2 = varsigma_c_2,
+                        tau_c_2 = tau_c_2)
+    vsb <- sum(vsb_parts)
+    # varrho sigma tildex u
+    vsxu_fun <- function(m, l, c, f, phi, varsigma_c_2, tau_c_2) {
+      ele <- (2*c*f/phi)^(m-l-1) * ((c*(c^2 - varsigma_c_2)*f) / tau_c_2)^l
+      return(ele)
+    }
+    vsxu_parts <- vapply(X = 0:(m-1), FUN = vsxu_fun, FUN.VALUE = double(1),
+                         m = m, c = c, f = f, phi = phi,
+                         varsigma_c_2 = varsigma_c_2, tau_c_2 = tau_c_2)
+    vsxu <- (((tau_c_2^m - (c * (c^2 - varsigma_c_2) * f)^m) /
+                (tau_c_2^(m-1) * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))) -
+               sum(vsxu_parts)) * c * (c^2 - varsigma_c_2) * f /
+      (tau_c_2 * (phi - 2 * c * f))
+
+  } # end normal
+
+  set <- list(sign_level = sign_level, ref_dist = ref_dist, m = iteration)
+  coeff <- list(vbb = vbb, vss = vss, vbxu = vbxu, vsuu = vsuu, vsb = vsb,
+                vsxu = vsxu)
+  out <- list(setting = set, c = coeff)
+
+  return(out)
+
+}
+
+
+
+
+#' @export
+
+estimate_param <- function(robust2SLS_object, iteration) {
+
+  # extract the dataset
+  data <- robust2SLS_object$cons$data
+
+  # how to call the variable in the data set that stores the subset selection
+  # don't overwrite an existing variable so create name that does not yet exist
+  i <- 1
+  selection_name <- "selection"
+  while (selection_name %in% colnames(data)) {
+    selection_name <- paste("selection_", i, sep = "")
+    i <- i + 1
+  }
+  remove(i)
+  data[[selection_name]] <- robust2SLS_object$sel[[iteration + 1]]
+
+  # calculate first stage linear projections
+  fml <- extract_formula(robust2SLS_object$cons$formula)
+  dx1 <- length(fml$x1_var)
+  dx2 <- length(fml$x2_var)
+  dz1 <- length(fml$z1_var)
+  dz2 <- length(fml$z2_var)
+
+  Pi_hat <- NULL
+  R2_hat <- NULL
+
+  # create the first stage formulas
+  z <- union(fml$z1_var, fml$z2_var)
+  part2 <- paste(z, collapse = " + ")
+  part2 <- paste("0 + ", part2, sep = "") # take out intercept
+  for (i in seq_along(fml$x2_var)) {
+    depvar <- fml$x2_var[[i]]
+    formula1 <- paste(depvar, part2, sep = " ~ ")
+    model1 <- NULL
+    # run first stages
+    command <- paste("model1 <- stats::lm(formula = as.formula(formula1),
+                     data = data, subset = ", selection_name, ")")
+    expr <- parse(text = command)
+    eval(expr)
+    pi_hat <- as.matrix(model1$coefficients, (dz1+dz2), 1) # into column vector
+    colnames(pi_hat) <- depvar
+    Pi_hat <- cbind(Pi_hat, pi_hat)
+
+    r2_hat <- data[, fml$x2_var[[i]]] - stats::predict(model1, newdata = data)
+    r2_hat <- r2_hat[data[[selection_name]]]
+    R2_hat <- cbind(R2_hat, r2_hat)
+
+  }
+
+  dimnames(R2_hat) <- NULL
+
+  # alternative to get R2_hat via ivreg model object
+  # other <- data[data[[selection_name]], fml$x2_var] -
+  #   stats::model.matrix(robust2SLS_object$model[[iteration + 2]],
+  #                       component = c("projected"))[, fml$x2_var]
+
+  # pad the matrix to account for perfectly fit exogenous regressors
+  Pi_hat <- cbind(rbind(diag(dx1), matrix(0,dz2,dx1)), Pi_hat)
+
+  # estimate Mzz = Ezz' = Var(z) + Ez Ez'
+  Z <- data[, z]
+  Z <- Z[robust2SLS_object$sel[[iteration + 1]], ]
+  ZZ <- t(as.matrix(Z)) %*% as.matrix(Z)
+  Mzz_hat <- ZZ / NROW(Z)
+
+  # estimate Mxx_tilde_inv
+  Mxx_tilde_hat <- t(Pi_hat) %*% Mzz_hat %*% Pi_hat
+  Mxx_tilde_inv_hat <- pracma::inv(Mxx_tilde_hat)
+
+  # estimate Sigma2 = E(r2i r2i')
+  Sigma2_hat <- stats::cov(R2_hat)
+  Sigma2_half_hat <- pracma::sqrtm(Sigma2_hat)$B
+  Sigma2_half_inv_hat <- pracma::inv(Sigma2_half_hat)
+
+  # pad the matrix to get estimate of Sigma
+  Sigma_hat <- rbind(cbind(matrix(0, dx1, dx1), matrix(0, dx1, dx2)),
+                     cbind(matrix(0, dx2, dx1), Sigma2_hat))
+  Sigma_half_hat <- rbind(cbind(matrix(0, dx1, dx1), matrix(0, dx1, dx2)),
+                     cbind(matrix(0, dx2, dx1), Sigma2_half_hat))
+  Sigma_half_inv_hat <- rbind(cbind(matrix(0, dx1, dx1), matrix(0, dx1, dx2)),
+                     cbind(matrix(0, dx2, dx1), Sigma2_half_inv_hat))
+
+  # estimate E(r2i ui)
+  u_std_hat <- robust2SLS_object$stdres[[iteration + 2]][robust2SLS_object$sel[[iteration + 1]]]
+  MRu_hat <- colMeans(R2_hat * u_std_hat)
+
+  # estimate Omega2
+  Omega2_hat <- Sigma2_half_inv_hat %*% MRu_hat
+
+  # pad the vector to get estimate of Omega
+  Omega_hat <- rbind(matrix(0, dx1, 1), Omega2_hat)
+
+  # try alternative and see whether works better; get virtually the same
+  # probably only different because below didn't reverse the df correction
+  # u_hat <- robust2SLS_object$model$m1$residuals
+  # MRu <- colMeans(R2_hat * u_hat)
+  # sigma <- robust2SLS_object$model$m1$sigma * sqrt(robust2SLS_object$cons$bias_corr)
+  # Omega2_hat <- Sigma2_half_inv_hat %*% MRu / sigma
+
+  # the problem is with R2u_hat because we are using a truncated sample
+  # so probably need a correction factor to account for falsely detected outl.
+  # could also estimate on full sample but the problem would be under altern.
+  # of contaminated sample
+
+  # for now, return results in a list similar to that created by generate_param
+
+  set <- list(call = robust2SLS_object$cons$call,
+              formula = robust2SLS_object$cons$formula, dx1 = dx1, dx2 = dx2,
+              dz2 = dz2)
+  nam <- list(y = fml$y_var, x1 = fml$x1_var, x2 = fml$x2_var, z2 = fml$z2_var)
+  par <- list(Omega = Omega_hat, Sigma_half = Sigma_half_hat,
+              Mxx_tilde_inv = Mxx_tilde_inv_hat)
+  out <- list(params = par, setting = set, names = nam)
+  return(out)
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
