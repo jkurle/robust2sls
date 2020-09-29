@@ -687,7 +687,8 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 
   # store results in a data frame
   results <- foreach::foreach (m = (1:M), .combine = "rbind",
-                               .options.RNG = seed) %dorng% {
+                               .options.RNG = seed,
+                               .packages = "r2sls") %dorng% {
 
     # draw random data of the 2SLS model, sample size n
     d <- generate_data(parameters = parameters, n = n)
