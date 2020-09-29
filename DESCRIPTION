@@ -22,10 +22,22 @@ Suggests:
     ggplot2,
     testthat,
     datasets,
-    grDevices
+    grDevices,
+    expm,
+    matrixcalc,
+    Matrix,
+    MASS,
+    pracma,
+    doFuture,
+    knitr,
+    rmarkdown,
+    doParallel
 RoxygenNote: 7.1.1
 Remotes: r-lib/testthat
 Config/testthat/edition: 3
 Imports: 
     stats,
-    AER
+    AER,
+    doRNG,
+    foreach
+VignetteBuilder: knitr
