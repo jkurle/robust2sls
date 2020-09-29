@@ -90,6 +90,7 @@ used.
 ```{r}
 library(r2sls)
 library(doFuture)
+library(parallel)
 ncores <- min(max(detectCores() - 1, 1), 2)
 registerDoFuture()
 plan(cluster, workers = ncores)
@@ -102,6 +103,7 @@ sim2 <- mc_grid(M = 100, n = 100, seed = 42, parameters = p,
 ```{r}
 library(r2sls)
 library(doFuture)
+library(parallel)
 ncores <- min(max(detectCores() - 1, 1), 2)
 registerDoFuture()
 plan(sequential)
