@@ -74,17 +74,17 @@ end-user. For example, both the packages
 used.
 
 ```{r}
-library(r2sls)
-library(doParallel)
-ncores <- min(max(detectCores() - 1, 1), 2)
-cl <- makeCluster(ncores)
-registerDoParallel(cl)
-clusterCall(cl, function(x) .libPaths(x), .libPaths())
-sim1 <- mc_grid(M = 100, n = 100, seed = 42, parameters = p, 
-               formula = p$setting$formula, ref_dist = "normal", 
-               sign_level = 0.05, initial_est = "robustified", iterations = 0,
-               shuffle = FALSE, shuffle_seed = 42, split = 0.5)
-stopCluster(cl)
+#library(r2sls)
+#library(doParallel)
+#ncores <- min(max(detectCores() - 1, 1), 2)
+#cl <- makeCluster(ncores)
+#registerDoParallel(cl)
+#clusterCall(cl, function(x) .libPaths(x), .libPaths())
+#sim1 <- mc_grid(M = 100, n = 100, seed = 42, parameters = p, 
+#               formula = p$setting$formula, ref_dist = "normal", 
+#               sign_level = 0.05, initial_est = "robustified", iterations = 0,
+#               shuffle = FALSE, shuffle_seed = 42, split = 0.5)
+#stopCluster(cl)
 ```
 
 ```{r}
@@ -112,7 +112,7 @@ sim3 <- mc_grid(M = 100, n = 100, seed = 42, parameters = p,
 ```
 
 ```{r}
-identical(sim1, sim2)
+#identical(sim1, sim2)
 identical(sim2, sim3)
 ```
 
