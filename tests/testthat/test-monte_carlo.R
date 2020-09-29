@@ -204,7 +204,8 @@ test_that("mc_grid() works correctly", {
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  future::plan(future::cluster, workers = ncores)
+  cl <- parallel::makeCluster(ncores)
+  future::plan(future::cluster, workers = cl)
   # parallel::clusterCall(cl = NULL, function(x) .libPaths(x), .libPaths())
   results <- mc_grid(100, n = c(100, 1000), seed = 42, parameters = p,
                               formula = p$setting$formula, ref_dist = "normal",
@@ -214,5 +215,6 @@ test_that("mc_grid() works correctly", {
                               shuffle_seed = NULL, split = c(0.3, 0.4, 0.5))
 
   expect_snapshot_output(results) # checked with manual original simulations
+  parallel::stopCluster(cl)
 
 })

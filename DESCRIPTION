@@ -32,7 +32,8 @@ Suggests:
     knitr,
     rmarkdown,
     doParallel,
-    future
+    future,
+    parallel
 RoxygenNote: 7.1.1
 Remotes: r-lib/testthat
 Config/testthat/edition: 3
