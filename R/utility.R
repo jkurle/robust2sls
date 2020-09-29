@@ -512,9 +512,34 @@ varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
 
 }
 
-
-
-
+#' Estimation of moments of the data
+#'
+#' DO NOT USE YET!
+#' \code{estimate_param} can be used to estimate certain moments of the data
+#' that are required for calculating the asymptotic variance of the gauge. Such
+#' moments are the covariance between the standardised first stage errors and
+#' the structural error \eqn{\Omega}, the covariance matrix of the first stage
+#' errors \eqn{\Sigma}, the first stage parameter matrix \eqn{\Pi}, and more.
+#'
+#' @param robust2SLS_object An object of class \code{"robust2sls"} for which
+#' the moments will be calculated.
+#' @param iteration An integer >= 0 specifying based on which model iteration
+#' the moments should be estimated. The model iteration affects which
+#' observations are determined to be outliers and these observations will hence
+#' be excluded during the estimation of the moments.
+#'
+#' @return \code{estimate_param} returns a list with a similar structure as the
+#' output of the Monte Carlo functionality \link{generate_param}. Hence, the
+#' resulting list can be given to the function \link{gauge_avar_mc} as argument
+#' \code{parameters} to return an estimate of the asymptotic variance of the
+#' gauge.
+#'
+#' @section Warning:
+#' The function is not yet fully developed. The estimators of the moments are
+#' at the moment not guaranteed to be consistent for the population moments. DO
+#' NOT USE! Also note that \link{gauge_avar_mc} will later be replaced by a
+#' generic function \code{gauge_avar} to make explicit that it is not only for
+#' true parameters from a Monte Carlo experiment.
 #' @export
 
 estimate_param <- function(robust2SLS_object, iteration) {
