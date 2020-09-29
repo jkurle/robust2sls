@@ -690,10 +690,10 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                                .options.RNG = seed) %dorng% {
 
     # draw random data of the 2SLS model, sample size n
-    d <- r2sls::generate_data(parameters = parameters, n = n)
+    d <- generate_data(parameters = parameters, n = n)
 
     # run the model
-    model <- r2sls::outlier_detection(data = d$data, formula = formula,
+    model <- outlier_detection(data = d$data, formula = formula,
                                ref_dist = ref_dist, sign_level = sign_level,
                                initial_est = initial_est, user_model = NULL,
                                iterations = iterations,
