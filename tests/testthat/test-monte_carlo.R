@@ -156,7 +156,7 @@ test_that("generate_data() works correctly", {
   # checked that this replicates the output from original data_gen_2SLS() fun
   p1 <- generate_param(3, 2, 3, seed = 42)
   set.seed(42)
-  d1 <- generate_data(p1, n = 100)
+  d1 <- generate_data(p1, n = 30)
   expect_snapshot_output(d1)
 
   # check that in the sample, the 2SLS model assumptions are approx. fulfilled

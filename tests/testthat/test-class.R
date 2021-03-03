@@ -564,7 +564,7 @@ test_that("plot.robust2sls() works correctly", {
   skip_on_cran()
   skip_on_ci() # for continuous integration
   expect_snapshot_file(path = save_png(plot(test1)), name = "test1_default.png")
-  expect_snapshot_file(path = save_png(plot(test1, iteration = 0)), name = "test1_m0.png")
+  expect_snapshot_file(path = save_png(plot(test1, iteration = 1)), name = "test1_m0.png")
   expect_snapshot_file(path = save_png(plot(test1, iteration = 4)), name = "test1_m4.png")
   expect_snapshot_file(path = save_png(plot(test2)), name = "test2_default.png")
   expect_snapshot_file(path = save_png(plot(test3)), name = "test3_default.png")
