@@ -1245,3 +1245,13 @@ registerDoParallel(cl)
 package_results_new <- mc_grid(500, n = c(1000, 100000), seed = 42, parameters = p, formula = p$setting$formula, ref_dist = "normal", sign_level = c(0.01, 0.05),
                                initial_est = "robustified", iterations = 0, shuffle = FALSE, shuffle_seed = NULL, split = 0.5)
 stopCluster(cl)
+
+# testing MC 2
+p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+library(doParallel)
+ncores <- 6
+cl <- makeCluster(ncores)
+registerDoParallel(cl)
+package_results_new <- mc_grid(3, n = 50, seed = 42, parameters = p, formula = p$setting$formula, ref_dist = "normal", sign_level = c(0.01, 0.05),
+                               initial_est = "robustified", iterations = 0, shuffle = FALSE, shuffle_seed = NULL, split = 0.5)
+stopCluster(cl)
