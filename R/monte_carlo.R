@@ -232,7 +232,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
     Pi_test <- Pi
     colnames(Pi) <- NULL
     rownames(Pi) <- NULL
-    if (!identical(Pi_test[1:dx1, 1:dx1], diag(dx1))) {
+    if (!(Pi_test[1:dx1, 1:dx1] == diag(dx1))) {
       stop(strwrap("The dx1 by dx1 submatrix of Pi in the upper left corner
                    has to be the identity matrix because the exogenous
                    regressors can be exactly explained by themselves",
@@ -736,7 +736,202 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 }
 
 
+#' Monte Carlo simulations parameter grid 2
+#'
+#' \code{mc_grid2} runs Monte Carlo simulations to assess the performance of
+#' simple proportion and count tests.
+#'
+#' @param M Number of replications.
+#' @param n Sample size for each replication.
+#' @param seed Random seed for the iterations.
+#' @param parameters A list as created by \link{generate_param} that specifies
+#' the true model.
+#' @param formula A formula that specifies the 2SLS model to be estimated. The
+#' format has to follow \code{y ~ x1 + x2 | x1 + z2}, where \code{y} is the
+#' dependent variable, \code{x1} are the exogenous regressors, \code{x2} the
+#' endogenous regressors, and \code{z2} the outside instruments.
+#' @param ref_dist A character vector that specifies the reference distribution
+#' against which observations are classified as outliers. \code{"normal"} refers
+#' to the normal distribution.
+#' @param sign_level A numeric value between 0 and 1 that determines the cutoff
+#' in the reference distribution against which observations are judged as
+#' outliers or not.
+#' @param initial_est A character vector that specifies the initial estimator
+#' for the outlier detection algorithm. \code{"robustified"} means that the full
+#' sample 2SLS is used as initial estimator. \code{"saturated"} splits the
+#' sample into two parts and estimates a 2SLS on each subsample. The
+#' coefficients of one subsample are used to calculate residuals and determine
+#' outliers in the other subsample. \code{"user"} allows the user to specify a
+#' model based on which observations are classified as outliers.
+#' @param iterations An integer >= 0 that specifies how often the outlier
+#' detection algorithm is iterated and for which summary statistics will be
+#' calculated. The value \code{0} means that outlier classification based on the
+#' initial estimator is done.
+#' @param shuffle A logical value or \code{NULL}. Only used if
+#' \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled
+#' before creating the subsamples.
+#' @param shuffle_seed An integer value that will set the seed for shuffling the
+#' sample or \code{NULL}. Only used if \code{initial_est == "saturated"} and
+#' \code{shuffle == TRUE}.
+#' @param split A numeric value strictly between 0 and 1 that determines
+#' in which proportions the sample will be split.
+#'
+#' @section Details:
+#' The following arguments can also be supplied as a vector of their type:
+#' \code{n}, \code{sign_level}, \code{initial_est}, and \code{split}. This makes
+#' the function estimate all possible combinations of the arguments. Note that
+#' the initial estimator \code{"robustified"} is not affected by the argument
+#' \code{split} and hence is not varied in this case.
+#'
+#' For example, specifying \code{n = c(100, 1000)} and
+#' \code{sign_level = c(0.01, 0.05)} estimates four Monte Carlo experiments with
+#' the four possible combinations of the parameters.
+#'
+#' @return \code{mc_grid} returns a data frame with the results of the Monte
+#' Carlo experiments. Each row corresponds to a specific simulation setup. The
+#' columns record the simulation setup and its results. Currently, the average
+#' proportion of detected outliers ("mean_gauge") and their variance
+#' ("var_gauge") are being recorded. Moreover, the theoretical asymptotic
+#' variance ("avar") and the ratio of simulated to theoretical variance -
+#' adjusted by the sample size - are calculated ("var_ratio").
+#'
+#' @import doRNG
+#' @importFrom foreach %dopar% %do%
+#' @importFrom stats poisson.test
+#' @export
 
+mc_grid2 <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
+                    initial_est, iterations, shuffle = FALSE, shuffle_seed,
+                    split = 0.5) {
+
+  gamma <- sign_level
+
+  # robustified does not vary with split, shuffle, shuffle_seed
+  # so create two separate grids, then append them
+  # initialise as empty data frames
+  grid1 <- data.frame()
+  grid2 <- data.frame()
+
+  if ("robustified" %in% initial_est) {
+    grid1 <- expand.grid(list(sample_size = n, sign_level = sign_level,
+                              initial_est = "robustified", split = 0.5),
+                         stringsAsFactors = FALSE)
+  }
+  if ("saturated" %in% initial_est) {
+    grid2 <- expand.grid(list(sample_size = n, sign_level = sign_level,
+                              initial_est = "saturated", split = split),
+                         stringsAsFactors = FALSE)
+  }
+  grid <- rbind(grid1, grid2)
+
+  # storing all results
+  results_all <- data.frame()
+  # start recording time
+  timestart <- proc.time()
+
+  cat("Total number of Monte Carlo experiments: ", NROW(grid), "\n")
+  cat("Monte Carlo experiment: ")
+
+  for (i in 1:NROW(grid)) {
+
+    cat(i, " ")
+
+    # which parameters in this run?
+    n <- grid$sample_size[[i]]
+    sign_level <- grid$sign_level[[i]]
+    initial_est <- grid$initial_est[[i]]
+    split <- grid$split[[i]]
+
+    avar <- gauge_avar_mc(ref_dist = ref_dist, sign_level = sign_level,
+                          initial_est = initial_est, iteration = iterations,
+                          parameters = parameters, split = split)
+
+    # store results in a data frame
+    results <- foreach::foreach(m = (1:M), .combine = "rbind",
+                                .options.RNG = seed) %dorng% {
+
+      # draw random data of the 2SLS model, sample size n
+      d <- generate_data(parameters = parameters, n = n)
+
+      # run the model
+      model <- outlier_detection(data = d$data, formula = formula,
+                                 ref_dist = ref_dist, sign_level = sign_level,
+                                 initial_est = initial_est, user_model = NULL,
+                                 iterations = iterations,
+                                 convergence_criterion = NULL,
+                                 shuffle = shuffle, shuffle_seed = shuffle_seed,
+                                 split = split, verbose = FALSE)
+
+      # calculate metrics of interest
+      num.outliers <- sum((model$type[[(iterations + 1)]] == 0))
+      num.expected <- n * sign_level
+      num.nonmissing <- n - sum((model$type[[(iterations + 1)]] == -1))
+      gauge <- num.outliers / num.nonmissing
+      p_est <- estimate_param_null(model)
+      avar_est <- gauge_avar_mc(ref_dist = ref_dist, sign_level = sign_level,
+                                initial_est = initial_est,
+                                iteration = iterations, parameters = p_est,
+                                split = split)
+      prop_t <- abs((gauge - sign_level) / sqrt((avar_est / n)))
+      prop_p <- 2 * pnorm(prop_t, lower.tail = FALSE)
+      prop_reject_001 <- (prop_p < 0.01)
+      prop_reject_005 <- (prop_p < 0.05)
+      prop_reject_010 <- (prop_p < 0.1)
+      count_p <- stats::poisson.test(x = num.outliers, r = num.expected,
+                                     alternative = "two.sided")$p.value
+      count_reject_001 <- (count_p < 0.01)
+      count_reject_005 <- (count_p < 0.05)
+      count_reject_010 <- (count_p < 0.1)
+
+      data.frame(M, n, iterations, sign_level, num.outliers, num.expected,
+                 gauge, avar, avar_est, prop_t, prop_p, prop_reject_001,
+                 prop_reject_005, prop_reject_010, count_p, count_reject_001,
+                 count_reject_005, count_reject_010)
+
+    } # end foreach
+
+    filename <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,sep = "")
+    filename_csv <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,".csv",sep = "")
+    saveRDS(results, file = filename)
+    write.csv(results, file = filename_csv)
+
+    mean_gauge <- mean(results$gauge)
+    var_gauge <- stats::var(results$gauge)
+    var_ratio <- (var_gauge / (avar/n))
+    var_ratio2 <- var_gauge * n / avar
+
+    mean_avar_est <- mean(results$avar_est)
+    mean_prop_t <- mean(results$prop_t)
+    mean_prop_p <- mean(results$prop_p)
+    prop_size_001 <- mean(results$prop_reject_001)
+    prop_size_005 <- mean(results$prop_reject_005)
+    prop_size_010 <- mean(results$prop_reject_010)
+    mean_count_p <- mean(results$count_p)
+    count_size_001 <- mean(results$count_reject_001)
+    count_size_005 <- mean(results$count_reject_005)
+    count_size_010 <- mean(results$count_reject_010)
+
+    res <- data.frame(M, n, iterations, sign_level, initial_est, split,
+                      mean_gauge, avar, mean_avar_est, var_gauge, var_ratio, var_ratio2,
+                      mean_prop_t, mean_prop_p, prop_size_001, prop_size_005,
+                      prop_size_010, mean_count_p, count_size_001,
+                      count_size_005, count_size_010)
+
+    results_all <- rbind(results_all, res)
+
+  } # end grid search
+
+  # might want to make clear that robustified is independent of split
+  # but then turns all of them to characters, so leave at 0.5 for now
+  # results_all$split[results_all$initial_est == "robustified"] <- "NULL"
+
+  timeend <- proc.time()
+  duration <- timeend - timestart
+  print(duration)
+
+  return(results_all)
+
+}
 
 
 
