@@ -73,7 +73,7 @@ extract_formula <- function(formula) {
 
 #' Create selection (non-outlying) vector from model
 #'
-#' \code{selection} uses the data and model objects to create a list with four
+#' \code{selection} uses the data and model objects to create a list with five
 #' elements that are used to determine whether the observations are judged as
 #' outliers or not.
 #'
