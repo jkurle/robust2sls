@@ -416,10 +416,11 @@ conv_diff <- function(current, counter) {
 #' @param iteration An integer >= 1 that specifies the iteration of the outlier
 #' detection algorithm.
 #'
-#' @return \code{varrho} returns a list with two components, both of which are
+#' @return \code{varrho} returns a list with three components, all of which are
 #' lists themselves. \code{$setting} stores the arguments with which the
 #' function was called. \code{$c} stores the values of the six different
-#' coefficients.
+#' coefficients. \code{$aux} stores intermediate values required for calculating
+#' the coefficients.
 #'
 #' @export
 
@@ -506,7 +507,9 @@ varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
   set <- list(sign_level = sign_level, ref_dist = ref_dist, m = iteration)
   coeff <- list(vbb = vbb, vss = vss, vbxu = vbxu, vsuu = vsuu, vsb = vsb,
                 vsxu = vsxu)
-  out <- list(setting = set, c = coeff)
+  auxiliary <- list(f = f, tau2 = tau_2, tau4 = tau_4, tauc2 = tau_c_2,
+                    tauc4 = tau_c_4, varsigmac2 = varsigma_c_2)
+  out <- list(setting = set, c = coeff, aux = auxiliary)
 
   return(out)
 
