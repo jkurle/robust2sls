@@ -279,7 +279,7 @@ nonmissing <- function(data, formula) {
 #'   of the outlier-detection algorithm: \code{$criterion} is the user-specified
 #'   convergence criterion (\code{NULL} if argument not used),
 #'   \code{$difference} is initialised as \code{NULL}. \code{$converged} is
-#'   initialised as \code{NULL}.}
+#'   initialised as \code{NULL}. \code{$iter} is initialised as \code{NULL}.}
 #'   \item{\code{$iterations}}{A list storing information about the iterations
 #'   of the algorithm. \code{$setting} stores the user-specified
 #'   \code{iterations} argument. \code{$actual} is initialised as \code{NULL}
@@ -313,7 +313,7 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
   initial <- list(estimator = estimator, split = split, shuffle = shuffle,
                   shuffle_seed = NULL)
   convergence <- list(criterion = criterion, difference = NULL,
-                      converged = NULL)
+                      converged = NULL, iter = NULL)
   iterations <- list(setting = iter, actual = NULL)
 
   if (identical(estimator, "saturated") & identical(shuffle, TRUE)) {
@@ -384,15 +384,68 @@ conv_diff <- function(current, counter) {
 
     if (current$cons$initial$estimator == "saturated" & counter == 1) {
       # we now have two initial estimates, one for each split
+
+      coef_current <- current$model[[2]]$coefficients
+      coef_before1 <- current$model[[1]][[1]]$coefficients
+      coef_before2 <- current$model[[1]][[2]]$coefficients
+
+      # check for NA coefficients (due to collinearity)
+      if (any(is.na(coef_current)) | any(is.na(coef_before1))
+          | any(is.na(coef_before2))) {
+
+        # need to get rid of these missing values
+        coef_current <- coef_current[!is.na(coef_current)]
+        coef_before1 <- coef_before1[!is.na(coef_before1)]
+        coef_before2 <- coef_before2[!is.na(coef_before2)]
+
+        # check that they are still lined up in the same way
+        if ((length(coef_current) != length(coef_before1)) |
+            (length(coef_current) != length(coef_before2))) {
+          stop(strwrap("Iterations have a different number of coefficients. This should only happen when the change in the subsample causes a change in perfect collinearity.",
+                       prefix = " ", initial = ""))
+        }
+        varnames1 <- names(coef_current)
+        varnames2 <- names(coef_before1)
+        varnames3 <- names(coef_before2)
+        if (!identical(varnames1, varnames2) |
+            !identical(varnames1, varnames3)) {
+          stop(strwrap("Iterations have different regressors or ordering. Cannot calculate the difference.",
+                       prefix = " ", initial = ""))
+        } # if not same variables or ordering
+      } # close if any missing
+
       # define the difference as the larger difference of the two estimates
-      diff1 <- sum((current$model[[2]]$coefficients -
-                      current$model[[1]][[1]]$coefficients)^2) # diff 1st split
-      diff2 <- sum((current$model[[2]]$coefficients -
-                      current$model[[1]][[2]]$coefficients)^2) # diff 2nd split
+      diff1 <- sum((coef_current - coef_before1)^2) # diff 1st split
+      diff2 <- sum((coef_current - coef_before2)^2) # diff 2nd split
       diff <- max(diff1, diff2) # take the maximum of the two differences
-    } else {
-      diff <- sum((current$model[[length(current$model)]]$coefficients -
-                     current$model[[length(current$model)-1]]$coefficients)^2)
+
+    } else { # not (first iteration and saturated)
+
+      coef_current <- current$model[[length(current$model)]]$coefficients
+      coef_before <- current$model[[length(current$model)-1]]$coefficients
+
+      # check for NA coefficients (due to collinearity)
+      if (any(is.na(coef_current)) | any(is.na(coef_before))) {
+
+        # need to get rid of these missing values
+        coef_current <- coef_current[!is.na(coef_current)]
+        coef_before <- coef_before[!is.na(coef_before)]
+
+        # check that they are still lined up in the same way
+        if (length(coef_current) != length(coef_before)) {
+          stop(strwrap("Iterations have a different number of coefficients. This should only happen when the change in the subsample causes a change in perfect collinearity.",
+                       prefix = " ", initial = ""))
+        }
+        varnames1 <- names(coef_current)
+        varnames2 <- names(coef_before)
+        if (!identical(varnames1, varnames2)) {
+          stop(strwrap("Iterations have different regressors or ordering. Cannot calculate the difference.",
+                       prefix = " ", initial = ""))
+        } # if not same variables or ordering
+      } # close if any missing
+
+      diff <- sum((coef_current - coef_before)^2) # L2 norm
+
     }
 
     return(diff)
@@ -416,11 +469,12 @@ conv_diff <- function(current, counter) {
 #' @param iteration An integer >= 1 that specifies the iteration of the outlier
 #' detection algorithm.
 #'
-#' @return \code{varrho} returns a list with three components, all of which are
+#' @return \code{varrho} returns a list with four components, all of which are
 #' lists themselves. \code{$setting} stores the arguments with which the
 #' function was called. \code{$c} stores the values of the six different
-#' coefficients. \code{$aux} stores intermediate values required for calculating
-#' the coefficients.
+#' coefficients for the specified iteration. \code{$fp} contains the fixed point
+#' versions of the six coefficients. \code{$aux} stores intermediate values
+#' required for calculating the coefficients.
 #'
 #' @export
 
@@ -502,14 +556,25 @@ varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
                sum(vsxu_parts)) * c * (c^2 - varsigma_c_2) * f /
       (tau_c_2 * (phi - 2 * c * f))
 
+    # also provide fixed point elements
+    vbb_fp <- 0
+    vbxu_fp <- 1 / (phi - 2 * c * f)
+    vss_fp <- 0
+    vsuu_fp <- 1 / (tau_c_2 - c * (c^2 - varsigma_c_2) * f)
+    vsb_fp <- 0
+    vsxu_fp <- c * (c^2 - varsigma_c_2) * f /
+      ((phi - 2 * c * f) * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))
+
   } # end normal
 
   set <- list(sign_level = sign_level, ref_dist = ref_dist, m = iteration)
   coeff <- list(vbb = vbb, vss = vss, vbxu = vbxu, vsuu = vsuu, vsb = vsb,
                 vsxu = vsxu)
+  fp <- list(vbb = vbb_fp, vss = vss_fp, vbxu = vbxu_fp, vsuu = vsuu_fp,
+             vsb = vsb_fp, vsxu = vsxu_fp)
   auxiliary <- list(f = f, tau2 = tau_2, tau4 = tau_4, tauc2 = tau_c_2,
                     tauc4 = tau_c_4, varsigmac2 = varsigma_c_2)
-  out <- list(setting = set, c = coeff, aux = auxiliary)
+  out <- list(setting = set, c = coeff, fp = fp, aux = auxiliary)
 
   return(out)
 
