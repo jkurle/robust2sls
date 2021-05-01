@@ -4,9 +4,11 @@
 \alias{beta_inf}
 \title{Calculates valid se for coefficients under H0 of no outliers}
 \usage{
-beta_inf(robust2SLS_object, iteration = 1, exact = FALSE, fp = FALSE)
+beta_inf(robust2sls_object, iteration = 1, exact = FALSE, fp = FALSE)
 }
 \arguments{
+\item{robust2sls_object}{An object of class \code{"robust2sls"}.}
+
 \item{iteration}{An integer specifying the iteration step for which
 parameters to calculate corrected standard errors.}
 
@@ -15,8 +17,6 @@ of outliers (TRUE) or the theoretical share (FALSE) should be used.}
 
 \item{fp}{A logical value whether the fixed point standard error correction
 (TRUE) or the exact iteration correction should be computed (FALSE).}
-
-\item{robust2sls_object}{An object of class \code{"robust2sls"}.}
 }
 \value{
 \code{beta_inf} returns the corrected standard errors for the

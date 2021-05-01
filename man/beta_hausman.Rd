@@ -21,7 +21,11 @@ vector of coefficients.}
 (TRUE) or the exact iteration asymptotic variance should be used (FALSE).}
 }
 \value{
-
+\code{beta_hausman} returns a matrix with the value of the Hausman
+test statistic and its corresponding p-value. The attribute
+\code{"type of avar"} records which asymptotic variance has been used (the
+specific iteration or the fixed point). The attribute \code{"coefficients"}
+stores the names of the coefficients that were included in the Hausman test.
 }
 \description{
 Calculates a Hausman test on the difference between robust and full sample
