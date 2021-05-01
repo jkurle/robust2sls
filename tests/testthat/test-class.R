@@ -125,18 +125,18 @@ test_that("validate_robust2sls() works correctly", {
   t$cons$convergence$criterion <- NULL
   z$cons$convergence$new <- 1:5
   expect_error(validate_robust2sls(t),
-               "Component \\$cons\\$convergence must be a list with 3 elements")
+               "Component \\$cons\\$convergence must be a list with 4 elements")
   expect_error(validate_robust2sls(z),
-               "Component \\$cons\\$convergence must be a list with 3 elements")
+               "Component \\$cons\\$convergence must be a list with 4 elements")
 
   t <- z <- test1
   t$cons$convergence[["diff"]] <- "abc"
   t$cons$convergence$difference <- NULL
   names(z$cons$convergence) <- NULL
   expect_error(validate_robust2sls(t),
-               "Component \\$cons\\$convergence must have 3 named components:")
+               "Component \\$cons\\$convergence must have 4 named components:")
   expect_error(validate_robust2sls(z),
-               "Component \\$cons\\$convergence must have 3 named components:")
+               "Component \\$cons\\$convergence must have 4 named components:")
 
   t <- test1
   t$cons$iterations <- c("abc", "def", "ghi")
@@ -352,8 +352,9 @@ test_that("validate_robust2sls() works correctly", {
   expect_error(validate_robust2sls(z),
             "\\$cons\\$convergence\\$difference must be a numeric value >= 0")
   z <- test1
+  con_list <- list(criterion = 2, difference = NULL, converged = NULL, iter = 1)
   z$cons$iterations$setting <- "convergence"
-  z$cons$convergence$criterion <- 2
+  z$cons$convergence <- con_list
   expect_error(validate_robust2sls(z),
             "\\$cons\\$convergence\\$difference must be a numeric value >= 0")
 
@@ -365,19 +366,19 @@ test_that("validate_robust2sls() works correctly", {
   expect_error(validate_robust2sls(z),
       "\\$cons\\$convergence\\$converged must be a logical vector of length 1")
   z <- test1
+  list_conv <- list(criterion = 2, difference = 1, converged = NULL, iter = 1)
   z$cons$iterations$setting <- "convergence"
-  z$cons$convergence$criterion <- 2
-  z$cons$convergence$difference <- 1
+  z$cons$convergence <- list_conv
   expect_error(validate_robust2sls(z),
       "\\$cons\\$convergence\\$converged must be a logical vector of length 1")
 
   t <- z <- test1
   t$cons$convergence$difference <- 1
   expect_error(validate_robust2sls(t),
-               "\\$cons\\$convergence\\$difference must be NULL")
+               "\\$cons\\$convergence\\$difference must be NULL or 0")
   z$cons$convergence$converged <- "a"
   expect_error(validate_robust2sls(z),
-               "\\$cons\\$convergence\\$converged must be NULL")
+               "\\$cons\\$convergence\\$converged must be NULL or TRUE")
 
   t <- test1
   t$cons$iterations$setting <- "abc"
