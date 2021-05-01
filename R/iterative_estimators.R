@@ -144,6 +144,9 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   out <- new_robust2sls(x = out) # turn into object of class "robust2sls"
   cutoff <- constant$cutoff
 
+  # to track which iteration lead to convergence first
+  firstzero <- TRUE
+
   # extract dependent variable
   vars <- extract_formula(formula)
   y_var <- vars$y_var
@@ -181,7 +184,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   }
   remove(i)
 
-  # initialise counter: how many interations were done?
+  # initialise counter: how many iterations were done?
   counter <- 1
 
   if (iterations == "convergence") {
@@ -196,7 +199,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
         cat(", ", counter, sep = "")
       }
 
-      # add latest selection vector as new variable to dataframe
+      # add latest selection vector as new variable to data frame
       data[[selection_name]] <- out$sel[[length(out$sel)]]
 
       # new model of this iteration
@@ -224,10 +227,23 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
       difference <- conv_diff(current = out, counter = counter)
 
       if (difference <= convergence_criterion) {
+
+        out$cons$convergence$difference <- difference
+        out$cons$convergence$converged <- TRUE
+
+        if (difference == 0) {
+          # if the difference is exactly 0 then actually already the previous
+          # iteration is a fixed point because from there onward won't have any
+          # changes
+          out$cons$convergence$iter <- counter - 1
+        } else {
+          out$cons$convergence$iter <- counter
+        }
         if (verbose == TRUE) {
           cat("\n Algorithm converged successfully. Exit iterations.")
         }
-      }
+
+      } # end if converged
 
       # update counter
       counter <- counter + 1
@@ -270,19 +286,41 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
       # calculate difference
       difference <- conv_diff(current = out, counter = counter)
 
-      # update counter
-      counter <- counter + 1
-
       # despite choosing fixed number of iterations, can end early if converged
       # this is only done when a convergence_criterion is specified (not NULL)
       if (!is.null(convergence_criterion)) {
         if (difference <= convergence_criterion) {
+          out$cons$convergence$difference <- difference
+          out$cons$convergence$converged <- TRUE
+          if (difference == 0) {
+            # if the difference is exactly 0 then actually already the previous
+            # iteration is a fixed point because from there onward won't have
+            # any changes
+            out$cons$convergence$iter <- counter - 1
+          } else {
+            out$cons$convergence$iter <- counter
+          }
           if (verbose == TRUE) {
             cat("\n Algorithm converged successfully. Exit iterations.")
           }
           break
         }
-      } # end if break
+      } else { # end if break, convergence_criterion not specified
+
+        if (difference == 0 & firstzero == TRUE) {
+
+          out$cons$convergence$difference <- difference
+          out$cons$convergence$converged <- TRUE
+          out$cons$convergence$iter <- counter - 1
+
+          firstzero <- FALSE # so that later iterations cannot fulfill criterion
+
+        }
+
+      } # end convergence_criterion not specified
+
+      # update counter
+      counter <- counter + 1
 
     } # end for numeric
 
@@ -290,11 +328,11 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
   out$cons$iterations$actual <- (length(out$type) - 1)
 
-  if (!is.null(out$cons$convergence$criterion)) {
-  out$cons$convergence$difference <- conv_diff(current = out, counter = counter)
-  out$cons$convergence$converged <- (out$cons$convergence$difference
-                                <= convergence_criterion)
-  }
+#  if (!is.null(out$cons$convergence$criterion)) {
+#  out$cons$convergence$difference <- conv_diff(current = out, counter = counter)
+#  out$cons$convergence$converged <- (out$cons$convergence$difference
+#                                <= convergence_criterion)
+#  }
 
   return(out)
 
