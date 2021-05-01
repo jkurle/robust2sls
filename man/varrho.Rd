@@ -19,10 +19,12 @@ to the normal distribution.}
 detection algorithm.}
 }
 \value{
-\code{varrho} returns a list with two components, both of which are
+\code{varrho} returns a list with four components, all of which are
 lists themselves. \code{$setting} stores the arguments with which the
 function was called. \code{$c} stores the values of the six different
-coefficients.
+coefficients for the specified iteration. \code{$fp} contains the fixed point
+versions of the six coefficients. \code{$aux} stores intermediate values
+required for calculating the coefficients.
 }
 \description{
 \code{varrho} calculates the coefficients for the asymptotic variance of the
