@@ -115,16 +115,16 @@ beta_inf_correction <- function(robust2sls_object, iteration = 1,
 #'
 #' @export
 
-beta_inf <- function(robust2SLS_object, iteration = 1, exact = FALSE,
+beta_inf <- function(robust2sls_object, iteration = 1, exact = FALSE,
                      fp = FALSE) {
 
   # extract usual standard errors (+1 because first element is m0)
-  rmodel <- robust2SLS_object$model[[iteration+1]]
+  rmodel <- robust2sls_object$model[[iteration+1]]
   beta_vcov <- (rmodel$sigma)^2 * rmodel$cov.unscaled # already divided by n
   beta_se <- sqrt(diag(beta_vcov))
 
   # create corrected standard errors
-  correction <- beta_inf_correction(robust2sls_object = robust2SLS_object,
+  correction <- beta_inf_correction(robust2sls_object = robust2sls_object,
                                     iteration = iteration, exact = exact,
                                     fp = fp)
   beta_vcov_corr <- correction * beta_vcov
@@ -256,7 +256,7 @@ beta_t <- function(robust2sls_object, iteration, element, fp = FALSE) {
   avar <- beta_test_avar(robust2sls_object = robust2sls_object,
                          iteration = iteration, fp = fp)
   # estimate full sample
-  full <- ivreg(formula = robust2sls_object$cons$formula,
+  full <- AER::ivreg(formula = robust2sls_object$cons$formula,
                 data = robust2sls_object$cons$data)
 
   # extract vector of parameter estimates
@@ -304,9 +304,9 @@ beta_t <- function(robust2sls_object, iteration, element, fp = FALSE) {
     betadiff_se <- sqrt(betadiff_avar / n)
 
     t <- (beta_robust - beta_full) / betadiff_se
-    p_two <- 2 * pnorm(abs(t), mean = 0, sd = 1, lower.tail = FALSE)
-    p_lower <- pnorm(t, mean = 0, sd = 1, lower.tail = TRUE)
-    p_higher <- pnorm(t, mean = 0, sd = 1, lower.tail = FALSE)
+    p_two <- 2 * stats::pnorm(abs(t), mean = 0, sd = 1, lower.tail = FALSE)
+    p_lower <- stats::pnorm(t, mean = 0, sd = 1, lower.tail = TRUE)
+    p_higher <- stats::pnorm(t, mean = 0, sd = 1, lower.tail = FALSE)
 
     out <- cbind(beta_robust, beta_full, betadiff_se, t, p_two, p_higher,
                  p_lower)
@@ -331,7 +331,11 @@ beta_t <- function(robust2sls_object, iteration, element, fp = FALSE) {
 #' @param fp A logical value whether the fixed point asymptotic variance
 #' (TRUE) or the exact iteration asymptotic variance should be used (FALSE).
 #'
-#' @return
+#' @return \code{beta_hausman} returns a matrix with the value of the Hausman
+#' test statistic and its corresponding p-value. The attribute
+#' \code{"type of avar"} records which asymptotic variance has been used (the
+#' specific iteration or the fixed point). The attribute \code{"coefficients"}
+#' stores the names of the coefficients that were included in the Hausman test.
 #'
 #' @details
 #' Argument \code{fp} determines whether the fixed point asymptotic variance
@@ -347,7 +351,7 @@ beta_hausman <- function(robust2sls_object, iteration, subset = NULL,
   avar <- beta_test_avar(robust2sls_object = robust2sls_object,
                          iteration = iteration, fp = fp)
   # estimate full sample
-  full <- ivreg(formula = robust2sls_object$cons$formula,
+  full <- AER::ivreg(formula = robust2sls_object$cons$formula,
                 data = robust2sls_object$cons$data)
 
   # extract vector of parameter estimates
@@ -404,7 +408,7 @@ beta_hausman <- function(robust2sls_object, iteration, subset = NULL,
 
   # Hausman test
   h <- n * t(coef_diff) %*% solve(betadiff_avar) %*% coef_diff
-  p <- pchisq(h, df = dx, lower.tail = FALSE)
+  p <- stats::pchisq(h, df = dx, lower.tail = FALSE)
 
   out <- cbind(h, p)
   cnames <- c("Hausman test", "p value")

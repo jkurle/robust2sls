@@ -873,7 +873,7 @@ mc_grid2 <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                                 iteration = iterations, parameters = p_est,
                                 split = split)
       prop_t <- abs((gauge - sign_level) / sqrt((avar_est / n)))
-      prop_p <- 2 * pnorm(prop_t, lower.tail = FALSE)
+      prop_p <- 2 * stats::pnorm(prop_t, lower.tail = FALSE)
       prop_reject_001 <- (prop_p < 0.01)
       prop_reject_005 <- (prop_p < 0.05)
       prop_reject_010 <- (prop_p < 0.1)
@@ -893,7 +893,7 @@ mc_grid2 <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
     filename <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,sep = "")
     filename_csv <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,".csv",sep = "")
     saveRDS(results, file = filename)
-    write.csv(results, file = filename_csv)
+    utils::write.csv(results, file = filename_csv)
 
     mean_gauge <- mean(results$gauge)
     var_gauge <- stats::var(results$gauge)
