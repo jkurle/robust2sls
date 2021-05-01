@@ -73,7 +73,7 @@ extract_formula <- function(formula) {
 
 #' Create selection (non-outlying) vector from model
 #'
-#' \code{selection} uses the data and model objects to create a list with four
+#' \code{selection} uses the data and model objects to create a list with five
 #' elements that are used to determine whether the observations are judged as
 #' outliers or not.
 #'
@@ -279,7 +279,7 @@ nonmissing <- function(data, formula) {
 #'   of the outlier-detection algorithm: \code{$criterion} is the user-specified
 #'   convergence criterion (\code{NULL} if argument not used),
 #'   \code{$difference} is initialised as \code{NULL}. \code{$converged} is
-#'   initialised as \code{NULL}.}
+#'   initialised as \code{NULL}. \code{$iter} is initialised as \code{NULL}.}
 #'   \item{\code{$iterations}}{A list storing information about the iterations
 #'   of the algorithm. \code{$setting} stores the user-specified
 #'   \code{iterations} argument. \code{$actual} is initialised as \code{NULL}
@@ -313,7 +313,7 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
   initial <- list(estimator = estimator, split = split, shuffle = shuffle,
                   shuffle_seed = NULL)
   convergence <- list(criterion = criterion, difference = NULL,
-                      converged = NULL)
+                      converged = NULL, iter = NULL)
   iterations <- list(setting = iter, actual = NULL)
 
   if (identical(estimator, "saturated") & identical(shuffle, TRUE)) {
@@ -384,15 +384,68 @@ conv_diff <- function(current, counter) {
 
     if (current$cons$initial$estimator == "saturated" & counter == 1) {
       # we now have two initial estimates, one for each split
+
+      coef_current <- current$model[[2]]$coefficients
+      coef_before1 <- current$model[[1]][[1]]$coefficients
+      coef_before2 <- current$model[[1]][[2]]$coefficients
+
+      # check for NA coefficients (due to collinearity)
+      if (any(is.na(coef_current)) | any(is.na(coef_before1))
+          | any(is.na(coef_before2))) {
+
+        # need to get rid of these missing values
+        coef_current <- coef_current[!is.na(coef_current)]
+        coef_before1 <- coef_before1[!is.na(coef_before1)]
+        coef_before2 <- coef_before2[!is.na(coef_before2)]
+
+        # check that they are still lined up in the same way
+        if ((length(coef_current) != length(coef_before1)) |
+            (length(coef_current) != length(coef_before2))) {
+          stop(strwrap("Iterations have a different number of coefficients. This should only happen when the change in the subsample causes a change in perfect collinearity.",
+                       prefix = " ", initial = ""))
+        }
+        varnames1 <- names(coef_current)
+        varnames2 <- names(coef_before1)
+        varnames3 <- names(coef_before2)
+        if (!identical(varnames1, varnames2) |
+            !identical(varnames1, varnames3)) {
+          stop(strwrap("Iterations have different regressors or ordering. Cannot calculate the difference.",
+                       prefix = " ", initial = ""))
+        } # if not same variables or ordering
+      } # close if any missing
+
       # define the difference as the larger difference of the two estimates
-      diff1 <- sum((current$model[[2]]$coefficients -
-                      current$model[[1]][[1]]$coefficients)^2) # diff 1st split
-      diff2 <- sum((current$model[[2]]$coefficients -
-                      current$model[[1]][[2]]$coefficients)^2) # diff 2nd split
+      diff1 <- sum((coef_current - coef_before1)^2) # diff 1st split
+      diff2 <- sum((coef_current - coef_before2)^2) # diff 2nd split
       diff <- max(diff1, diff2) # take the maximum of the two differences
-    } else {
-      diff <- sum((current$model[[length(current$model)]]$coefficients -
-                     current$model[[length(current$model)-1]]$coefficients)^2)
+
+    } else { # not (first iteration and saturated)
+
+      coef_current <- current$model[[length(current$model)]]$coefficients
+      coef_before <- current$model[[length(current$model)-1]]$coefficients
+
+      # check for NA coefficients (due to collinearity)
+      if (any(is.na(coef_current)) | any(is.na(coef_before))) {
+
+        # need to get rid of these missing values
+        coef_current <- coef_current[!is.na(coef_current)]
+        coef_before <- coef_before[!is.na(coef_before)]
+
+        # check that they are still lined up in the same way
+        if (length(coef_current) != length(coef_before)) {
+          stop(strwrap("Iterations have a different number of coefficients. This should only happen when the change in the subsample causes a change in perfect collinearity.",
+                       prefix = " ", initial = ""))
+        }
+        varnames1 <- names(coef_current)
+        varnames2 <- names(coef_before)
+        if (!identical(varnames1, varnames2)) {
+          stop(strwrap("Iterations have different regressors or ordering. Cannot calculate the difference.",
+                       prefix = " ", initial = ""))
+        } # if not same variables or ordering
+      } # close if any missing
+
+      diff <- sum((coef_current - coef_before)^2) # L2 norm
+
     }
 
     return(diff)
@@ -400,6 +453,290 @@ conv_diff <- function(current, counter) {
   } # end can calculate
 
 }
+
+
+#' Calculate varrho coefficients
+#'
+#' \code{varrho} calculates the coefficients for the asymptotic variance of the
+#' gauge (false positive rate) for a specific iteration m >= 1.
+#'
+#' @param sign_level A numeric value between 0 and 1 that determines the cutoff
+#' in the reference distribution against which observations are judged as
+#' outliers or not.
+#' @param ref_dist A character vector that specifies the reference distribution
+#' against which observations are classified as outliers. \code{"normal"} refers
+#' to the normal distribution.
+#' @param iteration An integer >= 1 that specifies the iteration of the outlier
+#' detection algorithm.
+#'
+#' @return \code{varrho} returns a list with four components, all of which are
+#' lists themselves. \code{$setting} stores the arguments with which the
+#' function was called. \code{$c} stores the values of the six different
+#' coefficients for the specified iteration. \code{$fp} contains the fixed point
+#' versions of the six coefficients. \code{$aux} stores intermediate values
+#' required for calculating the coefficients.
+#'
+#' @export
+
+varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
+
+  if (!is.numeric(sign_level) | !identical(length(sign_level), 1L)) {
+    stop(strwrap("Argument 'sign_level' must be a numeric vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!(sign_level > 0) | !(sign_level < 1)) {
+    stop(strwrap("Argument 'sign_level' must lie strictly between 0 and 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!is.character(ref_dist) | !identical(length(ref_dist), 1L)) {
+    stop(strwrap("Argument 'ref_dist' must be a character vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  # available reference distributions (so far only "normal"):
+  ref_dist_avail <- c("normal")
+  if (!(ref_dist %in% ref_dist_avail)) {
+    stop(strwrap(paste(c("Argument 'ref_dist' must be one of the available
+                 reference distributions:", ref_dist_avail), collapse = " "),
+                 prefix = " ", initial = ""))
+  }
+  if (!is.numeric(iteration) | !identical(length(iteration), 1L)) {
+    stop(strwrap("Argument 'iteration' must be a numeric vector of length 1",
+                 prefix = " ", initial = ""))
+  }
+  if (!(iteration %% 1 == 0)) {
+    stop(strwrap("Argument 'iteration' must be an integer", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration >= 1)) {
+    stop(strwrap("Argument 'iteration' must be weakly larger than 1",
+                 prefix = " ", initial = ""))
+  }
+
+  if (ref_dist == "normal") {
+
+    gamma <- sign_level
+    c <- stats::qnorm(gamma/2, mean=0, sd=1, lower.tail = FALSE)
+    phi <- 1 - gamma
+    f <- stats::dnorm(c, mean=0, sd=1)
+    tau_c_2 <- phi - 2 * c * f
+    tau_c_4 <- 3 * phi - 2 * c * (c^2 + 3) * f
+    tau_2 <- 1
+    tau_4 <- 3
+    varsigma_c_2 <- tau_c_2 / phi
+    m <- iteration
+
+    # varrho beta beta
+    vbb <- (2 * c * f / phi)^m
+    # varrho sigma sigma
+    vss <- (c * (c^2 - varsigma_c_2) * f / tau_c_2)^m
+    # varrho beta tildex u
+    vbxu <- (phi^m - (2 * c * f)^m) / (phi^m * (phi - 2 * c * f))
+    # varrho sigma u u
+    vsuu <- (tau_c_2^m - (c * (c^2 - varsigma_c_2) * f)^m) /
+      (tau_c_2^m * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))
+    # varrho sigma beta
+    vsb_fun <- function(m, l, c, f, phi, varsigma_c_2, tau_c_2) {
+      ele <- (2*c*f/phi)^(m-l-1) * ((c*(c^2 - varsigma_c_2)*f) / tau_c_2)^(l+1)
+      return(ele)
+    }
+    vsb_parts <- vapply(X = 0:(m-1), FUN = vsb_fun, FUN.VALUE = double(1),
+                        m = m, c = c, f = f, phi = phi, varsigma_c_2 = varsigma_c_2,
+                        tau_c_2 = tau_c_2)
+    vsb <- sum(vsb_parts)
+    # varrho sigma tildex u
+    vsxu_fun <- function(m, l, c, f, phi, varsigma_c_2, tau_c_2) {
+      ele <- (2*c*f/phi)^(m-l-1) * ((c*(c^2 - varsigma_c_2)*f) / tau_c_2)^l
+      return(ele)
+    }
+    vsxu_parts <- vapply(X = 0:(m-1), FUN = vsxu_fun, FUN.VALUE = double(1),
+                         m = m, c = c, f = f, phi = phi,
+                         varsigma_c_2 = varsigma_c_2, tau_c_2 = tau_c_2)
+    vsxu <- (((tau_c_2^m - (c * (c^2 - varsigma_c_2) * f)^m) /
+                (tau_c_2^(m-1) * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))) -
+               sum(vsxu_parts)) * c * (c^2 - varsigma_c_2) * f /
+      (tau_c_2 * (phi - 2 * c * f))
+
+    # also provide fixed point elements
+    vbb_fp <- 0
+    vbxu_fp <- 1 / (phi - 2 * c * f)
+    vss_fp <- 0
+    vsuu_fp <- 1 / (tau_c_2 - c * (c^2 - varsigma_c_2) * f)
+    vsb_fp <- 0
+    vsxu_fp <- c * (c^2 - varsigma_c_2) * f /
+      ((phi - 2 * c * f) * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))
+
+  } # end normal
+
+  set <- list(sign_level = sign_level, ref_dist = ref_dist, m = iteration)
+  coeff <- list(vbb = vbb, vss = vss, vbxu = vbxu, vsuu = vsuu, vsb = vsb,
+                vsxu = vsxu)
+  fp <- list(vbb = vbb_fp, vss = vss_fp, vbxu = vbxu_fp, vsuu = vsuu_fp,
+             vsb = vsb_fp, vsxu = vsxu_fp)
+  auxiliary <- list(f = f, tau2 = tau_2, tau4 = tau_4, tauc2 = tau_c_2,
+                    tauc4 = tau_c_4, varsigmac2 = varsigma_c_2)
+  out <- list(setting = set, c = coeff, fp = fp, aux = auxiliary)
+
+  return(out)
+
+}
+
+#' Estimation of moments of the data
+#'
+#' DO NOT USE YET!
+#' \code{estimate_param} can be used to estimate certain moments of the data
+#' that are required for calculating the asymptotic variance of the gauge. Such
+#' moments are the covariance between the standardised first stage errors and
+#' the structural error \eqn{\Omega}, the covariance matrix of the first stage
+#' errors \eqn{\Sigma}, the first stage parameter matrix \eqn{\Pi}, and more.
+#'
+#' @param robust2SLS_object An object of class \code{"robust2sls"} for which
+#' the moments will be calculated.
+#' @param iteration An integer >= 0 specifying based on which model iteration
+#' the moments should be estimated. The model iteration affects which
+#' observations are determined to be outliers and these observations will hence
+#' be excluded during the estimation of the moments.
+#'
+#' @return \code{estimate_param} returns a list with a similar structure as the
+#' output of the Monte Carlo functionality \link{generate_param}. Hence, the
+#' resulting list can be given to the function \link{gauge_avar_mc} as argument
+#' \code{parameters} to return an estimate of the asymptotic variance of the
+#' gauge.
+#'
+#' @section Warning:
+#' The function is not yet fully developed. The estimators of the moments are
+#' at the moment not guaranteed to be consistent for the population moments. DO
+#' NOT USE! Also note that \link{gauge_avar_mc} will later be replaced by a
+#' generic function \code{gauge_avar} to make explicit that it is not only for
+#' true parameters from a Monte Carlo experiment.
+#' @export
+
+estimate_param <- function(robust2SLS_object, iteration) {
+
+  # extract the dataset
+  data <- robust2SLS_object$cons$data
+
+  # how to call the variable in the data set that stores the subset selection
+  # don't overwrite an existing variable so create name that does not yet exist
+  i <- 1
+  selection_name <- "selection"
+  while (selection_name %in% colnames(data)) {
+    selection_name <- paste("selection_", i, sep = "")
+    i <- i + 1
+  }
+  remove(i)
+  data[[selection_name]] <- robust2SLS_object$sel[[iteration + 1]]
+
+  # calculate first stage linear projections
+  fml <- extract_formula(robust2SLS_object$cons$formula)
+  dx1 <- length(fml$x1_var)
+  dx2 <- length(fml$x2_var)
+  dz1 <- length(fml$z1_var)
+  dz2 <- length(fml$z2_var)
+
+  Pi_hat <- NULL
+  R2_hat <- NULL
+
+  # create the first stage formulas
+  z <- union(fml$z1_var, fml$z2_var)
+  part2 <- paste(z, collapse = " + ")
+  part2 <- paste("0 + ", part2, sep = "") # take out intercept
+  for (i in seq_along(fml$x2_var)) {
+    depvar <- fml$x2_var[[i]]
+    formula1 <- paste(depvar, part2, sep = " ~ ")
+    model1 <- NULL
+    # run first stages
+    command <- paste("model1 <- stats::lm(formula = as.formula(formula1),
+                     data = data, subset = ", selection_name, ")")
+    expr <- parse(text = command)
+    eval(expr)
+    pi_hat <- as.matrix(model1$coefficients, (dz1+dz2), 1) # into column vector
+    colnames(pi_hat) <- depvar
+    Pi_hat <- cbind(Pi_hat, pi_hat)
+
+    r2_hat <- data[, fml$x2_var[[i]]] - stats::predict(model1, newdata = data)
+    r2_hat <- r2_hat[data[[selection_name]]]
+    R2_hat <- cbind(R2_hat, r2_hat)
+
+  }
+
+  dimnames(R2_hat) <- NULL
+
+  # alternative to get R2_hat via ivreg model object
+  # other <- data[data[[selection_name]], fml$x2_var] -
+  #   stats::model.matrix(robust2SLS_object$model[[iteration + 2]],
+  #                       component = c("projected"))[, fml$x2_var]
+
+  # pad the matrix to account for perfectly fit exogenous regressors
+  Pi_hat <- cbind(rbind(diag(dx1), matrix(0,dz2,dx1)), Pi_hat)
+
+  # estimate Mzz = Ezz' = Var(z) + Ez Ez'
+  Z <- data[, z]
+  Z <- Z[robust2SLS_object$sel[[iteration + 1]], ]
+  ZZ <- t(as.matrix(Z)) %*% as.matrix(Z)
+  Mzz_hat <- ZZ / NROW(Z)
+
+  # estimate Mxx_tilde_inv
+  Mxx_tilde_hat <- t(Pi_hat) %*% Mzz_hat %*% Pi_hat
+  Mxx_tilde_inv_hat <- pracma::inv(Mxx_tilde_hat)
+
+  # estimate Sigma2 = E(r2i r2i')
+  Sigma2_hat <- stats::cov(R2_hat)
+  Sigma2_half_hat <- pracma::sqrtm(Sigma2_hat)$B
+  Sigma2_half_inv_hat <- pracma::inv(Sigma2_half_hat)
+
+  # pad the matrix to get estimate of Sigma
+  Sigma_hat <- rbind(cbind(matrix(0, dx1, dx1), matrix(0, dx1, dx2)),
+                     cbind(matrix(0, dx2, dx1), Sigma2_hat))
+  Sigma_half_hat <- rbind(cbind(matrix(0, dx1, dx1), matrix(0, dx1, dx2)),
+                     cbind(matrix(0, dx2, dx1), Sigma2_half_hat))
+  Sigma_half_inv_hat <- rbind(cbind(matrix(0, dx1, dx1), matrix(0, dx1, dx2)),
+                     cbind(matrix(0, dx2, dx1), Sigma2_half_inv_hat))
+
+  # estimate E(r2i ui)
+  u_std_hat <- robust2SLS_object$stdres[[iteration + 2]][robust2SLS_object$sel[[iteration + 1]]]
+  MRu_hat <- colMeans(R2_hat * u_std_hat)
+
+  # estimate Omega2
+  Omega2_hat <- Sigma2_half_inv_hat %*% MRu_hat
+
+  # pad the vector to get estimate of Omega
+  Omega_hat <- rbind(matrix(0, dx1, 1), Omega2_hat)
+
+  # try alternative and see whether works better; get virtually the same
+  # probably only different because below didn't reverse the df correction
+  # u_hat <- robust2SLS_object$model$m1$residuals
+  # MRu <- colMeans(R2_hat * u_hat)
+  # sigma <- robust2SLS_object$model$m1$sigma * sqrt(robust2SLS_object$cons$bias_corr)
+  # Omega2_hat <- Sigma2_half_inv_hat %*% MRu / sigma
+
+  # the problem is with R2u_hat because we are using a truncated sample
+  # so probably need a correction factor to account for falsely detected outl.
+  # could also estimate on full sample but the problem would be under altern.
+  # of contaminated sample
+
+  # for now, return results in a list similar to that created by generate_param
+
+  set <- list(call = robust2SLS_object$cons$call,
+              formula = robust2SLS_object$cons$formula, dx1 = dx1, dx2 = dx2,
+              dz2 = dz2)
+  nam <- list(y = fml$y_var, x1 = fml$x1_var, x2 = fml$x2_var, z2 = fml$z2_var)
+  par <- list(Omega = Omega_hat, Sigma_half = Sigma_half_hat,
+              Mxx_tilde_inv = Mxx_tilde_inv_hat)
+  out <- list(params = par, setting = set, names = nam)
+  return(out)
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

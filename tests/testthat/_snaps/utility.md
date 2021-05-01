@@ -81,6 +81,9 @@
     $convergence$converged
     NULL
     
+    $convergence$iter
+    NULL
+    
     
     $iterations
     $iterations$setting
@@ -172,6 +175,9 @@
     NULL
     
     $convergence$converged
+    NULL
+    
+    $convergence$iter
     NULL
     
     
@@ -267,6 +273,9 @@
     $convergence$converged
     NULL
     
+    $convergence$iter
+    NULL
+    
     
     $iterations
     $iterations$setting
@@ -358,6 +367,9 @@
     NULL
     
     $convergence$converged
+    NULL
+    
+    $convergence$iter
     NULL
     
     

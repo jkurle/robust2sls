@@ -29,6 +29,7 @@ test_that("outlier_detection() produces correct output", {
   expect_equal(t$cons$convergence$criterion, NULL)
   expect_equal(t$cons$convergence$difference, NULL)
   expect_equal(t$cons$convergence$converged, NULL)
+  expect_equal(t$cons$convergence$iter, NULL)
   expect_equal(t$cons$iterations$setting, 0)
   expect_equal(t$cons$iterations$actual, 0)
   expect_equal(t$model$m0$coefficients[[1]], 29.57671472)
@@ -55,8 +56,9 @@ test_that("outlier_detection() produces correct output", {
   expect_equal(t$cons$initial$shuffle, NULL)
   expect_equal(t$cons$initial$shuffle_seed, NULL)
   expect_equal(t$cons$convergence$criterion, NULL)
-  expect_equal(t$cons$convergence$difference, NULL)
-  expect_equal(t$cons$convergence$converged, NULL)
+  expect_equal(t$cons$convergence$difference, 0) # has actually converged
+  expect_equal(t$cons$convergence$converged, TRUE) # has converged
+  expect_equal(t$cons$convergence$iter, 1) # has converged at first iteration
   expect_equal(t$cons$iterations$setting, 5)
   expect_equal(t$cons$iterations$actual, 5)
   expect_equal(t$model$m0$coefficients[[1]], 29.57671472)
@@ -128,8 +130,9 @@ test_that("outlier_detection() produces correct output", {
   expect_equal(t$cons$initial$shuffle, TRUE)
   expect_equal(t$cons$initial$shuffle_seed, 42)
   expect_equal(t$cons$convergence$criterion, NULL)
-  expect_equal(t$cons$convergence$difference, NULL)
-  expect_equal(t$cons$convergence$converged, NULL)
+  expect_equal(t$cons$convergence$difference, 0) # has actually converged
+  expect_equal(t$cons$convergence$converged, TRUE) # has converged
+  expect_equal(t$cons$convergence$iter, 2) # for saturated took 2 iterations
   expect_equal(t$cons$iterations$setting, 5)
   expect_equal(t$cons$iterations$actual, 5)
   expect_equal(t$model$m0$split1$coefficients[[1]], 25.00242247,

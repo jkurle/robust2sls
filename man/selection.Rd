@@ -41,7 +41,7 @@ stores the \code{\link[AER]{ivreg}} model object based on which the four
 vectors were calculated.
 }
 \description{
-\code{selection} uses the data and model objects to create a list with four
+\code{selection} uses the data and model objects to create a list with five
 elements that are used to determine whether the observations are judged as
 outliers or not.
 }

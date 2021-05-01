@@ -81,7 +81,7 @@ which is returned by \link{outlier_detection}.
   of the outlier-detection algorithm: \code{$criterion} is the user-specified
   convergence criterion (\code{NULL} if argument not used),
   \code{$difference} is initialised as \code{NULL}. \code{$converged} is
-  initialised as \code{NULL}.}
+  initialised as \code{NULL}. \code{$iter} is initialised as \code{NULL}.}
   \item{\code{$iterations}}{A list storing information about the iterations
   of the algorithm. \code{$setting} stores the user-specified
   \code{iterations} argument. \code{$actual} is initialised as \code{NULL}
