@@ -93,14 +93,14 @@ validate_robust2sls <- function(x) {
                  initial = ""))
   }
   # test that subsublist $cons$convergence has length 3
-  if (!identical(length(x$cons$convergence), 3L)) {
-    stop(strwrap("Component $cons$convergence must be a list with 3 elements",
+  if (!identical(length(x$cons$convergence), 4L)) {
+    stop(strwrap("Component $cons$convergence must be a list with 4 elements",
                  prefix = " ", initial = ""))
   }
   # test that subsublist $cons$convergence has the correct named components
-  cons_convergence_name <- c("criterion", "difference", "converged")
+  cons_convergence_name <- c("criterion", "difference", "converged", "iter")
   if (!identical(names(x$cons$convergence), cons_convergence_name)) {
-    stop(strwrap(paste(c("Component $cons$convergence must have 3 named
+    stop(strwrap(paste(c("Component $cons$convergence must have 4 named
                     components:", cons_convergence_name), collapse = " ")),
          prefix = " ", initial = "")
   }
@@ -339,15 +339,17 @@ validate_robust2sls <- function(x) {
                    criterion has been specified", prefix = " ", initial = ""))
     }
   } else { # convergence criterion is NULL
-    if (!is.null(x$cons$convergence$difference)) {
-      stop(strwrap("Component $cons$convergence$difference must be NULL when
-                   no convergence criterion has been specified", prefix = " ",
-                   initial = ""))
+    if (!(is.null(x$cons$convergence$difference) ||
+          (x$cons$convergence$difference == 0))) {
+      stop(strwrap("Component $cons$convergence$difference must be NULL or 0
+                   when no convergence criterion has been specified",
+                   prefix = " ", initial = ""))
     }
-    if (!is.null(x$cons$convergence$converged)) {
-      stop(strwrap("Component $cons$convergence$converged must be NULL when no
-                   convergence criterion has been specified", prefix = " ",
-                   initial = ""))
+    if (!(is.null(x$cons$convergence$converged) ||
+          (x$cons$convergence$converged == TRUE))) {
+      stop(strwrap("Component $cons$convergence$converged must be NULL or TRUE
+                   when no convergence criterion has been specified",
+                   prefix = " ", initial = ""))
     }
   } # end convergence criterion
   if (!(identical(x$cons$iterations$setting, "convergence") |
@@ -584,7 +586,6 @@ plot.robust2sls <- function(x, iteration = NULL, ...) {
   print(plot)
 
 }
-
 
 
 
