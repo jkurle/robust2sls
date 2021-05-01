@@ -2,6 +2,11 @@
 
 S3method(plot,robust2sls)
 S3method(print,robust2sls)
+export(beta_hausman)
+export(beta_inf)
+export(beta_inf_correction)
+export(beta_t)
+export(beta_test_avar)
 export(estimate_param)
 export(estimate_param_null)
 export(gauge_avar_mc)
