@@ -10,7 +10,7 @@ beta_hausman(robust2sls_object, iteration, subset = NULL, fp = FALSE)
 \arguments{
 \item{robust2sls_object}{An object of class \code{"robust2sls"}.}
 
-\item{iteration}{An integer specifying the iteration step for which
+\item{iteration}{An integer > 0 specifying the iteration step for which
 parameters to calculate corrected standard errors.}
 
 \item{subset}{A vector of numeric indices or strings indicating which
