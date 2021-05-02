@@ -6,7 +6,7 @@
 #' Calculates the correction factor for inference under H0 of no outliers
 #'
 #' @param robust2sls_object An object of class \code{"robust2sls"}.
-#' @param iteration An integer specifying the iteration step for which
+#' @param iteration An integer > 0 specifying the iteration step for which
 #' parameters to calculate corrected standard errors.
 #' @param exact A logical value indicating whether the actually detected share
 #' of outliers (TRUE) or the theoretical share (FALSE) should be used.
@@ -34,6 +34,48 @@
 
 beta_inf_correction <- function(robust2sls_object, iteration = 1,
                                 exact = FALSE, fp = FALSE) {
+
+  # test inputs correct
+  validate_robust2sls(robust2sls_object)
+
+  if (!is.numeric(iteration)) {
+    stop(strwrap("The argument `iteration` has to be numeric", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(iteration), 1L)) {
+    stop(strwrap("The argument `iteration` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!((iteration %% 1) == 0)) {
+    stop(strwrap("The argument `iteration` has to be an integer", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration >= 1)) {
+    stop(strwrap("The argument `iteration` must be >= 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration <= robust2sls_object$cons$iterations$actual)) {
+    stop(strwrap("The argument `iteration` specifies a higher iteration
+                 than was actually done", prefix = " ",
+                 initial = ""))
+  }
+  if (!is.logical(exact)) {
+    stop(strwrap("The argument `exact` has to be a logical value", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(exact), 1L)) {
+    stop(strwrap("The argument `exact` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!is.logical(fp)) {
+    stop(strwrap("The argument `fp` has to be a logical value", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(fp), 1L)) {
+    stop(strwrap("The argument `fp` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  # checking inputs end
 
   m <- iteration
   fml <- extract_formula(robust2sls_object$cons$formula)
@@ -79,14 +121,14 @@ beta_inf_correction <- function(robust2sls_object, iteration = 1,
   }
 
   attr(correction, which = "type of correction") <- which_corr
-  return(correction) # returns correction factor (matrix)
+  return(correction) # returns correction factor
 
 }
 
 #' Calculates valid se for coefficients under H0 of no outliers
 #'
 #' @param robust2sls_object An object of class \code{"robust2sls"}.
-#' @param iteration An integer specifying the iteration step for which
+#' @param iteration An integer > 0 specifying the iteration step for which
 #' parameters to calculate corrected standard errors.
 #' @param exact A logical value indicating whether the actually detected share
 #' of outliers (TRUE) or the theoretical share (FALSE) should be used.
@@ -117,6 +159,48 @@ beta_inf_correction <- function(robust2sls_object, iteration = 1,
 
 beta_inf <- function(robust2sls_object, iteration = 1, exact = FALSE,
                      fp = FALSE) {
+
+  # test inputs correct
+  validate_robust2sls(robust2sls_object)
+
+  if (!is.numeric(iteration)) {
+    stop(strwrap("The argument `iteration` has to be numeric", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(iteration), 1L)) {
+    stop(strwrap("The argument `iteration` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!((iteration %% 1) == 0)) {
+    stop(strwrap("The argument `iteration` has to be an integer", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration >= 1)) {
+    stop(strwrap("The argument `iteration` must be >= 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration <= robust2sls_object$cons$iterations$actual)) {
+    stop(strwrap("The argument `iteration` specifies a higher iteration
+                 than was actually done", prefix = " ",
+                 initial = ""))
+  }
+  if (!is.logical(exact)) {
+    stop(strwrap("The argument `exact` has to be a logical value", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(exact), 1L)) {
+    stop(strwrap("The argument `exact` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!is.logical(fp)) {
+    stop(strwrap("The argument `fp` has to be a logical value", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(fp), 1L)) {
+    stop(strwrap("The argument `fp` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  # checking inputs end
 
   # extract usual standard errors (+1 because first element is m0)
   rmodel <- robust2sls_object$model[[iteration+1]]
@@ -165,7 +249,7 @@ beta_inf <- function(robust2sls_object, iteration = 1, exact = FALSE,
 #' sample estimators of the structural parameters
 #'
 #' @param robust2sls_object An object of class \code{"robust2sls"}.
-#' @param iteration An integer specifying the iteration step for which
+#' @param iteration An integer > 0 specifying the iteration step for which
 #' parameters to calculate corrected standard errors.
 #' @param fp A logical value whether the fixed point asymptotic variance
 #' (TRUE) or the exact iteration asymptotic variance should be computed (FALSE).
@@ -182,6 +266,40 @@ beta_inf <- function(robust2sls_object, iteration = 1, exact = FALSE,
 #' @export
 
 beta_test_avar <- function(robust2sls_object, iteration, fp = FALSE) {
+
+  # test inputs correct
+  validate_robust2sls(robust2sls_object)
+
+  if (!is.numeric(iteration)) {
+    stop(strwrap("The argument `iteration` has to be numeric", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(iteration), 1L)) {
+    stop(strwrap("The argument `iteration` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!((iteration %% 1) == 0)) {
+    stop(strwrap("The argument `iteration` has to be an integer", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration >= 1)) {
+    stop(strwrap("The argument `iteration` must be >= 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration <= robust2sls_object$cons$iterations$actual)) {
+    stop(strwrap("The argument `iteration` specifies a higher iteration
+                 than was actually done", prefix = " ",
+                 initial = ""))
+  }
+  if (!is.logical(fp)) {
+    stop(strwrap("The argument `fp` has to be a logical value", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(fp), 1L)) {
+    stop(strwrap("The argument `fp` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  # checking inputs end
 
   m <- iteration
   rmodel <- robust2sls_object$model[[iteration+1]] # 1st element is m0
@@ -231,7 +349,7 @@ beta_test_avar <- function(robust2sls_object, iteration, fp = FALSE) {
 #' Conducts a t-test on the difference between robust and full sample estimates
 #'
 #' @param robust2sls_object An object of class \code{"robust2sls"}.
-#' @param iteration An integer specifying the iteration step for which
+#' @param iteration An integer > 0 specifying the iteration step for which
 #' parameters to calculate corrected standard errors.
 #' @param element An index or a string to select the coefficient which is to be
 #' tested. The index should refer to the index of coefficients in the
@@ -251,6 +369,67 @@ beta_test_avar <- function(robust2sls_object, iteration, fp = FALSE) {
 #' @export
 
 beta_t <- function(robust2sls_object, iteration, element, fp = FALSE) {
+
+  # test inputs correct
+  validate_robust2sls(robust2sls_object)
+
+  if (!is.numeric(iteration)) {
+    stop(strwrap("The argument `iteration` has to be numeric", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(iteration), 1L)) {
+    stop(strwrap("The argument `iteration` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!((iteration %% 1) == 0)) {
+    stop(strwrap("The argument `iteration` has to be an integer", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration >= 1)) {
+    stop(strwrap("The argument `iteration` must be >= 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration <= robust2sls_object$cons$iterations$actual)) {
+    stop(strwrap("The argument `iteration` specifies a higher iteration
+                 than was actually done", prefix = " ",
+                 initial = ""))
+  }
+  if (!(is.numeric(element) | is.character(element))) {
+    stop(strwrap("The argument `element` must be numeric or a string",
+                 prefix = " ", initial = ""))
+  }
+  if (is.numeric(element)) {
+    if (any(!(element %% 1 == 0))) {
+      stop(strwrap("The argument `element` must only contain integers
+                   if numeric", prefix = " ", initial = ""))
+    }
+    n.coef <- length(robust2sls_object$model[[iteration + 1]]$coefficients)
+    if (any(element > n.coef)) {
+      stop(strwrap("The argument `element` contains indices larger than the
+                   number of coefficients in the model", prefix = " ",
+                   initial = ""))
+    }
+    if (any(element <= 0)) {
+      stop(strwrap("The argument `element` contains indices < 1",
+                   prefix = " ", initial = ""))
+    }
+  } # end if element numeric
+  if (is.character(element)) {
+    names.coef <- names(robust2sls_object$model[[iteration + 1]]$coefficients)
+    if (any(!(element %in% names.coef))) {
+      stop(strwrap("The argument `element` contains names that are not among the
+                   coefficients in the model", prefix = " ", initial = ""))
+    }
+  } # end if element character
+  if (!is.logical(fp)) {
+    stop(strwrap("The argument `fp` has to be a logical value", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(fp), 1L)) {
+    stop(strwrap("The argument `fp` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  # checking inputs end
 
   # obtain asymptotic variance of whole beta vector
   avar <- beta_test_avar(robust2sls_object = robust2sls_object,
@@ -323,7 +502,7 @@ beta_t <- function(robust2sls_object, iteration, element, fp = FALSE) {
 #' estimates
 #'
 #' @param robust2sls_object An object of class \code{"robust2sls"}.
-#' @param iteration An integer specifying the iteration step for which
+#' @param iteration An integer > 0 specifying the iteration step for which
 #' parameters to calculate corrected standard errors.
 #' @param subset A vector of numeric indices or strings indicating which
 #' coefficients to include in the Hausman test. \code{NULL} uses the whole
@@ -346,6 +525,69 @@ beta_t <- function(robust2sls_object, iteration, element, fp = FALSE) {
 
 beta_hausman <- function(robust2sls_object, iteration, subset = NULL,
                          fp = FALSE) {
+
+  # test inputs correct
+  validate_robust2sls(robust2sls_object)
+
+  if (!is.numeric(iteration)) {
+    stop(strwrap("The argument `iteration` has to be numeric", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(iteration), 1L)) {
+    stop(strwrap("The argument `iteration` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!((iteration %% 1) == 0)) {
+    stop(strwrap("The argument `iteration` has to be an integer", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration >= 1)) {
+    stop(strwrap("The argument `iteration` must be >= 1", prefix = " ",
+                 initial = ""))
+  }
+  if (!(iteration <= robust2sls_object$cons$iterations$actual)) {
+    stop(strwrap("The argument `iteration` specifies a higher iteration
+                 than was actually done", prefix = " ",
+                 initial = ""))
+  }
+  if (!(is.null(subset) || is.numeric(subset) || is.character(subset))) {
+    stop(strwrap("The argument `subset` must be NULL or numeric or a string",
+                 prefix = " ", initial = ""))
+  }
+  if (!is.null(subset)) { # otherwise cannot evaluate others
+    if (is.numeric(subset)) {
+      if (any(!(subset %% 1 == 0))) {
+        stop(strwrap("The argument `subset` must only contain integers
+                    if numeric", prefix = " ", initial = ""))
+      }
+      n.coef <- length(robust2sls_object$model[[iteration + 1]]$coefficients)
+      if (any(subset > n.coef)) {
+        stop(strwrap("The argument `subset` contains indices larger than the
+                    number of coefficients in the model", prefix = " ",
+                    initial = ""))
+      }
+      if (any(subset <= 0)) {
+        stop(strwrap("The argument `subset` contains indices < 1",
+                    prefix = " ", initial = ""))
+      }
+    } # end if subset numeric
+    if (is.character(subset)) {
+      names.coef <- names(robust2sls_object$model[[iteration + 1]]$coefficients)
+      if (any(!(subset %in% names.coef))) {
+        stop(strwrap("The argument `subset` contains names that are not among the
+                    coefficients in the model", prefix = " ", initial = ""))
+      }
+    } # end if subset character
+  } # end if subset not null
+  if (!is.logical(fp)) {
+    stop(strwrap("The argument `fp` has to be a logical value", prefix = " ",
+                 initial = ""))
+  }
+  if (!identical(length(fp), 1L)) {
+    stop(strwrap("The argument `fp` has to be length 1", prefix = " ",
+                 initial = ""))
+  }
+  # checking inputs end
 
   # obtain asymptotic variance of whole beta vector
   avar <- beta_test_avar(robust2sls_object = robust2sls_object,
