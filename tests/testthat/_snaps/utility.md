@@ -3,6 +3,9 @@
     $call
     eval(code, test_env)
     
+    $verbose
+    [1] FALSE
+    
     $formula
     mpg ~ cyl + disp | cyl + wt
     NULL
@@ -68,6 +71,9 @@
     NULL
     
     $initial$shuffle_seed
+    NULL
+    
+    $initial$user
     NULL
     
     
@@ -99,6 +105,9 @@
     $call
     eval(code, test_env)
     
+    $verbose
+    [1] FALSE
+    
     $formula
     mpg ~ cyl + disp | cyl + wt
     NULL
@@ -164,6 +173,9 @@
     NULL
     
     $initial$shuffle_seed
+    NULL
+    
+    $initial$user
     NULL
     
     
@@ -194,6 +206,9 @@
 
     $call
     eval(code, test_env)
+    
+    $verbose
+    [1] FALSE
     
     $formula
     mpg ~ cyl + disp | cyl + wt
@@ -262,6 +277,9 @@
     $initial$shuffle_seed
     [1] 42
     
+    $initial$user
+    NULL
+    
     
     $convergence
     $convergence$criterion
@@ -290,6 +308,9 @@
 
     $call
     eval(code, test_env)
+    
+    $verbose
+    [1] FALSE
     
     $formula
     mpg ~ cyl + disp | cyl + wt
@@ -356,6 +377,9 @@
     [1] FALSE
     
     $initial$shuffle_seed
+    NULL
+    
+    $initial$user
     NULL
     
     

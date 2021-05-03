@@ -58,16 +58,17 @@ validate_robust2sls <- function(x) {
   if (!is.list(x$cons)) {
     stop(strwrap("Component $cons must be a list", prefix = " ", initial = ""))
   }
-  # test that sublist $cons has length 11
-  if (!identical(length(x$cons), 11L)) {
-    stop(strwrap("Component $cons must be a list with 11 elements",
+  # test that sublist $cons has length 12
+  if (!identical(length(x$cons), 12L)) {
+    stop(strwrap("Component $cons must be a list with 12 elements",
                  prefix = " ", initial = ""))
   }
   # test that sublist $cons has the correct named components
-  cons_name <- c("call", "formula", "data", "reference", "sign_level", "psi",
-                 "cutoff", "bias_corr", "initial", "convergence", "iterations")
+  cons_name <- c("call", "verbose", "formula", "data", "reference",
+                 "sign_level", "psi", "cutoff", "bias_corr", "initial",
+                 "convergence", "iterations")
   if (!identical(names(x$cons), cons_name)) {
-    stop(strwrap(paste(c("Component $cons must have 11 named components:",
+    stop(strwrap(paste(c("Component $cons must have 12 named components:",
                       cons_name), collapse = " ")), prefix = " ", initial = "")
   }
   # test that subsublist $cons$initial is a list
@@ -75,15 +76,16 @@ validate_robust2sls <- function(x) {
     stop(strwrap("Component $cons$initial must be a list", prefix = " ",
                  initial = ""))
   }
-  # test that subsublist $cons$initial has length 4
-  if (!identical(length(x$cons$initial), 4L)) {
-    stop(strwrap("Component $cons$initial must be a list with 4 elements",
+  # test that subsublist $cons$initial has length 5
+  if (!identical(length(x$cons$initial), 5L)) {
+    stop(strwrap("Component $cons$initial must be a list with 5 elements",
                  prefix = " ", initial = ""))
   }
   # test that subsublist $cons$initial has the correct named components
-  cons_initial_name <- c("estimator", "split", "shuffle", "shuffle_seed")
+  cons_initial_name <- c("estimator", "split", "shuffle", "shuffle_seed",
+                         "user")
   if (!identical(names(x$cons$initial), cons_initial_name)) {
-    stop(strwrap(paste(c("Component $cons$initial must have 4 named
+    stop(strwrap(paste(c("Component $cons$initial must have 5 named
                     components:", cons_initial_name), collapse = " ")),
                     prefix = " ", initial = "")
   }
@@ -179,13 +181,19 @@ validate_robust2sls <- function(x) {
                    have named components called 'm0', 'm1' etc.", prefix = " ",
                    initial = ""))
     }
-  } # end if axctual iterations >= 0
+  } # end if actual iterations >= 0
 
   # test that the elements are of the correct type or class
   if (!identical(typeof(x$cons$call), "language") &
       !identical(class(x$cons$call), "call")) {
     stop(strwrap("Component $cons$call must be a valid function call (class
                  'call' and type 'language')", prefix = " ", initial = ""))
+  }
+  if (!identical(typeof(x$cons$verbose), "logical") &
+      !identical(class(x$cons$verbose), "logical")) {
+    stop(strwrap("Component $cons$verbose must be a logical value",
+                 prefix = " ", initial = ""))
+
   }
   if (!identical(typeof(x$cons$formula), "language") &
       !identical(class(x$cons$formula), "formula")) {
@@ -294,6 +302,12 @@ validate_robust2sls <- function(x) {
       }
     } # end shuffle
   } # end saturated
+  if (!is.null(x$cons$initial$user)) {
+    if (!identical(class(x$cons$initial$user), "ivreg")) {
+      stop(strwrap("Component $cons$initial$user must be NULL or of class
+                   ivreg", prefix = " ", initial = ""))
+    }
+  }
   if (!is.null(x$cons$convergence$criterion) &
       !is.numeric(x$cons$convergence$criterion)) {
     stop(strwrap("Component $cons$convergence$criterion must either be NULL or
