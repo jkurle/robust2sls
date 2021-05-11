@@ -172,22 +172,22 @@ test_that("constants() works correctly", {
                   reference = "normal", sign_level = 0.05,
                   estimator = "robustified", split = 0.5, shuffle = FALSE,
                   shuffle_seed = 42, iter = 5, criterion = NULL,
-                  user_model = NULL, verbose = FALSE)
+                  user_model = NULL)
   c2 <- constants(call = call2, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "robustified", split = NULL, shuffle = NULL,
                   shuffle_seed = NULL, iter = 5, criterion = 0,
-                  user_model = NULL, verbose = FALSE)
+                  user_model = NULL)
   c3 <- constants(call = call3, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "saturated", split = 0.5, shuffle = TRUE,
                   shuffle_seed = 42, iter = 5, criterion = 0.5,
-                  user_model = NULL, verbose = FALSE)
+                  user_model = NULL)
   c4 <- constants(call = call4, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "saturated", split = 0.5, shuffle = FALSE,
                   shuffle_seed = 42, iter = "convergence", criterion = 1,
-                  user_model = NULL, verbose = FALSE)
+                  user_model = NULL)
 
   names <- c("call", "verbose", "formula", "data", "reference", "sign_level",
              "psi", "cutoff", "bias_corr", "initial", "convergence",

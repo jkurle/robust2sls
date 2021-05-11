@@ -297,7 +297,7 @@ nonmissing <- function(data, formula) {
 
 constants <- function(call, formula, data, reference = c("normal"), sign_level,
                       estimator, split, shuffle, shuffle_seed, iter,
-                      criterion, user_model, verbose) {
+                      criterion, user_model) {
 
   ref <- match.arg(reference) # throws error if not in selection
 
@@ -327,7 +327,7 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
     initial$shuffle_seed <- shuffle_seed
   }
 
-  cons <- list(call = call, verbose = verbose, formula = formula, data = data,
+  cons <- list(call = call, verbose = FALSE, formula = formula, data = data,
                reference = ref, sign_level = sign_level, psi = psi,
                cutoff = cutoff, bias_corr = bias_corr, initial = initial,
                convergence = convergence, iterations = iterations)

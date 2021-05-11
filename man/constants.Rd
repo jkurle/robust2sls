@@ -16,8 +16,7 @@ constants(
   shuffle_seed,
   iter,
   criterion,
-  user_model,
-  verbose
+  user_model
 )
 }
 \arguments{
