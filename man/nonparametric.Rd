@@ -36,6 +36,6 @@ vectors with the resampled indices.
 \description{
 \code{nonparametric} is used for nonparametric resampling, for example
 nonparametric case or error/residual resampling. The function takes a vector
-of indices that correspond to the index of observations that should be used
+of indices that correspond to the indices of observations that should be used
 in the resampling procedure.
 }
