@@ -787,7 +787,7 @@ ncores <- 6
 cl <- makeCluster(ncores)
 registerDoParallel(cl)
 clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
-bt1000 <- case_resampling(base, R = 10000, parallel = TRUE, coef = NULL, m = NULL)
+bt1000 <- case_resampling(base, R = 1000, parallel = TRUE, coef = NULL, m = NULL)
 end <- timestart <- proc.time()
 duration <- end - start
 print(duration)
@@ -815,6 +815,13 @@ stopCluster(cl)
 
 b1000 <- evaluate_boot(bt1000, "convergence")
 
+
+
+
+
+
+
+
 # convergence
 p <- generate_param(1, 1, 1, beta = c(2, 4), sigma = 2, mean_z = 1, cov_z = matrix(1), Sigma2_half = matrix(2), Omega2 = matrix(1/2), Pi = t(matrix(c(1, 2, 0, 3), nrow = 2)))
 d <- generate_data(p, 10000)
@@ -834,3 +841,30 @@ print(duration)
 stopCluster(cl)
 
 b10000 <- evaluate_boot(bt10000, "convergence")
+
+
+
+
+
+
+
+
+p <- generate_param(1, 1, 1, beta = c(2, 4), sigma = 2, mean_z = 1, cov_z = matrix(1), Sigma2_half = matrix(2), Omega2 = matrix(1/2), Pi = t(matrix(c(1, 2, 0, 3), nrow = 2)))
+d <- generate_data(p, 1000)
+data <- d$data
+base <- outlier_detection(data = data, formula = y ~ x2 | z2, sign_level = 0.05,
+                          initial_est = "robustified", iterations = 1, shuffle_seed = 5)
+set.seed(123)
+library(doParallel)
+ncores <- 6
+cl <- makeCluster(ncores)
+registerDoParallel(cl)
+clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
+bt1000 <- case_resampling(base, R = 10000, parallel = TRUE, coef = NULL, m = 1)
+end <- timestart <- proc.time()
+duration <- end - start
+print(duration)
+stopCluster(cl)
+
+b1000 <- evaluate_boot(bt1000, iterations = 1)
+sqrt(gauge_avar_mc("normal", 0.05, "robustified", 1, p = p, split = 0.5) / 1000)
