@@ -432,8 +432,15 @@ extract_boot <- function(r2sls_boot, iteration) {
 
 #' Evaluate bootstrap results
 #'
+#' @param r2sls_boot An object of \link{class} \code{"r2sls_boot"}, as returned
+#' by \link{case_resampling}.
+#' @param iterations An integer or numeric vector with values >= 0 specifying
+#' which bootstrap results to evaluate.
 #'
-#'
+#' @return \code{evaluate_boot} returns a data frame with the bootstrap and the
+#'   theoretical standard errors. Each row corresponds to a different iteration
+#'   step while each column refers to the parameters whose standard errors are
+#'   produced.
 #'
 #' @export
 
