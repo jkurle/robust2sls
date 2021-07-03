@@ -232,7 +232,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
     Pi_test <- Pi
     colnames(Pi) <- NULL
     rownames(Pi) <- NULL
-    if (!identical(matrix(Pi_test[1:dx1, 1:dx1]), diag(dx1))) {
+    if (!identical(as.matrix(Pi_test[1:dx1, 1:dx1]), diag(dx1))) {
       stop(strwrap("The dx1 by dx1 submatrix of Pi in the upper left corner
                    has to be the identity matrix because the exogenous
                    regressors can be exactly explained by themselves",
