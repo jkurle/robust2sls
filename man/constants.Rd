@@ -15,7 +15,8 @@ constants(
   shuffle,
   shuffle_seed,
   iter,
-  criterion
+  criterion,
+  user_model
 )
 }
 \arguments{
@@ -52,6 +53,13 @@ outlier-detection algorithm.}
 outlier-detection algorithm stops by comparing it to the sum of squared
 differences between the m- and (m-1)-step parameter estimates. NULL if
 convergence criterion should not be used.}
+
+\item{user_model}{A model object of \link{class} \link[AER]{ivreg}. Only
+required if argument \code{initial_est} is set to \code{"user"}, otherwise
+\code{NULL}.}
+
+\item{verbose}{A logical value whether progress during estimation should be
+reported.}
 }
 \value{
 Returns a list that stores values that are constant across the
@@ -59,6 +67,7 @@ estimation. It is used to fill parts of the \code{"robust2sls"} class object,
 which is returned by \link{outlier_detection}.
 \describe{
   \item{\code{$call}}{The captured function call.}
+  \item{\code{$verbose}}{The verbose argument (TRUE/FALSE).}
   \item{\code{$formula}}{The formula argument.}
   \item{\code{$data}}{The original data set.}
   \item{\code{$reference}}{The chosen reference distribution to classify
@@ -76,7 +85,8 @@ which is returned by \link{outlier_detection}.
   saturated), \code{$split} how the sample is split (\code{NULL} if argument
   not used), \code{$shuffle} whether the sample is shuffled before splitting
   (\code{NULL} if argument not used), \code{$shuffle_seed} the value of the
-  random seed (\code{NULL} if argument not used).}
+  random seed (\code{NULL} if argument not used), \code{$user} the
+  user-specified initial model (\code{NULL} if not used).}
   \item{\code{$convergence}}{A list storing information about the convergence
   of the outlier-detection algorithm: \code{$criterion} is the user-specified
   convergence criterion (\code{NULL} if argument not used),

@@ -83,16 +83,16 @@ test_that("validate_robust2sls() works correctly", {
   t <- test1
   t$cons$call <- NULL
   expect_error(validate_robust2sls(t),
-               "Component \\$cons must be a list with 11 elements")
+               "Component \\$cons must be a list with 12 elements")
 
   t <- z <- test1
   t$cons$ref <- t$cons$reference
   t$cons$reference <- NULL
   names(z$cons) <- NULL
   expect_error(validate_robust2sls(t),
-               "Component \\$cons must have 11 named components:")
+               "Component \\$cons must have 12 named components:")
   expect_error(validate_robust2sls(z),
-               "Component \\$cons must have 11 named components:")
+               "Component \\$cons must have 12 named components:")
 
   t <- test1
   t$cons$initial <- 1:10
@@ -103,18 +103,18 @@ test_that("validate_robust2sls() works correctly", {
   t$cons$initial$estimator <- NULL
   z$cons$initial$new <- 1:5
   expect_error(validate_robust2sls(t),
-               "Component \\$cons\\$initial must be a list with 4 elements")
+               "Component \\$cons\\$initial must be a list with 5 elements")
   expect_error(validate_robust2sls(z),
-               "Component \\$cons\\$initial must be a list with 4 elements")
+               "Component \\$cons\\$initial must be a list with 5 elements")
 
   t <- z <- test1
   t$cons$initial$est <- t$cons$initial$estimator
   t$cons$initial$estimator <- NULL
   names(z$cons$initial) <- NULL
   expect_error(validate_robust2sls(t),
-               "Component \\$cons\\$initial must have 4 named components:")
+               "Component \\$cons\\$initial must have 5 named components:")
   expect_error(validate_robust2sls(z),
-               "Component \\$cons\\$initial must have 4 named components:")
+               "Component \\$cons\\$initial must have 5 named components:")
 
   t <- test1
   t$cons$convergence <- 1:10

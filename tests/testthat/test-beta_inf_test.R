@@ -403,6 +403,15 @@ test_that("beta_t() produces the correct output", {
   expect_identical(t1[1,], tt1[1,])
   expect_identical(t1[1,], tt2[1,])
 
+  # test that errors raised if index addresses an NA value or different elements
+  t <- z <- model
+  z$model$m1$coefficients[[1]] <- NA # set intercept to NA
+  names(t$model$m1$coefficients) <- c("othername", "Education", "Infant.Mortality")
+  expect_error(beta_t(z, iteration = 1, element = 1),
+               "At least one of the coefficients is NA. Check elements.")
+  expect_error(beta_t(t, iteration = 1, element = 1),
+               "index selects different coefficients in the robust and full")
+
 })
 
 test_that("beta_hausman() throws the correct errors to invalid inputs", {
@@ -513,5 +522,14 @@ test_that("beta_hausman() produces the correct output", {
   expect_snapshot_output(h3)
   expect_snapshot_output(h4)
   expect_snapshot_output(h5)
+
+  # test that errors raised if index addresses an NA value or different elements
+  t <- z <- model
+  z$model$m1$coefficients[[1]] <- NA # set intercept to NA
+  names(t$model$m1$coefficients) <- c("othername", "Education", "Infant.Mortality")
+  expect_error(beta_hausman(z, iteration = 1, subset = c(1, 2)),
+               "At least one of the coefficients is NA. Check elements.")
+  expect_error(beta_hausman(t, iteration = 1, subset = c(1, 2)),
+               "index selects different coefficients in the robust and full")
 
 })

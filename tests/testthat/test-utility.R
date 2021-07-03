@@ -171,27 +171,32 @@ test_that("constants() works correctly", {
   c1 <- constants(call = call1, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "robustified", split = 0.5, shuffle = FALSE,
-                  shuffle_seed = 42, iter = 5, criterion = NULL)
+                  shuffle_seed = 42, iter = 5, criterion = NULL,
+                  user_model = NULL)
   c2 <- constants(call = call2, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "robustified", split = NULL, shuffle = NULL,
-                  shuffle_seed = NULL, iter = 5, criterion = 0)
+                  shuffle_seed = NULL, iter = 5, criterion = 0,
+                  user_model = NULL)
   c3 <- constants(call = call3, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "saturated", split = 0.5, shuffle = TRUE,
-                  shuffle_seed = 42, iter = 5, criterion = 0.5)
+                  shuffle_seed = 42, iter = 5, criterion = 0.5,
+                  user_model = NULL)
   c4 <- constants(call = call4, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "saturated", split = 0.5, shuffle = FALSE,
-                  shuffle_seed = 42, iter = "convergence", criterion = 1)
+                  shuffle_seed = 42, iter = "convergence", criterion = 1,
+                  user_model = NULL)
 
-  names <- c("call", "formula", "data", "reference", "sign_level", "psi",
-             "cutoff", "bias_corr", "initial", "convergence", "iterations")
+  names <- c("call", "verbose", "formula", "data", "reference", "sign_level",
+             "psi", "cutoff", "bias_corr", "initial", "convergence",
+             "iterations")
 
-  expect_equal(length(c1), 11)
-  expect_equal(length(c2), 11)
-  expect_equal(length(c3), 11)
-  expect_equal(length(c4), 11)
+  expect_equal(length(c1), 12)
+  expect_equal(length(c2), 12)
+  expect_equal(length(c3), 12)
+  expect_equal(length(c4), 12)
   expect_equal(class(c1), "list")
   expect_equal(class(c2), "list")
   expect_equal(class(c3), "list")
@@ -200,22 +205,22 @@ test_that("constants() works correctly", {
   expect_equal(names(c2), names)
   expect_equal(names(c3), names)
   expect_equal(names(c4), names)
-  expect_equal(length(c1$initial), 4)
-  expect_equal(length(c2$initial), 4)
-  expect_equal(length(c3$initial), 4)
-  expect_equal(length(c4$initial), 4)
+  expect_equal(length(c1$initial), 5)
+  expect_equal(length(c2$initial), 5)
+  expect_equal(length(c3$initial), 5)
+  expect_equal(length(c4$initial), 5)
   expect_equal(class(c1$initial), "list")
   expect_equal(class(c2$initial), "list")
   expect_equal(class(c3$initial), "list")
   expect_equal(class(c4$initial), "list")
   expect_equal(names(c1$initial),
-               c("estimator", "split", "shuffle", "shuffle_seed"))
+               c("estimator", "split", "shuffle", "shuffle_seed", "user"))
   expect_equal(names(c2$initial),
-               c("estimator", "split", "shuffle", "shuffle_seed"))
+               c("estimator", "split", "shuffle", "shuffle_seed", "user"))
   expect_equal(names(c3$initial),
-               c("estimator", "split", "shuffle", "shuffle_seed"))
+               c("estimator", "split", "shuffle", "shuffle_seed", "user"))
   expect_equal(names(c4$initial),
-               c("estimator", "split", "shuffle", "shuffle_seed"))
+               c("estimator", "split", "shuffle", "shuffle_seed", "user"))
   expect_equal(length(c1$convergence), 4)
   expect_equal(length(c2$convergence), 4)
   expect_equal(length(c3$convergence), 4)
@@ -250,6 +255,11 @@ test_that("constants() works correctly", {
   expect_equal(c2$formula, formula)
   expect_equal(c3$formula, formula)
   expect_equal(c4$formula, formula)
+
+  expect_equal(c1$verbose, FALSE)
+  expect_equal(c2$verbose, FALSE)
+  expect_equal(c3$verbose, FALSE)
+  expect_equal(c4$verbose, FALSE)
 
   expect_equal(c1$data, mtcars)
   expect_equal(c2$data, mtcars)
@@ -300,6 +310,11 @@ test_that("constants() works correctly", {
   expect_equal(c2$initial$shuffle_seed, NULL)
   expect_equal(c3$initial$shuffle_seed, 42)
   expect_equal(c4$initial$shuffle_seed, NULL)
+
+  expect_equal(c1$initial$user, NULL)
+  expect_equal(c2$initial$user, NULL)
+  expect_equal(c3$initial$user, NULL)
+  expect_equal(c4$initial$user, NULL)
 
   expect_equal(c1$iterations$setting, 5)
   expect_equal(c2$iterations$setting, 5)

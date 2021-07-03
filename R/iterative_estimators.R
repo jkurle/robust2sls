@@ -139,7 +139,9 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
                         reference = ref_dist, sign_level = sign_level,
                         estimator = initial_est, split = split,
                         shuffle = shuffle, shuffle_seed = shuffle_seed,
-                        iter = iterations, criterion = convergence_criterion)
+                        iter = iterations, criterion = convergence_criterion,
+                        user_model = user_model)
+  if (exists("verbose")) { constant$verbose <- verbose}
   out$cons <- constant
   out <- new_robust2sls(x = out) # turn into object of class "robust2sls"
   cutoff <- constant$cutoff
