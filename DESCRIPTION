@@ -43,3 +43,5 @@ Imports:
     foreach,
     utils
 VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)
