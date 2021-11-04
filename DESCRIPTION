@@ -3,7 +3,6 @@ Type: Package
 Title: Outlier Robust Two-Stage Least Squares Inference and Testing
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Jiao", "Xiyu", email = "xiyu.jiao@nuffield.ox.ac.uk", role = "aut"),
     person("Kurle", "Jonas", email = "mail@jonaskurle.com", 
     role = c("aut","cre"), comment = (ORCID = "0000-0003-2197-2012")))
 Description: An implementation of easy tools for outlier robust inference in
