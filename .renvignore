@@ -1,6 +1,7 @@
-^old_comparison$
-^data-raw$
-^DESCRIPTION
-
+old_comparison
+data-raw
+DESCRIPTION
+renv
+renv.lock
 
 
