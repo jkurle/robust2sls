@@ -528,6 +528,10 @@ generate_data <- function(parameters, n) {
 #' \code{shuffle == TRUE}.
 #' @param split A numeric value strictly between 0 and 1 that determines
 #' in which proportions the sample will be split.
+#' @param path A character string or \code{FALSE}. The simulation grid can save
+#' the individual results of each different entry in the grid to this
+#' location. Individual results not saved if argument set to \code{FALSE}.
+#' @param verbose A logical value whether any messages should be printed.
 #'
 #' @section Details:
 #' The following arguments can also be supplied as a vector of their type:
@@ -539,6 +543,11 @@ generate_data <- function(parameters, n) {
 #' For example, specifying \code{n = c(100, 1000)} and
 #' \code{sign_level = c(0.01, 0.05)} estimates four Monte Carlo experiments with
 #' the four possible combinations of the parameters.
+#'
+#' The \code{path} argument allows users to store the \code{M} replication
+#' results for all of the individual Monte Carlo simulations that are part of
+#' the grid. The results are saved both as \code{.Rds} and \code{.csv} files.
+#' The file name is indicative of the simulation setting.
 #'
 #' @return \code{mc_grid} returns a data frame with the results of the Monte
 #' Carlo experiments. Each row corresponds to a specific simulation setup. The
@@ -556,7 +565,7 @@ generate_data <- function(parameters, n) {
 
 mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                     initial_est, iterations, shuffle = FALSE, shuffle_seed,
-                    split = 0.5) {
+                    split = 0.5, path = FALSE, verbose = FALSE) {
 
   gamma <- sign_level
 
@@ -583,12 +592,16 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
   # start recording time
   timestart <- proc.time()
 
-  cat("Total number of Monte Carlo experiments: ", NROW(grid), "\n")
-  cat("Monte Carlo experiment: ")
+  if (verbose == TRUE) {
+    cat("Total number of Monte Carlo experiments: ", NROW(grid), "\n")
+    cat("Monte Carlo experiment: ")
+  }
 
   for (i in 1:NROW(grid)) {
 
-    cat(i, " ")
+    if (verbose == TRUE) {
+      cat(i, " ")
+    }
 
     # which parameters in this run?
     n <- grid$sample_size[[i]]
@@ -644,10 +657,23 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 
     } # end foreach
 
-    filename <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,sep = "")
-    filename_csv <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,".csv",sep = "")
-    saveRDS(results, file = filename)
-    utils::write.csv(results, file = filename_csv)
+    if (!(path == FALSE)) {
+
+      # path should not end with a separator
+      # use base R function file.path() because uses path separator for platform
+      ending <- substr(x = path, start = nchar(path), stop = nchar(path))
+      if (ending %in% c("/", "\\")) {
+        stop("Argument 'path' should not end with a path separator.")
+      }
+
+      filename <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,sep = "")
+      filename_csv <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,".csv",sep = "")
+      pathi <- file.path(path, filename)
+      pathi_csv <- file.path(path, filename_csv)
+      saveRDS(results, file = pathi)
+      utils::write.csv(results, file = pathi_csv)
+
+    }
 
     mean_gauge <- mean(results$gauge)
     var_gauge <- stats::var(results$gauge)
@@ -681,7 +707,9 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 
   timeend <- proc.time()
   duration <- timeend - timestart
-  print(duration)
+  if (verbose == TRUE) {
+    print(duration)
+  }
 
   return(results_all)
 
