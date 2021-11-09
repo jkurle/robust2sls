@@ -71,6 +71,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
   cll <- sys.call()
 
   # check that the suggested packages required "pracma" package is installed
+
   if (!requireNamespace("pracma", quietly = TRUE)) {
     stop("Package 'pracma' needed for this function to work.
          Please install it.",
