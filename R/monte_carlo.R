@@ -487,10 +487,12 @@ generate_data <- function(parameters, n) {
 }
 
 
-#' Monte Carlo simulations parameter grid 2
+#' Monte Carlo simulations parameter grid
 #'
-#' \code{mc_grid2} runs Monte Carlo simulations to assess the performance of
-#' simple proportion and count tests.
+#' WARNING: not for average user - function not completed yet
+#'
+#' \code{mc_grid} runs Monte Carlo simulations to assess the performance of
+#' the theory of the gauge, simple proportion tests, and count tests.
 #'
 #' @param M Number of replications.
 #' @param n Sample size for each replication.
@@ -544,14 +546,15 @@ generate_data <- function(parameters, n) {
 #' proportion of detected outliers ("mean_gauge") and their variance
 #' ("var_gauge") are being recorded. Moreover, the theoretical asymptotic
 #' variance ("avar") and the ratio of simulated to theoretical variance -
-#' adjusted by the sample size - are calculated ("var_ratio").
+#' adjusted by the sample size - are calculated ("var_ratio"). Furthermore,
+#' tentative results of size and power for the tests are calculated.
 #'
 #' @import doRNG
 #' @importFrom foreach %dopar% %do%
 #' @importFrom stats poisson.test
 #' @export
 
-mc_grid2 <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
+mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                     initial_est, iterations, shuffle = FALSE, shuffle_seed,
                     split = 0.5) {
 
