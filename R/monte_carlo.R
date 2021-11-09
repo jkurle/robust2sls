@@ -72,18 +72,18 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
 
   # check that the suggested packages required for this package are installed
   # those are: "expm", "Matrix", "matrixcalc", "pracma"
-  if (!requireNamespace("expm", quietly = TRUE)) {
-    stop("Package 'expm' needed for this function to work. Please install it.",
-         call. = FALSE)
-  }
-  if (!requireNamespace("Matrix", quietly = TRUE)) {
-    stop("Package 'Matrix' needed for this function to work. Please install
-         it.", call. = FALSE)
-  }
-  if (!requireNamespace("matrixcalc", quietly = TRUE)) {
-    stop("Package 'matrixcalc' needed for this function to work. Please install
-         it.", call. = FALSE)
-  }
+  # if (!requireNamespace("expm", quietly = TRUE)) {
+  #   stop("Package 'expm' needed for this function to work. Please install it.",
+  #        call. = FALSE)
+  # }
+  # if (!requireNamespace("Matrix", quietly = TRUE)) {
+  #   stop("Package 'Matrix' needed for this function to work. Please install
+  #        it.", call. = FALSE)
+  # }
+  # if (!requireNamespace("matrixcalc", quietly = TRUE)) {
+  #   stop("Package 'matrixcalc' needed for this function to work. Please install
+  #        it.", call. = FALSE)
+  # }
   if (!requireNamespace("pracma", quietly = TRUE)) {
     stop("Package 'pracma' needed for this function to work.
          Please install it.",
@@ -187,7 +187,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
                     prefix = " ", initial = ""))
       }
     }
-    if (!matrixcalc::is.positive.definite(cov_z)) {
+    if (!pracma::isposdef(cov_z)) {
       stop(strwrap("'cov_z' must be positive definite", prefix = " ",
                    initial = " "))
     }
@@ -201,7 +201,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
       stop(strwrap("'Sigma2_half' must be a square matrix with dimensions dx2",
                    prefix = " ", initial = ""))
     }
-    if (!matrixcalc::is.positive.definite(Sigma2_half)) {
+    if (!pracma::isposdef(Sigma2_half)) {
       stop(strwrap("'Sigma2_half' must be positive definite", prefix = " ",
                    initial = " "))
     }
@@ -225,7 +225,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
       stop(strwrap("'Pi' must have dimensions dz by dx", prefix = " ",
                    initial = ""))
     }
-    if (!identical(Matrix::rankMatrix(Pi)[[1]], as.integer(dx1+dx2))) {
+    if (!identical(pracma::Rank(Pi), as.integer(dx1+dx2))) {
       stop(strwrap("'Pi' must have full rank, i.e. dx1+dx2", prefix = " ",
                    initial = ""))
     }
@@ -255,7 +255,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
   if (is.null(Sigma2_half)) { # not specified, create random pd Sigma2 matrix
     Sigma2_half <- matrix(stats::runif(dx2^2)*2-1, ncol=dx2) # not symm
     Sigma2 <- Sigma2_half %*% t(Sigma2_half) # symm
-    Sigma2_half <- expm::expm(1/2 * expm::logm(Sigma2)) # symm
+    Sigma2_half <- pracma::sqrtm(Sigma2)$B # symm
     Sigma2_half <- round(Sigma2_half, digits=2) # to avoid numeric inaccuracies
     Sigma2 <- Sigma2_half %*% Sigma2_half
   } else { # user-specified
@@ -305,7 +305,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
       cov_z_half <- matrix(stats::runif((dz)^2)*2-1, ncol=(dz))
     }
     cov_z <- cov_z_half %*% t(cov_z_half) # var-cov matrix of instruments
-    cov_z_half <- expm::expm(1/2 * expm::logm(cov_z))
+    cov_z_half <- pracma::sqrtm(cov_z)$B
     cov_z_half <- round(cov_z_half, digits=2) # to avoid numeric inaccuracies
     cov_z <- cov_z_half %*% cov_z_half
   }
@@ -330,7 +330,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
     Pi1 <- t(matrix(stats::runif(dx2*dz1)*2-1, ncol=dz1))
     pd_half <- matrix(stats::runif(dx2*dx2)*2-1, ncol=dx2)
     pd <- pd_half %*% t(pd_half)
-    pd_half <- expm::expm(1/2 * expm::logm(pd))
+    pd_half <- pracma::sqrtm(pd)$B
     pd_half <- round(pd_half, digits=2)
     pd <- pd_half %*% pd_half
     # NOTE: if dz2 = dx2 then the next line creates an empty 0x0 matrix

@@ -21,26 +21,23 @@ Suggests:
     datasets,
     doFuture,
     doParallel,
-    expm,
     foreach,
     future,
     ggplot2,
     grDevices,
     knitr,
     MASS,
-    Matrix,
-    matrixcalc,
     parallel,
-    pracma,
     rmarkdown,
-    testthat
+    testthat,
+    utils
 RoxygenNote: 7.1.1
 Config/testthat/edition: 3
 Imports: 
     AER,
     doRNG,
-    stats,
-    utils
+    pracma,
+    stats
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
