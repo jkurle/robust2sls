@@ -3,5 +3,6 @@ data-raw
 DESCRIPTION
 renv
 renv.lock
+README.Rmd
 
 

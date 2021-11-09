@@ -17,29 +17,29 @@ BugReports: https://github.com/jkurle/r2sls/issues
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Suggests: 
-    ggplot2,
-    testthat,
+Suggests:
     datasets,
-    grDevices,
-    expm,
-    matrixcalc,
-    Matrix,
-    MASS,
-    pracma,
     doFuture,
-    knitr,
-    rmarkdown,
     doParallel,
+    expm,
+    foreach,
     future,
-    parallel
+    ggplot2,
+    grDevices,
+    knitr,
+    MASS,
+    Matrix,
+    matrixcalc,
+    parallel,
+    pracma,
+    rmarkdown,
+    testthat
 RoxygenNote: 7.1.1
 Config/testthat/edition: 3
 Imports: 
-    stats,
     AER,
     doRNG,
-    foreach,
+    stats,
     utils
 VignetteBuilder: knitr
 Depends: 
