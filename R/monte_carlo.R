@@ -253,9 +253,9 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
   # because they can be prefectly explained by themselves, so are nonrandom
   # hence when generating first stage errors, only dx2 elements are random
   if (is.null(Sigma2_half)) { # not specified, create random pd Sigma2 matrix
-    Sigma2_half <- matrix(stats::runif(dx2^2)*2-1, ncol=dx2)
-    Sigma2 <- Sigma2_half %*% t(Sigma2_half)
-    Sigma2_half <- expm::expm(1/2 * expm::logm(Sigma2))
+    Sigma2_half <- matrix(stats::runif(dx2^2)*2-1, ncol=dx2) # not symm
+    Sigma2 <- Sigma2_half %*% t(Sigma2_half) # symm
+    Sigma2_half <- expm::expm(1/2 * expm::logm(Sigma2)) # symm
     Sigma2_half <- round(Sigma2_half, digits=2) # to avoid numeric inaccuracies
     Sigma2 <- Sigma2_half %*% Sigma2_half
   } else { # user-specified
@@ -722,6 +722,8 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
   results_all <- rbind(results_all, res)
 
   } # end grid search
+
+  cat("\n")
 
   # might want to make clear that robustified is independent of split
   # but then turns all of them to characters, so leave at 0.5 for now
