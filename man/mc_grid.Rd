@@ -16,7 +16,9 @@ mc_grid(
   iterations,
   shuffle = FALSE,
   shuffle_seed,
-  split = 0.5
+  split = 0.5,
+  path = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -65,6 +67,12 @@ sample or \code{NULL}. Only used if \code{initial_est == "saturated"} and
 
 \item{split}{A numeric value strictly between 0 and 1 that determines
 in which proportions the sample will be split.}
+
+\item{path}{A character string or \code{FALSE}. The simulation grid can save
+the individual results of each different entry in the grid to this
+location. Individual results not saved if argument set to \code{FALSE}.}
+
+\item{verbose}{A logical value whether any messages should be printed.}
 }
 \value{
 \code{mc_grid} returns a data frame with the results of the Monte
@@ -73,11 +81,15 @@ columns record the simulation setup and its results. Currently, the average
 proportion of detected outliers ("mean_gauge") and their variance
 ("var_gauge") are being recorded. Moreover, the theoretical asymptotic
 variance ("avar") and the ratio of simulated to theoretical variance -
-adjusted by the sample size - are calculated ("var_ratio").
+adjusted by the sample size - are calculated ("var_ratio"). Furthermore,
+tentative results of size and power for the tests are calculated.
 }
 \description{
-\code{mc_grid} runs Monte Carlo simulations for a set of known population
-parameters and certain specifications of the outlier detection algorithm.
+WARNING: not for average user - function not completed yet
+}
+\details{
+\code{mc_grid} runs Monte Carlo simulations to assess the performance of
+the theory of the gauge, simple proportion tests, and count tests.
 }
 \section{Details}{
 
@@ -90,5 +102,10 @@ the initial estimator \code{"robustified"} is not affected by the argument
 For example, specifying \code{n = c(100, 1000)} and
 \code{sign_level = c(0.01, 0.05)} estimates four Monte Carlo experiments with
 the four possible combinations of the parameters.
+
+The \code{path} argument allows users to store the \code{M} replication
+results for all of the individual Monte Carlo simulations that are part of
+the grid. The results are saved both as \code{.Rds} and \code{.csv} files.
+The file name is indicative of the simulation setting.
 }
 
