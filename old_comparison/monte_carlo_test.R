@@ -763,7 +763,7 @@ identical(results1, results2) # not identical but almost
 library(waldo)
 compare(results1, results2) # original tibble saved as integer vector, df as double vector -> change tibble to df
 results1$num.nonmissing <- as.double(results1$num.nonmissing)
-identical(results1, results2) TRUE
+identical(results1, results2) # TRUE
 
 
 

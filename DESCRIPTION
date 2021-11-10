@@ -3,43 +3,40 @@ Type: Package
 Title: Outlier Robust Two-Stage Least Squares Inference and Testing
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Jiao", "Xiyu", email = "xiyu.jiao@nuffield.ox.ac.uk", role = "aut"),
     person("Kurle", "Jonas", email = "mail@jonaskurle.com", 
     role = c("aut","cre"), comment = (ORCID = "0000-0003-2197-2012")))
 Description: An implementation of easy tools for outlier robust inference in
     two-stage least squares (2SLS) models. The user specifies a reference 
     distribution against which observations are classified as outliers or not. 
     After removing the outliers, adjusted standard errors are automatically 
-    provided. Furthermore, several staistical tests for the false positive rate 
-    can be calculated. The outlier removing algorithm can be iterated a fixed 
-    number of times or until the procedure converges.
+    provided. Furthermore, several statistical tests for the false outlier 
+    detection rate can be calculated. The outlier removing algorithm can be 
+    iterated a fixed number of times or until the procedure converges.
 URL: https://github.com/jkurle/r2sls
 BugReports: https://github.com/jkurle/r2sls/issues
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
-Suggests: 
-    ggplot2,
-    testthat,
+Suggests:
     datasets,
-    grDevices,
-    expm,
-    matrixcalc,
-    Matrix,
-    MASS,
-    pracma,
     doFuture,
-    knitr,
-    rmarkdown,
     doParallel,
     future,
-    parallel
+    ggplot2,
+    grDevices,
+    knitr,
+    MASS,
+    parallel,
+    rmarkdown,
+    testthat,
+    utils
 RoxygenNote: 7.1.1
 Config/testthat/edition: 3
 Imports: 
-    stats,
     AER,
     doRNG,
     foreach,
-    utils
+    pracma,
+    stats
 VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)

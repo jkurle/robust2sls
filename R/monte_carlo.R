@@ -70,20 +70,8 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
   # capture function call
   cll <- sys.call()
 
-  # check that the suggested packages required for this package are installed
-  # those are: "expm", "Matrix", "matrixcalc", "pracma"
-  if (!requireNamespace("expm", quietly = TRUE)) {
-    stop("Package 'expm' needed for this function to work. Please install it.",
-         call. = FALSE)
-  }
-  if (!requireNamespace("Matrix", quietly = TRUE)) {
-    stop("Package 'Matrix' needed for this function to work. Please install
-         it.", call. = FALSE)
-  }
-  if (!requireNamespace("matrixcalc", quietly = TRUE)) {
-    stop("Package 'matrixcalc' needed for this function to work. Please install
-         it.", call. = FALSE)
-  }
+  # check that the suggested packages required "pracma" package is installed
+
   if (!requireNamespace("pracma", quietly = TRUE)) {
     stop("Package 'pracma' needed for this function to work.
          Please install it.",
@@ -187,7 +175,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
                     prefix = " ", initial = ""))
       }
     }
-    if (!matrixcalc::is.positive.definite(cov_z)) {
+    if (!pracma::isposdef(cov_z)) {
       stop(strwrap("'cov_z' must be positive definite", prefix = " ",
                    initial = " "))
     }
@@ -201,7 +189,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
       stop(strwrap("'Sigma2_half' must be a square matrix with dimensions dx2",
                    prefix = " ", initial = ""))
     }
-    if (!matrixcalc::is.positive.definite(Sigma2_half)) {
+    if (!pracma::isposdef(Sigma2_half)) {
       stop(strwrap("'Sigma2_half' must be positive definite", prefix = " ",
                    initial = " "))
     }
@@ -225,7 +213,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
       stop(strwrap("'Pi' must have dimensions dz by dx", prefix = " ",
                    initial = ""))
     }
-    if (!identical(Matrix::rankMatrix(Pi)[[1]], as.integer(dx1+dx2))) {
+    if (!identical(pracma::Rank(Pi), as.integer(dx1+dx2))) {
       stop(strwrap("'Pi' must have full rank, i.e. dx1+dx2", prefix = " ",
                    initial = ""))
     }
@@ -253,9 +241,9 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
   # because they can be prefectly explained by themselves, so are nonrandom
   # hence when generating first stage errors, only dx2 elements are random
   if (is.null(Sigma2_half)) { # not specified, create random pd Sigma2 matrix
-    Sigma2_half <- matrix(stats::runif(dx2^2)*2-1, ncol=dx2)
-    Sigma2 <- Sigma2_half %*% t(Sigma2_half)
-    Sigma2_half <- expm::expm(1/2 * expm::logm(Sigma2))
+    Sigma2_half <- matrix(stats::runif(dx2^2)*2-1, ncol=dx2) # not symm
+    Sigma2 <- Sigma2_half %*% t(Sigma2_half) # symm
+    Sigma2_half <- pracma::sqrtm(Sigma2)$B # symm
     Sigma2_half <- round(Sigma2_half, digits=2) # to avoid numeric inaccuracies
     Sigma2 <- Sigma2_half %*% Sigma2_half
   } else { # user-specified
@@ -305,7 +293,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
       cov_z_half <- matrix(stats::runif((dz)^2)*2-1, ncol=(dz))
     }
     cov_z <- cov_z_half %*% t(cov_z_half) # var-cov matrix of instruments
-    cov_z_half <- expm::expm(1/2 * expm::logm(cov_z))
+    cov_z_half <- pracma::sqrtm(cov_z)$B
     cov_z_half <- round(cov_z_half, digits=2) # to avoid numeric inaccuracies
     cov_z <- cov_z_half %*% cov_z_half
   }
@@ -330,7 +318,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
     Pi1 <- t(matrix(stats::runif(dx2*dz1)*2-1, ncol=dz1))
     pd_half <- matrix(stats::runif(dx2*dx2)*2-1, ncol=dx2)
     pd <- pd_half %*% t(pd_half)
-    pd_half <- expm::expm(1/2 * expm::logm(pd))
+    pd_half <- pracma::sqrtm(pd)$B
     pd_half <- round(pd_half, digits=2)
     pd <- pd_half %*% pd_half
     # NOTE: if dz2 = dx2 then the next line creates an empty 0x0 matrix
@@ -487,103 +475,12 @@ generate_data <- function(parameters, n) {
 }
 
 
-# function mc is not being used right now, use mc_grid instead
-#' Monte Carlo simulations
-#'
-#' NOTE: \code{mc} is currently not used. See \code{mc_grid} instead.
-#'
-#' \code{mc} runs Monte Carlo simulations for a set of known population
-#' parameters and a certain specification of the outlier detection algorithm.
-#'
-#' @param M Number of replications.
-#' @param n Sample size for each replication.
-#' @param seed Random seed for the iterations.
-#' @param parameters A list as created by \link{generate_param} that specifies
-#' the true model.
-#' @param formula A formula that specifies the 2SLS model to be estimated. The
-#' format has to follow \code{y ~ x1 + x2 | x1 + z2}, where \code{y} is the
-#' dependent variable, \code{x1} are the exogenous regressors, \code{x2} the
-#' endogenous regressors, and \code{z2} the outside instruments.
-#' @param ref_dist A character vector that specifies the reference distribution
-#' against which observations are classified as outliers. \code{"normal"} refers
-#' to the normal distribution.
-#' @param sign_level A numeric value between 0 and 1 that determines the cutoff
-#' in the reference distribution against which observations are judged as
-#' outliers or not.
-#' @param initial_est A character vector that specifies the initial estimator
-#' for the outlier detection algorithm. \code{"robustified"} means that the full
-#' sample 2SLS is used as initial estimator. \code{"saturated"} splits the
-#' sample into two parts and estimates a 2SLS on each subsample. The
-#' coefficients of one subsample are used to calculate residuals and determine
-#' outliers in the other subsample. \code{"user"} allows the user to specify a
-#' model based on which observations are classified as outliers.
-#' @param iterations An integer >= 0 that specifies how often the outlier
-#' detection algorithm is iterated and for which summary statistics will be
-#' calculated. The value \code{0} means that outlier classification based on the
-#' initial estimator is done.
-#' @param shuffle A logical value or \code{NULL}. Only used if
-#' \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled
-#' before creating the subsamples.
-#' @param shuffle_seed An integer value that will set the seed for shuffling the
-#' sample or \code{NULL}. Only used if \code{initial_est == "saturated"} and
-#' \code{shuffle == TRUE}.
-#' @param split A numeric value strictly between 0 and 1 that determines
-#' in which proportions the sample will be split.
-#'
-#' @import doRNG
-#' @importFrom foreach %dopar% %do%
-
-mc <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
-               initial_est, iterations, shuffle = FALSE, shuffle_seed,
-               split = 0.5) {
-
-  gamma <- sign_level
-
-    # start recording time
-    timestart <- proc.time()
-
-    # store results in a data frame
-    results <- foreach::foreach (m = (1:M), .combine = "rbind", .options.RNG = seed) %dorng% {
-
-      # draw random data of the 2SLS model, sample size n
-      d <- generate_data(parameters = parameters, n = n)
-
-      # run the model
-      model <- outlier_detection(data = d$data, formula = formula,
-                                 ref_dist = ref_dist, sign_level = sign_level,
-                                 initial_est = initial_est, user_model = NULL,
-                                 iterations = iterations,
-                                 convergence_criterion = NULL,
-                                 shuffle = shuffle, shuffle_seed = shuffle_seed,
-                                 split = split, verbose = FALSE)
-
-      # calculate metrics of interest
-      num.outliers <- sum((model$type[[(iterations + 1)]] == 0))
-      num.nonmissing <- n - sum((model$type[[(iterations + 1)]] == -1))
-      gauge <- num.outliers / num.nonmissing
-      data.frame(num.outliers, num.nonmissing, gauge)
-
-    }
-
-    timeend <- proc.time()
-    duration <- timeend - timestart
-    print(duration)
-
-    #future::plan("default") # reset to default
-
-    # mean(results$gauge)
-    # var(results$gauge)
-    # var(results$gauge) / (avar0/n)
-
-    return(results)
-
-}
-
-
 #' Monte Carlo simulations parameter grid
 #'
-#' \code{mc_grid} runs Monte Carlo simulations for a set of known population
-#' parameters and certain specifications of the outlier detection algorithm.
+#' WARNING: not for average user - function not completed yet
+#'
+#' \code{mc_grid} runs Monte Carlo simulations to assess the performance of
+#' the theory of the gauge, simple proportion tests, and count tests.
 #'
 #' @param M Number of replications.
 #' @param n Sample size for each replication.
@@ -619,6 +516,10 @@ mc <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 #' \code{shuffle == TRUE}.
 #' @param split A numeric value strictly between 0 and 1 that determines
 #' in which proportions the sample will be split.
+#' @param path A character string or \code{FALSE}. The simulation grid can save
+#' the individual results of each different entry in the grid to this
+#' location. Individual results not saved if argument set to \code{FALSE}.
+#' @param verbose A logical value whether any messages should be printed.
 #'
 #' @section Details:
 #' The following arguments can also be supplied as a vector of their type:
@@ -631,161 +532,10 @@ mc <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 #' \code{sign_level = c(0.01, 0.05)} estimates four Monte Carlo experiments with
 #' the four possible combinations of the parameters.
 #'
-#' @return \code{mc_grid} returns a data frame with the results of the Monte
-#' Carlo experiments. Each row corresponds to a specific simulation setup. The
-#' columns record the simulation setup and its results. Currently, the average
-#' proportion of detected outliers ("mean_gauge") and their variance
-#' ("var_gauge") are being recorded. Moreover, the theoretical asymptotic
-#' variance ("avar") and the ratio of simulated to theoretical variance -
-#' adjusted by the sample size - are calculated ("var_ratio").
-#'
-#' @import doRNG
-#' @importFrom foreach %dopar% %do%
-#' @export
-
-mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
-               initial_est, iterations, shuffle = FALSE, shuffle_seed,
-               split = 0.5) {
-
-  gamma <- sign_level
-
-  # robustified does not vary with split, shuffle, shuffle_seed
-  # so create two separate grids, then append them
-  # initialise as empty data frames
-  grid1 <- data.frame()
-  grid2 <- data.frame()
-
-  if ("robustified" %in% initial_est) {
-    grid1 <- expand.grid(list(sample_size = n, sign_level = sign_level,
-                              initial_est = "robustified", split = 0.5),
-                         stringsAsFactors = FALSE)
-  }
-  if ("saturated" %in% initial_est) {
-    grid2 <- expand.grid(list(sample_size = n, sign_level = sign_level,
-                              initial_est = "saturated", split = split),
-                         stringsAsFactors = FALSE)
-  }
-  grid <- rbind(grid1, grid2)
-
-  # storing all results
-  results_all <- data.frame()
-  # start recording time
-  timestart <- proc.time()
-
-  cat("Total number of Monte Carlo experiments: ", NROW(grid), "\n")
-  cat("Monte Carlo experiment: ")
-
-  for (i in 1:NROW(grid)) {
-
-  cat(i, " ")
-
-  # which parameters in this run?
-  n <- grid$sample_size[[i]]
-  sign_level <- grid$sign_level[[i]]
-  initial_est <- grid$initial_est[[i]]
-  split <- grid$split[[i]]
-
-  # store results in a data frame
-  results <- foreach::foreach(m = (1:M), .combine = "rbind",
-                              .options.RNG = seed) %dorng% {
-
-    # draw random data of the 2SLS model, sample size n
-    d <- generate_data(parameters = parameters, n = n)
-
-    # run the model
-    model <- outlier_detection(data = d$data, formula = formula,
-                               ref_dist = ref_dist, sign_level = sign_level,
-                               initial_est = initial_est, user_model = NULL,
-                               iterations = iterations,
-                               convergence_criterion = NULL,
-                               shuffle = shuffle, shuffle_seed = shuffle_seed,
-                               split = split, verbose = FALSE)
-
-    # calculate metrics of interest
-    num.outliers <- sum((model$type[[(iterations + 1)]] == 0))
-    num.nonmissing <- n - sum((model$type[[(iterations + 1)]] == -1))
-    gauge <- num.outliers / num.nonmissing
-    data.frame(M, n, sign_level, num.outliers, num.nonmissing, gauge)
-
-  } # end foreach
-
-  mean_gauge <- mean(results$gauge)
-  var_gauge <- stats::var(results$gauge)
-  avar <- gauge_avar_mc(ref_dist = ref_dist, sign_level = sign_level,
-                        initial_est = initial_est, iteration = iterations,
-                        parameters = parameters, split = split)
-  var_ratio <- (var_gauge / (avar/n))
-  res <- data.frame(M, n, sign_level, initial_est, split, iterations,
-                    mean_gauge, var_gauge, avar, var_ratio)
-
-
-  results_all <- rbind(results_all, res)
-
-  } # end grid search
-
-  # might want to make clear that robustified is independent of split
-  # but then turns all of them to characters, so leave at 0.5 for now
-  # results_all$split[results_all$initial_est == "robustified"] <- "NULL"
-
-  timeend <- proc.time()
-  duration <- timeend - timestart
-  print(duration)
-
-  return(results_all)
-
-}
-
-
-#' Monte Carlo simulations parameter grid 2
-#'
-#' \code{mc_grid2} runs Monte Carlo simulations to assess the performance of
-#' simple proportion and count tests.
-#'
-#' @param M Number of replications.
-#' @param n Sample size for each replication.
-#' @param seed Random seed for the iterations.
-#' @param parameters A list as created by \link{generate_param} that specifies
-#' the true model.
-#' @param formula A formula that specifies the 2SLS model to be estimated. The
-#' format has to follow \code{y ~ x1 + x2 | x1 + z2}, where \code{y} is the
-#' dependent variable, \code{x1} are the exogenous regressors, \code{x2} the
-#' endogenous regressors, and \code{z2} the outside instruments.
-#' @param ref_dist A character vector that specifies the reference distribution
-#' against which observations are classified as outliers. \code{"normal"} refers
-#' to the normal distribution.
-#' @param sign_level A numeric value between 0 and 1 that determines the cutoff
-#' in the reference distribution against which observations are judged as
-#' outliers or not.
-#' @param initial_est A character vector that specifies the initial estimator
-#' for the outlier detection algorithm. \code{"robustified"} means that the full
-#' sample 2SLS is used as initial estimator. \code{"saturated"} splits the
-#' sample into two parts and estimates a 2SLS on each subsample. The
-#' coefficients of one subsample are used to calculate residuals and determine
-#' outliers in the other subsample. \code{"user"} allows the user to specify a
-#' model based on which observations are classified as outliers.
-#' @param iterations An integer >= 0 that specifies how often the outlier
-#' detection algorithm is iterated and for which summary statistics will be
-#' calculated. The value \code{0} means that outlier classification based on the
-#' initial estimator is done.
-#' @param shuffle A logical value or \code{NULL}. Only used if
-#' \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled
-#' before creating the subsamples.
-#' @param shuffle_seed An integer value that will set the seed for shuffling the
-#' sample or \code{NULL}. Only used if \code{initial_est == "saturated"} and
-#' \code{shuffle == TRUE}.
-#' @param split A numeric value strictly between 0 and 1 that determines
-#' in which proportions the sample will be split.
-#'
-#' @section Details:
-#' The following arguments can also be supplied as a vector of their type:
-#' \code{n}, \code{sign_level}, \code{initial_est}, and \code{split}. This makes
-#' the function estimate all possible combinations of the arguments. Note that
-#' the initial estimator \code{"robustified"} is not affected by the argument
-#' \code{split} and hence is not varied in this case.
-#'
-#' For example, specifying \code{n = c(100, 1000)} and
-#' \code{sign_level = c(0.01, 0.05)} estimates four Monte Carlo experiments with
-#' the four possible combinations of the parameters.
+#' The \code{path} argument allows users to store the \code{M} replication
+#' results for all of the individual Monte Carlo simulations that are part of
+#' the grid. The results are saved both as \code{.Rds} and \code{.csv} files.
+#' The file name is indicative of the simulation setting.
 #'
 #' @return \code{mc_grid} returns a data frame with the results of the Monte
 #' Carlo experiments. Each row corresponds to a specific simulation setup. The
@@ -793,16 +543,17 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 #' proportion of detected outliers ("mean_gauge") and their variance
 #' ("var_gauge") are being recorded. Moreover, the theoretical asymptotic
 #' variance ("avar") and the ratio of simulated to theoretical variance -
-#' adjusted by the sample size - are calculated ("var_ratio").
+#' adjusted by the sample size - are calculated ("var_ratio"). Furthermore,
+#' tentative results of size and power for the tests are calculated.
 #'
 #' @import doRNG
 #' @importFrom foreach %dopar% %do%
 #' @importFrom stats poisson.test
 #' @export
 
-mc_grid2 <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
+mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                     initial_est, iterations, shuffle = FALSE, shuffle_seed,
-                    split = 0.5) {
+                    split = 0.5, path = FALSE, verbose = FALSE) {
 
   gamma <- sign_level
 
@@ -829,12 +580,16 @@ mc_grid2 <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
   # start recording time
   timestart <- proc.time()
 
-  cat("Total number of Monte Carlo experiments: ", NROW(grid), "\n")
-  cat("Monte Carlo experiment: ")
+  if (verbose == TRUE) {
+    cat("Total number of Monte Carlo experiments: ", NROW(grid), "\n")
+    cat("Monte Carlo experiment: ")
+  }
 
   for (i in 1:NROW(grid)) {
 
-    cat(i, " ")
+    if (verbose == TRUE) {
+      cat(i, " ")
+    }
 
     # which parameters in this run?
     n <- grid$sample_size[[i]]
@@ -890,10 +645,23 @@ mc_grid2 <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 
     } # end foreach
 
-    filename <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,sep = "")
-    filename_csv <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,".csv",sep = "")
-    saveRDS(results, file = filename)
-    utils::write.csv(results, file = filename_csv)
+    if (!(path == FALSE)) {
+
+      # path should not end with a separator
+      # use base R function file.path() because uses path separator for platform
+      ending <- substr(x = path, start = nchar(path), stop = nchar(path))
+      if (ending %in% c("/", "\\")) {
+        stop("Argument 'path' should not end with a path separator.")
+      }
+
+      filename <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,sep = "")
+      filename_csv <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,".csv",sep = "")
+      pathi <- file.path(path, filename)
+      pathi_csv <- file.path(path, filename_csv)
+      saveRDS(results, file = pathi)
+      utils::write.csv(results, file = pathi_csv)
+
+    }
 
     mean_gauge <- mean(results$gauge)
     var_gauge <- stats::var(results$gauge)
@@ -927,7 +695,9 @@ mc_grid2 <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 
   timeend <- proc.time()
   duration <- timeend - timestart
-  print(duration)
+  if (verbose == TRUE) {
+    print(duration)
+  }
 
   return(results_all)
 
