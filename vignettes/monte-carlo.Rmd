@@ -123,24 +123,34 @@ two cores, so the code limits the number of cores.
 ```{r}
 library(parallel)
 ncores <- min(max(detectCores() - 1, 1), 2)
-cl <- makeCluster(ncores)
 ```
 
-First, we use the [doParallel](https://CRAN.R-project.org/package=doParallel) package to run the simulations in parallel.
+First, we use the [doParallel](https://CRAN.R-project.org/package=doParallel)
+package to run the simulations in parallel. We need to export the functions that
+are used within `mc_grid()` explicitly.
 
 ```{r}
 library(doParallel)
+cl <- makeCluster(ncores)
 registerDoParallel(cl)
+
+# export libraries to all workers in the cluster
+invisible(clusterCall(cl = cl, function(x) .libPaths(x), .libPaths()))
 sim1 <- mc_grid(M = 100, n = c(100, 1000), seed = 42, parameters = p, 
                formula = p$setting$formula, ref_dist = "normal", 
                sign_level = 0.05, initial_est = "robustified", iterations = 0,
                shuffle = FALSE, shuffle_seed = 42, split = 0.5)
+stopCluster(cl)
 ```
 
-Next, we use the [doFuture](https://CRAN.R-project.org/package=doFuture) package for the parallel loop. Both implementations yield the same result.
+Next, we use the [doFuture](https://CRAN.R-project.org/package=doFuture) package
+for the parallel loop. With `registerDoFuture()`, it is not necessary to
+explicitly export variables or packages because it identifies them autmatically
+via static code inspection. Both implementations yield the same result.
 
 ```{r}
 library(doFuture)
+cl <- makeCluster(ncores)
 registerDoFuture()
 plan(cluster, workers = cl)
 sim2 <- mc_grid(M = 100, n = c(100, 1000), seed = 42, parameters = p, 
