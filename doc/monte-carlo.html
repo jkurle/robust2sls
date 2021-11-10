@@ -188,15 +188,15 @@ text-align: justify}
 </div>
 <div id="step-4-backend-for-execution" class="section level1">
 <h1>Step 4: Backend for execution</h1>
-<p>The functions <code>mc()</code> and <code>mc_grid()</code> are designed to be used either sequentially or in parallel. They are implemented using the <a href="https://cran.r-project.org/web/packages/foreach/index.html">foreach</a> package. To ensure that the results are reproducible across different ways of executing the simulations (sequentially or parallel; within the latter as multisession, multicore, cluster etc.), the package <a href="https://cran.r-project.org/web/packages/doRNG/index.html">doRNG</a> is used to execute the loops.</p>
-<p>The Monte Carlo functions leave the registration of the foreach adaptor to the end-user. For example, both the packages <a href="https://cran.r-project.org/web/packages/doParallel/index.html">doParallel</a> and <a href="https://cran.r-project.org/web/packages/doFuture/index.html">doFuture</a> can be used.</p>
+<p>The functions <code>mc()</code> and <code>mc_grid()</code> are designed to be used either sequentially or in parallel. They are implemented using the <a href="https://CRAN.R-project.org/package=foreach">foreach</a> package. To ensure that the results are reproducible across different ways of executing the simulations (sequentially or parallel; within the latter as multisession, multicore, cluster etc.), the package <a href="https://CRAN.R-project.org/package=doRNG">doRNG</a> is used to execute the loops.</p>
+<p>The Monte Carlo functions leave the registration of the foreach adaptor to the end-user. For example, both the packages <a href="https://CRAN.R-project.org/package=doParallel">doParallel</a> and <a href="https://CRAN.R-project.org/package=doFuture">doFuture</a> can be used.</p>
 <div id="parallel-loop" class="section level2">
 <h2>Parallel loop</h2>
 <p>We first consider running the Monte Carlo simulation in parallel. We set the number of cores and create the cluster. Note that CRAN only allows for at most two cores, so the code limits the number of cores.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(parallel)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ncores <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">max</span>(<span class="fu">detectCores</span>() <span class="sc">-</span> <span class="dv">1</span>, <span class="dv">1</span>), <span class="dv">2</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">&lt;-</span> <span class="fu">makeCluster</span>(ncores)</span></code></pre></div>
-<p>First, we use the <a href="https://cran.r-project.org/web/packages/doParallel/index.html">doParallel</a> package to run the simulations in parallel.</p>
+<p>First, we use the <a href="https://CRAN.R-project.org/package=doParallel">doParallel</a> package to run the simulations in parallel.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(doParallel)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: foreach</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: iterators</span></span>
@@ -205,7 +205,7 @@ text-align: justify}
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">formula =</span> p<span class="sc">$</span>setting<span class="sc">$</span>formula, <span class="at">ref_dist =</span> <span class="st">&quot;normal&quot;</span>, </span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">sign_level =</span> <span class="fl">0.05</span>, <span class="at">initial_est =</span> <span class="st">&quot;robustified&quot;</span>, <span class="at">iterations =</span> <span class="dv">0</span>,</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">shuffle =</span> <span class="cn">FALSE</span>, <span class="at">shuffle_seed =</span> <span class="dv">42</span>, <span class="at">split =</span> <span class="fl">0.5</span>)</span></code></pre></div>
-<p>Next, we use the <a href="https://cran.r-project.org/web/packages/doFuture/index.html">doFuture</a> package for the parallel loop. Both implementations yield the same result.</p>
+<p>Next, we use the <a href="https://CRAN.R-project.org/package=doFuture">doFuture</a> package for the parallel loop. Both implementations yield the same result.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(doFuture)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: future</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">registerDoFuture</span>()</span>
@@ -222,7 +222,7 @@ text-align: justify}
 </div>
 <div id="sequential-loop" class="section level2">
 <h2>Sequential loop</h2>
-<p>To run the loop sequentially, we can again use the <a href="https://cran.r-project.org/web/packages/doFuture/index.html">doFuture</a> package but this time setting a different plan. The <a href="https://cran.r-project.org/web/packages/doRNG/index.html">doRNG</a> ensures that the results are identical to those from the parallel loops.</p>
+<p>To run the loop sequentially, we can again use the <a href="https://CRAN.R-project.org/package=doFuture">doFuture</a> package but this time setting a different plan. The <a href="https://CRAN.R-project.org/package=doRNG">doRNG</a> ensures that the results are identical to those from the parallel loops.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(doFuture)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">registerDoFuture</span>()</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(sequential)</span>

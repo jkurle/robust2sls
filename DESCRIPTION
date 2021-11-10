@@ -9,14 +9,13 @@ Description: An implementation of easy tools for outlier robust inference in
     two-stage least squares (2SLS) models. The user specifies a reference 
     distribution against which observations are classified as outliers or not. 
     After removing the outliers, adjusted standard errors are automatically 
-    provided. Furthermore, several staistical tests for the false positive rate 
-    can be calculated. The outlier removing algorithm can be iterated a fixed 
-    number of times or until the procedure converges.
+    provided. Furthermore, several statistical tests for the false outlier 
+    detection rate can be calculated. The outlier removing algorithm can be 
+    iterated a fixed number of times or until the procedure converges.
 URL: https://github.com/jkurle/r2sls
 BugReports: https://github.com/jkurle/r2sls/issues
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
 Suggests:
     datasets,
     doFuture,

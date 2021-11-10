@@ -101,17 +101,17 @@ sample sizes of 50 and 100, respectively.
 # Step 4: Backend for execution
 The functions `mc()` and `mc_grid()` are designed to be used either sequentially
 or in parallel. They are implemented using the 
-[foreach](https://cran.r-project.org/web/packages/foreach/index.html) package.
+[foreach](https://CRAN.R-project.org/package=foreach) package.
 To ensure that the results are reproducible across different ways of executing 
 the simulations (sequentially or parallel; within the latter as multisession, 
 multicore, cluster etc.), the package 
-[doRNG](https://cran.r-project.org/web/packages/doRNG/index.html) is used to
+[doRNG](https://CRAN.R-project.org/package=doRNG) is used to
 execute the loops.
 
 The Monte Carlo functions leave the registration of the foreach adaptor to the
 end-user. For example, both the packages 
-[doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) and
-[doFuture](https://cran.r-project.org/web/packages/doFuture/index.html) can be
+[doParallel](https://CRAN.R-project.org/package=doParallel) and
+[doFuture](https://CRAN.R-project.org/package=doFuture) can be
 used.
 
 ## Parallel loop
@@ -126,7 +126,7 @@ ncores <- min(max(detectCores() - 1, 1), 2)
 cl <- makeCluster(ncores)
 ```
 
-First, we use the [doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) package to run the simulations in parallel.
+First, we use the [doParallel](https://CRAN.R-project.org/package=doParallel) package to run the simulations in parallel.
 
 ```{r}
 library(doParallel)
@@ -137,7 +137,7 @@ sim1 <- mc_grid(M = 100, n = c(100, 1000), seed = 42, parameters = p,
                shuffle = FALSE, shuffle_seed = 42, split = 0.5)
 ```
 
-Next, we use the [doFuture](https://cran.r-project.org/web/packages/doFuture/index.html) package for the parallel loop. Both implementations yield the same result.
+Next, we use the [doFuture](https://CRAN.R-project.org/package=doFuture) package for the parallel loop. Both implementations yield the same result.
 
 ```{r}
 library(doFuture)
@@ -155,7 +155,7 @@ identical(sim1, sim2)
 
 ## Sequential loop
 
-To run the loop sequentially, we can again use the [doFuture](https://cran.r-project.org/web/packages/doFuture/index.html) package but this time setting a different plan. The [doRNG](https://cran.r-project.org/web/packages/doRNG/index.html) ensures that the results are identical to those from the parallel loops.
+To run the loop sequentially, we can again use the [doFuture](https://CRAN.R-project.org/package=doFuture) package but this time setting a different plan. The [doRNG](https://CRAN.R-project.org/package=doRNG) ensures that the results are identical to those from the parallel loops.
 
 ```{r}
 library(doFuture)
