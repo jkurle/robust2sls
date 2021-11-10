@@ -21,7 +21,6 @@ Suggests:
     datasets,
     doFuture,
     doParallel,
-    foreach,
     future,
     ggplot2,
     grDevices,
@@ -36,6 +35,7 @@ Config/testthat/edition: 3
 Imports: 
     AER,
     doRNG,
+    foreach,
     pracma,
     stats
 VignetteBuilder: knitr
