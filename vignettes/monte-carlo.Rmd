@@ -117,11 +117,12 @@ used.
 ## Parallel loop
 
 We first consider running the Monte Carlo simulation in parallel. We set the
-number of cores and create the cluster.
+number of cores and create the cluster. Note that CRAN only allows for at most
+two cores, so the code limits the number of cores.
 
 ```{r}
 library(parallel)
-ncores <- detectCores() - 1
+ncores <- min(max(detectCores() - 1, 1), 2)
 cl <- makeCluster(ncores)
 ```
 
