@@ -124,8 +124,8 @@
 
 outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   initial_est = c("robustified", "saturated", "user"), user_model = NULL,
-  iterations = 1, convergence_criterion = NULL, shuffle = FALSE, shuffle_seed,
-  split = 0.5, verbose = FALSE) {
+  iterations = 1, convergence_criterion = NULL, shuffle = FALSE,
+  shuffle_seed = NULL, split = 0.5, verbose = FALSE) {
 
   # capture the original function call
   cll <- sys.call()

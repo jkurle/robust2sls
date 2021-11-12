@@ -1,0 +1,526 @@
+---
+title: "Introduction to the robust2sls Package"
+author: "Jonas Kurle"
+date: "12 November 2021"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to the robust2sls Package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+```{r, include = FALSE, echo = FALSE}
+Sys.setenv(LANGUAGE="en")
+```
+
+# Overview
+The *robust2sls* package provides an implementation of several algorithms for
+estimating outlier robust two-stage least squares (2SLS) models. All currently
+implemented algorithms are based on trimmed 2SLS, i.e. procedures where certain
+observations are identified as outliers and subsequently removed from the sample
+for re-estimation.
+
+The algorithms can be customized using a range of arguments. After estimation,
+corrected standard errors can be computed, which take false outlier detection
+into account. Moreover, the *robust2sls* package provides statistical tests for
+whether (a subset of) the parameters between the full and the trimmed sample are
+statistically significant. Currently, tests for the presence of outliers in the
+original sample are being developed and will be added in the future.
+
+# Model setup
+
+The model setting is a standard 2SLS setup. Suppose we have cross-sectional iid data $\{(y_{i}, x_{i}, z_{i})\}$, where $y_{i}$ is the outcome variable, $x_{i}$ is a vector of regressors of which some can be endogenous, and $z_{i}$ is a vector of instruments. The set of regressors can be decomposed into the exogenous regressors, $x_{1i}$, and the endogenous regressors $x_{2i}$. The total dimension of $x_{i}$ is then $d_{x} = d_{x_{1}} + d_{x_{2}}$. The instruments $z_{i}$ consist of both the exogenous regressors, $z_{1i} = x_{1i}$, and a set of excluded instruments $z_{2i}$. The total dimension of $z_{i}$ is then $d_{z} = d_{x_{1}} + d_{z_{2}}$.
+
+The structural equation is:
+
+$$y_{i} = x_{i}^{\prime}\beta + u_{i} = x_{1i}^{\prime}\beta_{1} + x_{2i}^{\prime}\beta_{2} + u_{i},$$
+
+where $\mathsf{E}(x_{1i}u_{i}) = 0_{d_{x_{1}}}$ for the exogenous regressors and $\mathsf{E}(x_{2i}u_{i}) \neq 0_{d_{x_{2}}}$ for the endogenous regressors.
+
+The first stage equation is:
+
+$$\begin{pmatrix} x_{1i} \\ x_{2i} \end{pmatrix} = \Pi^{\prime} \begin{pmatrix} x_{1i} \\ z_{2i} \end{pmatrix} + \begin{pmatrix} r_{1i} \\ r_{2i} \end{pmatrix} = \begin{pmatrix} I_{d_{x_{1}}} & 0_{d_{x_{1}} \times d_{z_{2}}} \\ \Pi_{1}^{\prime} & \Pi_{2}^{\prime} \end{pmatrix} \begin{pmatrix} x_{1i} \\ z_{2i} \end{pmatrix} + \begin{pmatrix} 0_{d_{x_{1}}} \\ r_{2i} \end{pmatrix}.$$
+The instruments $z_{i}$ are assumed to be valid and informative (rank condition fulfilled). The projection errors for the exogenous regressors $r_{1i}$ are zero because the exogenous regressors are included themselves as regressors and can therefore be fit perfectly.
+
+# Outlier detection algorithms
+
+The implemented algorithms are all forms of trimmed 2SLS. Their basic principle
+is as follows: First, an initial estimate of the model is obtained and the
+standardized residuals are calculated for each observation. These residuals are
+then compared against a reference distribution that the researchers has chosen.
+Observations with an absolute standardized residual beyond the cut-off value are
+classified as outliers and removed from the sample. Next, the model is
+re-estimated on the trimmed sample of non-outlying observations. The procedure
+can end after the initial classification or can be iterated.
+
+The workhorse command for different types of trimmed 2SLS algorithms in the
+*robust2sls* package is `outlier_detection()`. The algorithms differ in the
+following respect:
+
+* which initial estimator to use
+* how the sample is trimmed, which is governed by
+  * the reference distribution against which the errors are judged to be outliers or not
+  * the cut-off value $c$ that determines the size of the standardized errors beyond which observations are labeled as outliers and subsequently removed
+* how often the algorithm is iterated, which is represented by the parameter $m$.
+
+The following subsections briefly explain the different choices.
+
+## Initial estimator
+
+The initial estimator can be set in `outlier_detection()` through the
+`initial_est` argument. 
+
+The most common choice for the initial estimator is to simply use the 2SLS
+estimator based on the full sample. The corresponding argument is
+`"robustified"`.
+
+Alternatively, the initial estimation can consist of two estimations based on
+two sub-samples. For that purpose, the sample is partitioned into two parts and
+separate models are estimated on each of them. However, the estimates of **one**
+sub-sample are used to calculate the residuals of observations in the **other**
+sub-sample. For example, the estimates of sub-sample 2 are used to calculate the
+residuals in sub-sample 1: 
+$\widehat{u}_{i} = y_{i} - x_{i}^{\prime} \widehat{\beta}_{2}$ for observations
+$i$ in sub-sample 1 and where $\widehat{\beta}_{2}$ denotes the parameter
+estimate obtained from the second sub-sample. The corresponding argument is
+`"saturated"`. The `split` argument governs in what proportions the sample is
+split.
+
+Lastly, the user can specified their own initial estimator if the argument is
+set to `"user"`. In this case, a model object of class `ivreg` must be given to
+the `user_model` argument.
+
+## Reference distribution
+
+Whether an observation is an outlier, that means unusual in a certain sense, can
+only be decided relative to a certain distribution - the reference distribution.
+While it is unusual to obtain a value of 5 under the standard normal
+distribution, $\mathcal{N}(0,1)$, it is not unusual for a normal distribution
+with mean 5, $\mathcal{N}(5,1)$, or a uniform distribution over the interval
+$[2,6]$, $\mathcal{U}_{[2,6]}$. The reference distribution is the distribution of
+the standardized structural error, i.e. of $u_{i}/\sigma$.
+
+Currently, `outlier_detection()` only allows for the normal distribution, which
+is the distribution that is usually chosen in practice. The theoretical
+foundation allows for a broader range of distributions as long as they fulfil
+certain moment conditions but they are not yet implemented. The argument
+`ref_dist` therefore currently only accepts the value `"normal"`.
+
+## Cut-off or probability of outliers
+
+In addition to the reference distribution, the user needs to decide the cut-off
+value $c$, which is the value beyond which absolute standardized residuals are
+considered as unusual. This is linked to the probability of drawing a
+standardized residual larger than $c$ and therefore of classifying an
+observation as an outlier if there are actually no outliers in the sample (null
+hypothesis). The probability of falsely classifying an observation as an outlier
+when there are in fact none is called $\gamma_{c}$. Together with the reference
+distribution, it determines the cut-off value $c$.
+
+Suppose we assume a standard normal distribution of the standardized residuals.
+A cut-off value of $c = 1.96$ corresponds to a probability of false outlier
+detection of approximately 5%. Remember that we classify observations as
+outliers if the absolute value of the standardized residual is larger than the
+cu-off value $c$, i.e. for values that are larger than $1.96$ or smaller than
+$-1.96$. Instead, we could target the expected false outlier detection rate, for
+example by targeting 1%. Together with the reference distribution being standard
+normal, this yields a cut-off value of approximately $c = 2.58$.
+
+It is usually easier to think about the expected false outlier detection rate
+than the cut-off itself, which is why te user actually sets $\gamma_{c}$ in
+`outlier_detection()` using the argument `sign_level`. Remember that the
+expected false outlier detection rate refers to the scenario in which we have no
+actual outliers in the sample. This is our null hypothesis. It just happens that
+sometimes we have unusual draws of the errors, in accordance with the assumed
+reference distribution.
+
+## Iteration
+
+The procedure of classifying observations as outlier with subsequent
+re-estimation of the model can be applied iteratively. The argument `iterations`
+determines whether the algorithm is iterated (value $\geq 1$) or not (value
+$0$).
+
+The algorithm can also be iterated until convergence, that is until the selected
+sub-sample of non-outlying observations does not change anymore or until the
+parameter estimates do not change much anymore. For this, the argument
+`iterations` must be set to `"convergence"`. The user can also set the
+`convergence_criterion` argument, which is the stopping criterion. If the L2
+norm of the difference of the coefficients between iteration $m$ and $m-1$ is
+smaller than the criterion, the algorithm is terminated. The stopping criterion
+can also be used when `iterations` is set to a numeric value $m$, in which case
+the algorithm is iterated at most $m$ times but stops earlier if the stopping
+criterion is fulfilled.
+
+# Example without outliers
+
+In this section, we create a toy example using artificial data to showcase some
+of the different algorithms and statistical tests. We first load the necessary
+packages.
+
+```{r, echo = FALSE}
+library(r2sls)
+library(AER) # for 2sls regression
+```
+
+## Data generating process (DGP)
+
+We choose a simple example with an intercept, one endogenous regressor, and one
+excluded instrument. The function `generate_param()` takes the dimensions of the
+elements of the 2SLS model and returns a parameter setup that fulfills the
+assumption, such as the validity and informativeness of the instruments. Based
+on the random parameter setup, we also create some random artificial data
+`generate_data()`, with which we will work throughout this section. We create a
+sample of 1,000 data points.
+
+```{r}
+param <- generate_param(dx1 = 1, dx2 = 1, dz2 = 1, intercept = TRUE, beta = c(2,-1), sigma = 1, seed = 2)
+data_full <- generate_data(parameters = param, n = 1000)$data
+
+# have a look at the data
+head(data_full)
+```
+
+In reality, the researcher would only observe $y$, $x_{1}$ (intercept), $x_{2}$
+(endogenous), and $z_{2}$ (instrument). We have created data from the following
+structural equation:
+
+$$ y_{i} = x_{i}^{\prime} \beta + u_{i} = \beta_{1} x_{1} + \beta_{2} x_{2} + u_{i} = 2 - x_{2} + u_{i}.$$
+We can quickly check whether the assumptions are approximately fulfilled in our
+finite sample.
+
+```{r}
+cor(data_full$u, data_full$x2) # correlation for endogenous regressor
+cor(data_full$u, data_full$z2) # close to zero correlation for valid instrument
+cor(data_full$x2, data_full$z2) # correlation for informativeness
+```
+
+We can also compare 2SLS to OLS and see how close their estimates are to the
+true parameters $\beta^{\prime} = \begin{pmatrix} 2 & -1 \end{pmatrix}$.
+
+```{r}
+fml_ols <- y ~ x2
+ols <- lm(formula = fml_ols, data = data_full[, 1:3])
+print(ols$coefficients)
+
+fml_tsls <- y ~ x2 | z2
+tsls <- ivreg(formula = fml_tsls, data = data_full[, c(1:3, 6)])
+print(tsls$coefficients)
+```
+
+As expected, we clearly see that 2SLS provides estimates closer to the true DGP
+than OLS.
+
+## Outlier detection
+
+We have generated the data without any outliers in the sense that none of the
+structural errors has been drawn from a different distribution, such as a
+fat-tailed distribution. In our setting, the structural error follows a marginal
+normal distribution with variance $\sigma^{2} = 1$, such that 
+$u_{i} / \sigma \sim \mathcal{N}(0,1)$. So we are working under the null 
+hypothesis of no outliers.
+
+### Robustified 2SLS
+
+In our first example, we use the full sample 2SLS estimator as the initial
+estimator. Let us use an expected false outlier detection rate, $\gamma_{c}$, of
+1% so that we expect to find $1000 \times 0.01 = 10$ outliers even though there
+are technically none in the sample.
+
+```{r}
+# extract the variables we observe
+data <- data.frame(data_full[, c(1:3, 6)])
+
+# not iterating the algorithm
+robustified_0 <- outlier_detection(data = data, formula = fml_tsls, ref_dist = "normal",
+                                   sign_level = 0.01, initial_est = "robustified", iterations = 0)
+print(robustified_0)
+
+# iterating algorithm until convergence
+robustified_conv <- outlier_detection(data = data, formula = fml_tsls, ref_dist = "normal",
+                                      sign_level = 0.01, initial_est = "robustified", 
+                                      iterations = "convergence", convergence_criterion = 0)
+print(robustified_conv)
+
+```
+
+`outlier_detection()` returns an object of class `"robust2sls"`, which is a list
+that saves - inter alia - the settings of the algorithm, the 2SLS models for
+each iteration, and information on which observations were classified as
+outliers in which iteration. The `print()` method for this class summarizes the
+most important results.
+
+Both the non-iterated version that stops after the initial classification of
+outliers and the iterated version detect a bit more outliers than we would have
+expected (13 and 15, respectively). This can be due to the estimation error,
+i.e. we make the classification based on the residuals $\widehat{u}_{i}$ instead
+of the true errors $u_{i}$; or simply because there just happened to be more
+unusual draws of the error in our finite sample than expected. Since we are
+working with artificial data that we have created ourselves, we can actually
+check how many true errors were larger than $2.58$ or smaller than $-2.58$.
+
+```{r}
+sum(abs(data_full[, "u"]) > 2.58)
+```
+We find that there were 15 true errors that we would technically classify as
+outliers, of which we detected 13 or 15, respectively. We can also check whether
+we identified those observations with large true errors as outliers or whether
+we classified some observations as outliers that actually had true errors that
+were smaller than the cut-off. The `"robust2sls"` object stores a vector that
+records for each observation whether it has been classified as an outlier (`0`)
+or not (`1`) or whether the observation was not used in the estimation for other
+reasons, such as a missing value in $y$, $x$, or $z$ (`-1`). This information is
+stored for each iteration.
+
+```{r}
+# which observations had large true errors?
+large_true <- which(abs(data_full[, "u"]) > 2.58)
+
+# which observations were detected as outliers
+# both step 0 and iterated version had same starting point, so same initial classification
+large_detected_0 <- which(robustified_conv$type$m0 == 0)
+large_detected_3 <- which(robustified_conv$type$m3 == 0)
+
+# how much do the sets of true and detected large errors overlap?
+sum(large_detected_0 %in% large_true) # 12 of the 13 detected outliers really had large errors
+sum(large_detected_3 %in% large_true) # 13 of the 15 detected outliers really had large errors
+
+# which were wrongly detected as having large errors?
+ind <- large_detected_3[which(!(large_detected_3 %in% large_true))]
+# what were their true error values?
+data_full[ind, "u"] # relatively large values even though technically smaller than cut-off
+
+# which large true errors were missed?
+ind2 <- large_true[which(!(large_true %in% large_detected_3))]
+# what were their true error values?
+data_full[ind2, "u"] # one of them is close to the cut-off
+```
+All in all, the algorithm performed as expected.
+
+### Saturated 2SLS
+
+As explained above, the Saturated 2SLS estimator partitions the sample into two
+sub-samples and estimates separate models on each of them. The estimates of one
+sub-sample are then used to calculate residuals of observations in the other
+sub-sample. Again, the standardized residuals are compared to the chosen cut-off
+value. The `split` argument of `outlier_detection()` determines the relative
+size of each sub-sample. Especially with small samples, the split should be
+chosen such that none of the sub-samples is *too small*.
+
+```{r}
+# not iterating the algorithm
+saturated_0 <- outlier_detection(data = data, formula = fml_tsls, ref_dist = "normal",
+                                 sign_level = 0.01, initial_est = "saturated", iterations = 0,
+                                 split = 0.5)
+print(saturated_0)
+
+# iterating algorithm until convergence
+saturated_conv <- outlier_detection(data = data, formula = fml_tsls, ref_dist = "normal",
+                                    sign_level = 0.01, initial_est = "saturated", split = 0.5,
+                                    iterations = "convergence", convergence_criterion = 0)
+print(saturated_conv)
+
+# which did it find in final selection?
+large_detected_4 <- which(saturated_conv$type$m4 == 0)
+identical(large_detected_3, large_detected_4)
+```
+Saturated 2SLS finds 10 outliers initially, which is exactly what we would
+expect. Once we iterate, it also finds 15 outliers as Robustified 2SLS did. In
+fact, the converged Saturated 2SLS classified exactly the same observations as
+outliers as Robustified 2SLS.
+
+## Inference under Null hypothesis of no outliers
+
+After using the trimmed 2SLS algorithms, we want to do inference on the
+structural parameters. Since the procedures exclude observations with large
+errors, we would underestimate the error variance. [Jiao
+(2019)](https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view)
+has derived the correction factor for the estimator of the variance, which is
+both implemented in the algorithms for the selection and in the command
+`beta_inf()` function, which provides corrected standard errors. It returns both
+the original and corrected standard errors, t-statistics, and p-values. The
+corrected values are calculated under the null hypothesis of no outliers in the
+sample and are indicated by `H0`. We look at the results from the converged
+Robust 2SLS algorithm. The algorithm converged after 3 iterations, so we can
+either use the correction factor for iteration 3 or for the fixed point.
+
+```{r}
+# final model (iteration 3) without corrected standard errors
+summary(robustified_conv$model$m3)$coef
+
+# final model with corrected standard errors, m = 3 (subset of output)
+beta_inf(robustified_conv, iteration = 3, exact = TRUE)[, 1:5]
+
+# final model with corrected standard errors, m = "fixed point" / "converged" (subset of output)
+beta_inf(robustified_conv, iteration = 3, exact = TRUE, fp = TRUE)[, 1:5]
+```
+We can see that the standard inference leads to smaller standard errors,
+potentially overstating statistical significance because it ignores the
+preceding selection. For the corrected inference, there is almost no difference
+between using the correction factor for the exact iteration 3 or using the
+correction factor for the fixed point.
+
+Instead of corrected standard errors, the researcher could also use bootstrapped
+standard errors for inference. This should work well when there are actually no
+outliers but might be problematic when the sample is actually contaminated.
+Since outliers might be also be re-sampled, the obtained standard errors might
+be too large. This functionality is still under development.
+
+```{r}
+# use case re-sampling (to save time, use low iteration m = 1)
+resampling <- case_resampling(robustified_conv, R = 1000, m = 1)
+beta_boot <- evaluate_boot(resampling, iterations = 1)
+mat <- matrix(beta_boot[, 1:2], ncol = 1, nrow = 2) # show subset, put into column vector
+colnames(mat) <- "bootStd. Error"
+cbind(beta_inf(robustified_conv, iteration = 1, exact = TRUE)[, 1:3], mat)
+```
+## Testing for difference in coefficient estimates
+
+[Jiao
+(2019)](https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view)
+also devises a Hausman-type test for whether the difference between the full
+sample and trimmed sample coefficient estimates is statistically significant.
+The test can be used on subsets of the coefficient vector or the whole vector
+itself.
+
+```{r}
+# t-test on a single coefficient
+# testing difference in beta_2 (coef on endogenous regressor x2), m = 3
+beta_t(robustified_conv, iteration = 3, element = "x2")
+# testing difference in beta_2 (coef on endogenous regressor x2), m = "fixed point"
+beta_t(robustified_conv, iteration = 3, element = "x2", fp = TRUE)
+
+# Hausman-type test on whole coefficient vector, m = 3
+beta_hausman(robustified_conv, iteration = 3)
+```
+While the difference between $\widehat{\beta}_{2}^{(0) = full}$ and
+$\widehat{\beta}_{2}^{(3)}$ is statistically significant at the 5% significance
+level using a t-test, the difference is not significant at 5% when testing the
+whole coefficient vector.
+
+# Example with outliers
+
+## Data
+
+We now create a contaminated data set from the previous data. To ensure that we
+know where the outliers are, we populate the data with deterministic outliers,
+i.e. by setting their errors to a large value. We populate 3% of the sample with
+outliers, i.e. 30 outliers. The location of the outliers is random. The size of
+their errors is either -3.5 or 3.5, which is also determined randomly.
+
+```{r}
+data_full_contaminated <- data_full
+outlier_location <- sample(1:NROW(data_full), size = 0.03*NROW(data_full), replace = FALSE)
+outlier_size <- sample(c(-3.5, 3.5), size = length(outlier_location), replace = TRUE)
+
+# replace errors
+data_full_contaminated[outlier_location, "u"] <- outlier_size
+# replace value of dependent variable
+data_full_contaminated[outlier_location, "y"] <- data_full_contaminated[outlier_location, "y"] - 
+                                                  data_full[outlier_location, "u"] + 
+                                                  data_full_contaminated[outlier_location, "u"]
+
+# extract the data that researcher would actually collect
+data_cont <- data.frame(data_full_contaminated[, c(1:3, 6)])
+```
+
+## Outlier detection
+
+### Robustified 2SLS
+
+We use the same algorithm setup as before.
+
+```{r}
+# not iterating the algorithm
+robustified_0 <- outlier_detection(data = data_cont, formula = fml_tsls, ref_dist = "normal",
+                                   sign_level = 0.01, initial_est = "robustified", iterations = 0)
+print(robustified_0)
+
+# iterating algorithm until convergence
+robustified_conv <- outlier_detection(data = data_cont, formula = fml_tsls, ref_dist = "normal",
+                                      sign_level = 0.01, initial_est = "robustified", 
+                                      iterations = "convergence", convergence_criterion = 0)
+print(robustified_conv)
+```
+The initial selection finds 31 outliers, close to the 30 deterministic outliers
+that we put into the model. The algorithm converges after 7 iterations and
+ultimately classifies 45 observations as outliers. Again, this might well be
+because even under the normal distribution of the regular errors, we have draws
+that are beyond the cut-off.
+
+```{r}
+# which observations were classified as outliers?
+detected_0 <- which(robustified_conv$type$m0 == 0)
+detected_7 <- which(robustified_conv$type$m7 == 0)
+
+# overlap between deterministic outliers
+sum(outlier_location %in% detected_0) # initial found 28 of 30
+sum(outlier_location %in% detected_7) # converged found all 30 (+ 15 in addition)
+```
+Let us now compare the coefficient estimates between the contaminated full
+sample model and the Robustified 2SLS estimates.
+
+```{r}
+# full sample model
+tsls_cont <- ivreg(formula = fml_tsls, data = data_cont)
+tsls_cont$coefficients
+
+# updated estimates after initial classification and removal of outliers
+robustified_conv$model$m1$coefficients
+# updated estimates after convergence
+robustified_conv$model$m7$coefficients
+```
+In the present setting, the contamination of the model made the full sample
+estimates of the model slightly worse compared to the estimates based on the
+non-contaminated sample. The model that applies the algorithm once is closer to
+the true DGP values of
+$\beta^{\prime} = \begin{pmatrix} 2 & -1 \end{pmatrix}$ while the converged
+model performs similarly to the full sample estimates.
+
+We now also see a clearer difference between the corrected and the uncorrected
+standard errors. The corrected standard errors are close to the bootstrap
+standard error.
+
+```{r}
+# use case re-sampling (to save time, use low iteration m = 1)
+resampling <- case_resampling(robustified_conv, R = 1000, m = 1)
+beta_boot <- evaluate_boot(resampling, iterations = 1)
+mat <- matrix(beta_boot[, 1:2], ncol = 1, nrow = 2) # show subset, put into column vector
+colnames(mat) <- "bootStd. Error"
+cbind(beta_inf(robustified_conv, iteration = 1, exact = TRUE)[, 1:3], mat)
+```
+
+### Saturated 2SLS
+
+Finally, we also check the performance of the Saturated 2SLS algorithm.
+
+```{r}
+# not iterating the algorithm
+saturated_0 <- outlier_detection(data = data_cont, formula = fml_tsls, ref_dist = "normal",
+                                 sign_level = 0.01, initial_est = "saturated", iterations = 0,
+                                 split = 0.5)
+print(saturated_0)
+
+# iterating algorithm until convergence
+saturated_conv <- outlier_detection(data = data_cont, formula = fml_tsls, ref_dist = "normal",
+                                    sign_level = 0.01, initial_est = "saturated", split = 0.5,
+                                    iterations = "convergence", convergence_criterion = 0)
+print(saturated_conv)
+
+# which did it find in final selection?
+detected_7_sat <- which(saturated_conv$type$m7 == 0)
+identical(detected_7, detected_7_sat)
+```
+Saturated 2SLS leads to a similar outcome. In the initial step, one more
+observation is classified as an outlier compared to Robust 2SLS but their
+converged classification is again the same.
