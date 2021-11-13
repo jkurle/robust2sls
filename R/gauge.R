@@ -227,7 +227,7 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
       tau_4 <- 3
       varsigma_c_2 <- tau_c_2 / phi
       Omega <- parameters$params$Omega
-      w <- parameters$params$w
+      w <- Omega * tau_c_2
       zeta_c_minus <- 2 * Omega * c
       Sigma_half <- parameters$params$Sigma_half
       Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
@@ -285,7 +285,7 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
         tau_4 <- 3
         varsigma_c_2 <- tau_c_2 / phi
         Omega <- parameters$params$Omega
-        w <- parameters$params$w
+        w <- Omega * tau_c_2
         zeta_c_minus <- 2 * Omega * c
         Sigma_half <- parameters$params$Sigma_half
         Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
