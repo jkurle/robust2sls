@@ -597,9 +597,9 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
     initial_est <- grid$initial_est[[i]]
     split <- grid$split[[i]]
 
-    avar <- gauge_avar_mc(ref_dist = ref_dist, sign_level = sign_level,
-                          initial_est = initial_est, iteration = iterations,
-                          parameters = parameters, split = split)
+    avar <- gauge_avar(ref_dist = ref_dist, sign_level = sign_level,
+                       initial_est = initial_est, iteration = iterations,
+                       parameters = parameters, split = split)
 
     # store results in a data frame
     results <- foreach::foreach(m = (1:M), .combine = "rbind",
@@ -623,10 +623,10 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
       num.nonmissing <- n - sum((model$type[[(iterations + 1)]] == -1))
       gauge <- num.outliers / num.nonmissing
       p_est <- estimate_param_null(model)
-      avar_est <- gauge_avar_mc(ref_dist = ref_dist, sign_level = sign_level,
-                                initial_est = initial_est,
-                                iteration = iterations, parameters = p_est,
-                                split = split)
+      avar_est <- gauge_avar(ref_dist = ref_dist, sign_level = sign_level,
+                             initial_est = initial_est,
+                             iteration = iterations, parameters = p_est,
+                             split = split)
       prop_t <- abs((gauge - sign_level) / sqrt((avar_est / n)))
       prop_p <- 2 * stats::pnorm(prop_t, lower.tail = FALSE)
       prop_reject_001 <- (prop_p < 0.01)
