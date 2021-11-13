@@ -12,17 +12,14 @@
 #'
 #' @return \code{estimate_param_null} returns a list with a similar structure as
 #' the output of the Monte Carlo functionality \link{generate_param}. Hence, the
-#' resulting list can be given to the function \link{gauge_avar_mc} as argument
+#' resulting list can be given to the function \link{gauge_avar} as argument
 #' \code{parameters} to return an estimate of the asymptotic variance of the
 #' gauge.
 #'
 #' @section Warning:
 #' The function uses the full sample to estimate the moments. Therefore, they
 #' are only consistent under the null hypothesis of no outliers and estimators
-#' are likely to be inconsistent under the alternative. Also note that
-#' \link{gauge_avar_mc} will later be replaced by a generic function
-#' \code{gauge_avar} to make explicit that it is not only for true parameters
-#' from a Monte Carlo experiment.
+#' are likely to be inconsistent under the alternative.
 #' @export
 
 estimate_param_null <- function(robust2SLS_object) {
