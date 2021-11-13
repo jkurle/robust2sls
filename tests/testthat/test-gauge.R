@@ -269,7 +269,7 @@ test_that("gauge_avar() gives correct errors", {
   expect_error(gauge_avar("normal", 0.05, "nonexist", 1, p, 0.5),
                "'initial_est' must be one of the available initial estimators")
   expect_error(gauge_avar("normal", 0.05, "robustified", "1", p, 0.5),
-               "'iteration' must be a numeric vector of length 1")
+               "'iteration' must either be numeric or 'convergence'")
   expect_error(gauge_avar("normal", 0.05, "robustified", c(0,1), p, 0.5),
                "'iteration' must be a numeric vector of length 1")
   expect_error(gauge_avar("normal", 0.05, "saturated", -2, p, 0.5),

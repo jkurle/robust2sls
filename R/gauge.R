@@ -289,12 +289,12 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
         # might change in future if varrho() takes also "convergence" as value
         v <- varrho(sign_level = gamma, ref_dist = "normal",
                     iteration = 1)
-        vbb <- v$c$vbb_fp
-        vss <- v$c$vss_fp
-        vbxu <- v$c$vbxu_fp
-        vsuu <- v$c$vsuu_fp
-        vsb <- v$c$vsb_fp
-        vsxu <- v$c$vsxu_fp
+        vbb <- v$fp$vbb
+        vss <- v$fp$vss
+        vbxu <- v$fp$vbxu
+        vsuu <- v$fp$vsuu
+        vsb <- v$fp$vsb
+        vsxu <- v$fp$vsxu
 
         # here use explicit formula because is not too complicated (varrho then not even needed)
         term1 <- gamma*(1-gamma) + (c*f/(tau_c_2 - c*(c^2-varsigma_c_2)*f))^2 * (tau_c_4 - tau_c_2 * varsigma_c_2)
