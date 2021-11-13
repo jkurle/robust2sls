@@ -148,11 +148,11 @@ outlier <- function(robust2sls_object, obs) {
 #' sample into two parts and estimates a 2SLS on each subsample. The
 #' coefficients of one subsample are used to calculate residuals and determine
 #' outliers in the other subsample.
-#' @param iteration An integer >= 0 representing the iteration for which the
-#' outliers are calculated.
+#' @param iteration An integer >= 0 or character \code{"convergence"}
+#' representing the iteration for which the outliers are calculated. Uses the
+#' fixed point value if set to \code{"convergence"}.
 #' @param parameters A list created by \link{generate_param} or
-#' \link{estimate_param_null} that stores the true parameters of the data
-#' generating process.
+#' \link{estimate_param_null} that stores the parameters (true or estimated).
 #' @param split A numeric value strictly between 0 and 1 that determines
 #' in which proportions the sample will be split.
 #'
@@ -181,17 +181,23 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
                  reference distributions:", ref_dist_avail), collapse = " "),
                  prefix = " ", initial = ""))
   }
-  if (!is.numeric(iteration) | !identical(length(iteration), 1L)) {
-    stop(strwrap("Argument 'iteration' must be a numeric vector of length 1",
+  if (!(is.numeric(iteration) | identical(iteration, "convergence"))) {
+    stop(strwrap("Argument 'iteration' must either be numeric or 'convergence'",
                  prefix = " ", initial = ""))
   }
-  if (!(iteration %% 1 == 0)) {
-    stop(strwrap("Argument 'iteration' must be an integer", prefix = " ",
-                 initial = ""))
-  }
-  if (!(iteration >= 0)) {
-    stop(strwrap("Argument 'iteration' must be weakly larger than 0",
-                 prefix = " ", initial = ""))
+  if (is.numeric(iteration)) { # following tests only if numeric
+    if (!identical(length(iteration), 1L)) {
+      stop(strwrap("Argument 'iteration' must be a numeric vector of length 1",
+                   prefix = " ", initial = ""))
+    }
+    if (!(iteration %% 1 == 0)) {
+      stop(strwrap("Argument 'iteration' must be an integer", prefix = " ",
+                   initial = ""))
+    }
+    if (!(iteration >= 0)) {
+      stop(strwrap("Argument 'iteration' must be weakly larger than 0",
+                   prefix = " ", initial = ""))
+    }
   }
   if (!is.numeric(split) | !identical(length(split), 1L)) {
     stop(strwrap("Argument 'split' must be a numeric vector of length 1",
@@ -242,7 +248,7 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
           Mxx_tilde_inv %*% Sigma_half %*% (2*c*Omega - zeta_c_minus)
         avar <- term1 + term2 + term3 + term4
 
-      } else { # m >= 1
+      } else if (is.numeric(iteration)) { # m >= 1
 
         # calculate varrho parameters, already for iteration
         m <- iteration
@@ -256,19 +262,48 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
         vsxu <- v$c$vsxu
 
         # calculate asymptotic variance
-        term1 <- gamma*(1-gamma) - 2*c*f*vss*(1-gamma-tau_c_2) +
-          (c*f)^2 * vss^2 * (tau_4-1)
-        term2 <- (c*f)^2 * vsuu * (2*vss + vsuu) *
-          (tau_c_4 - tau_c_2 * varsigma_c_2)
-        term3 <- f^2 * t(((vbb + vsb)*zeta_c_minus - 2*c*vss*Omega)) %*%
-          Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*%
-          ((vbb+vsb)*zeta_c_minus - 2*c*vss*Omega)
-        term4 <- tau_c_2*f^2 * (vbxu + vsxu) *
-          t(((2*(vbb + vsb) + (vbxu + vsxu))*zeta_c_minus - 4*c*vss*Omega)) %*%
-          Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*% zeta_c_minus
-        avar <- term1 + term2 + term3 + term4
+        # to avoid mistakes, I don't implement the formula explicitly
+        # instead, use vector notation of gauge and get avar by inner product
 
-      } # end m >= 1
+        # vector with scalars
+        v1 <- rbind(1, -c*f*vss, -c*f*vsuu)
+        # vector with vectors
+        v21 <- t(vbb*zeta_c_minus + 2*c*f/tauc2*vsb*((c^2-varsigmac2)/2*zeta_c_minus - 2*c/psi*w) - 2*c*vss*Omega) %*% Sigma_half %*% Mxx_tilde_inv
+        v22 <- t(vbxu*zeta_c_minus + 2*c*(vsxu*((c^2-varsigmac2)/2*zeta_c_minus - 2*c/psi*w) - vsuu/psi*w)) %*% Sigma_half %*% Mxx_tilde_inv
+        v2 <- -f/sigma * t(cbind(v21, v22))
+
+        # var-cov matrices
+        var1 <- cbind(gamma*psi, psi-tauc2, 0)
+        var1 <- rbind(var1, cbind(psi-tauc2, tau4-1, tauc4-tauc2*varsigmac2))
+        var1 <- rbind(var1, cbind(0, tauc4-tauc2*varsigmac2, tauc4-tauc2*varsigmac2))
+        var2 <- cbind(Mxx_tilde_inv*sigma^2, Mxx_tilde_inv*sigma^2*tauc2)
+        var2 <- rbind(var2, cbind(Mxx_tilde_inv*sigma^2*tauc2, Mxx_tilde_inv*sigma^2*tauc2))
+
+        # calculate avar
+        avar <- t(v1) %*% var1 %*% v1 + t(v2) %*% var2 %*% v2
+
+      } else { # "convergence"
+
+        # varrho parameters
+        # varrho always also gives fixed point parameters so "iteration" does not matter
+        # might change in future if varrho() takes also "convergence" as value
+        v <- varrho(sign_level = gamma, ref_dist = "normal",
+                    iteration = 1)
+        vbb <- v$c$vbb_fp
+        vss <- v$c$vss_fp
+        vbxu <- v$c$vbxu_fp
+        vsuu <- v$c$vsuu_fp
+        vsb <- v$c$vsb_fp
+        vsxu <- v$c$vsxu_fp
+
+        # here use explicit formula because is not too complicated (varrho then not even needed)
+        term1 <- gamma*(1-gamma) + (c*f/(tau_c_2 - c*(c^2-varsigma_c_2)*f))^2 * (tau_c_4 - tau_c_2 * varsigma_c_2)
+        term2 <- tau_c_2 * (f / ((phi - 2*c*f)(tau_c_2 - c*(c^2-varsigma_c_2)*f)))^2 * t(2*c*w - tau_c_2*zeta_c_minus) %*%
+          Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*% (2*c*w - tau_c_2*zeta_c_minus)
+
+        avar <- term1 + term2
+
+      }
     } # end normal
   } else if (initial_est == "saturated") { # end robustified
     if (ref_dist == "normal") {

@@ -18,7 +18,7 @@ be excluded during the estimation of the moments.}
 \value{
 \code{estimate_param} returns a list with a similar structure as the
 output of the Monte Carlo functionality \link{generate_param}. Hence, the
-resulting list can be given to the function \link{gauge_avar_mc} as argument
+resulting list can be given to the function \link{gauge_avar} as argument
 \code{parameters} to return an estimate of the asymptotic variance of the
 gauge.
 }
@@ -34,8 +34,6 @@ errors \eqn{\Sigma}, the first stage parameter matrix \eqn{\Pi}, and more.
 
 The function is not yet fully developed. The estimators of the moments are
 at the moment not guaranteed to be consistent for the population moments. DO
-NOT USE! Also note that \link{gauge_avar_mc} will later be replaced by a
-generic function \code{gauge_avar} to make explicit that it is not only for
-true parameters from a Monte Carlo experiment.
+NOT USE!
 }
 
