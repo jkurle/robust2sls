@@ -500,8 +500,8 @@ test_that("varrho() works correctly", {
   vsuu <- (tau_c_2^iteration - (c*(c^2-varsigma_c_2)*f)^iteration) /
     (tau_c_2^iteration*(tau_c_2 - c*(c^2 - varsigma_c_2)*f))
 
-  vsb0 <- (2*c*f/phi) * c * (c^2 - varsigma_c_2) * f / tau_c_2
-  vsb1 <- 1 * (c * (c^2 - varsigma_c_2) * f / tau_c_2)^2
+  vsb0 <- (2*c*f/phi) * 1
+  vsb1 <- 1 * (c * (c^2 - varsigma_c_2) * f / tau_c_2)
   vsb <- vsb0 + vsb1
 
   vsxu0 <- (2*c*f/phi) * 1
@@ -509,7 +509,7 @@ test_that("varrho() works correctly", {
   vsxuterm1 <- (tau_c_2^iteration - (c*(c^2 - varsigma_c_2)*f)^iteration) /
     (tau_c_2^(iteration-1) * (tau_c_2 - c*(c^2 - varsigma_c_2)*f))
   vsxuterm2 <- vsxu0 + vsxu1
-  vsxuterm3 <- c*(c^2 - varsigma_c_2)*f / (tau_c_2*(phi - 2*c*f))
+  vsxuterm3 <- f / (tau_c_2*(phi - 2*c*f))
   vsxu <- (vsxuterm1 - vsxuterm2) * vsxuterm3
 
   res <- varrho(sign_level = sign_level, ref_dist = ref_dist,
