@@ -244,45 +244,45 @@ test_that("outlier() works correctly", {
 })
 
 
-test_that("gauge_avar_mc() gives correct errors", {
+test_that("gauge_avar() gives correct errors", {
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
 
-  expect_error(gauge_avar_mc(1, 0.05, "robustified", 0, p, 0.5),
+  expect_error(gauge_avar(1, 0.05, "robustified", 0, p, 0.5),
                "'ref_dist' must be a character vector of length 1")
-  expect_error(gauge_avar_mc(c("n", "n"), 0.05, "robustified", 0, p, 0.5),
+  expect_error(gauge_avar(c("n", "n"), 0.05, "robustified", 0, p, 0.5),
                "'ref_dist' must be a character vector of length 1")
-  expect_error(gauge_avar_mc("nonexist", 0.05, "robustified", 1, p, 0.4),
+  expect_error(gauge_avar("nonexist", 0.05, "robustified", 1, p, 0.4),
                "'ref_dist' must be one of the available reference")
-  expect_error(gauge_avar_mc("normal", "a", "saturated", 0, p, 0.4),
+  expect_error(gauge_avar("normal", "a", "saturated", 0, p, 0.4),
                "'sign_level' must be a numeric vector of length 1")
-  expect_error(gauge_avar_mc("normal", c(0.01, 0.05), "saturated", 0, p, 0.4),
+  expect_error(gauge_avar("normal", c(0.01, 0.05), "saturated", 0, p, 0.4),
                "'sign_level' must be a numeric vector of length 1")
-  expect_error(gauge_avar_mc("normal", -0.3, "robustified", 1, p, 0.5),
+  expect_error(gauge_avar("normal", -0.3, "robustified", 1, p, 0.5),
                "'sign_level' must lie strictly between 0 and 1")
-  expect_error(gauge_avar_mc("normal", 1.2, "robustified", 1, p, 0.5),
+  expect_error(gauge_avar("normal", 1.2, "robustified", 1, p, 0.5),
                "'sign_level' must lie strictly between 0 and 1")
-  expect_error(gauge_avar_mc("normal", 0.05, 2, 1, p, 0.5),
+  expect_error(gauge_avar("normal", 0.05, 2, 1, p, 0.5),
                "'initial_est' must be a character vector of length 1")
-  expect_error(gauge_avar_mc("normal", 0.05, c("a", "b"), 1, p, 0.5),
+  expect_error(gauge_avar("normal", 0.05, c("a", "b"), 1, p, 0.5),
                "'initial_est' must be a character vector of length 1")
-  expect_error(gauge_avar_mc("normal", 0.05, "nonexist", 1, p, 0.5),
+  expect_error(gauge_avar("normal", 0.05, "nonexist", 1, p, 0.5),
                "'initial_est' must be one of the available initial estimators")
-  expect_error(gauge_avar_mc("normal", 0.05, "robustified", "1", p, 0.5),
+  expect_error(gauge_avar("normal", 0.05, "robustified", "1", p, 0.5),
                "'iteration' must be a numeric vector of length 1")
-  expect_error(gauge_avar_mc("normal", 0.05, "robustified", c(0,1), p, 0.5),
+  expect_error(gauge_avar("normal", 0.05, "robustified", c(0,1), p, 0.5),
                "'iteration' must be a numeric vector of length 1")
-  expect_error(gauge_avar_mc("normal", 0.05, "saturated", -2, p, 0.5),
+  expect_error(gauge_avar("normal", 0.05, "saturated", -2, p, 0.5),
                "'iteration' must be weakly larger than 0")
-  expect_error(gauge_avar_mc("normal", 0.05, "saturated", 1.5, p, 0.5),
+  expect_error(gauge_avar("normal", 0.05, "saturated", 1.5, p, 0.5),
                "'iteration' must be an integer")
-  expect_error(gauge_avar_mc("normal", 0.01, "saturated", 0, p, "0.5"),
+  expect_error(gauge_avar("normal", 0.01, "saturated", 0, p, "0.5"),
                "'split' must be a numeric vector of length 1")
-  expect_error(gauge_avar_mc("normal", 0.01, "saturated", 0, p, c(0.2, 0.5)),
+  expect_error(gauge_avar("normal", 0.01, "saturated", 0, p, c(0.2, 0.5)),
                "'split' must be a numeric vector of length 1")
-  expect_error(gauge_avar_mc("normal", 0.01, "saturated", 0, p, -1.5),
+  expect_error(gauge_avar("normal", 0.01, "saturated", 0, p, -1.5),
                "'split' must lie strictly between 0 and 1")
-  expect_error(gauge_avar_mc("normal", 0.01, "saturated", 0, p, 2.4),
+  expect_error(gauge_avar("normal", 0.01, "saturated", 0, p, 2.4),
                "'split' must lie strictly between 0 and 1")
 
 })
