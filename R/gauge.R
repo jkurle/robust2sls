@@ -131,10 +131,10 @@ outlier <- function(robust2sls_object, obs) {
 
 }
 
-#' Asymptotic variance of gauge (MC)
+#' Asymptotic variance of gauge
 #'
-#' \code{gauge_avar_mc} calculates the asymptotic variance of the gauge for a
-#' given iteration using the true parameters from the Monte Carlo setup.
+#' \code{gauge_avar} calculates the asymptotic variance of the gauge for a
+#' given iteration using a given set of parameters (true or estimated).
 #'
 #' @param ref_dist A character vector that specifies the reference distribution
 #' against which observations are classified as outliers. \code{"normal"} refers
@@ -150,16 +150,17 @@ outlier <- function(robust2sls_object, obs) {
 #' outliers in the other subsample.
 #' @param iteration An integer >= 0 representing the iteration for which the
 #' outliers are calculated.
-#' @param parameters A list created by \link{generate_param} that stores the
-#' true parameters of the data-generating process.
+#' @param parameters A list created by \link{generate_param} or
+#' \link{estimate_param_null} that stores the true parameters of the data
+#' generating process.
 #' @param split A numeric value strictly between 0 and 1 that determines
 #' in which proportions the sample will be split.
 #'
 #' @export
 
-gauge_avar_mc <- function(ref_dist = c("normal"), sign_level,
-                          initial_est = c("robustified", "saturated"),
-                          iteration, parameters, split) {
+gauge_avar <- function(ref_dist = c("normal"), sign_level,
+                       initial_est = c("robustified", "saturated"),
+                       iteration, parameters, split) {
 
   if (!is.numeric(sign_level) | !identical(length(sign_level), 1L)) {
     stop(strwrap("Argument 'sign_level' must be a numeric vector of length 1",
@@ -226,6 +227,7 @@ gauge_avar_mc <- function(ref_dist = c("normal"), sign_level,
       tau_4 <- 3
       varsigma_c_2 <- tau_c_2 / phi
       Omega <- parameters$params$Omega
+      w <- parameters$params$w
       zeta_c_minus <- 2 * Omega * c
       Sigma_half <- parameters$params$Sigma_half
       Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
@@ -283,6 +285,7 @@ gauge_avar_mc <- function(ref_dist = c("normal"), sign_level,
         tau_4 <- 3
         varsigma_c_2 <- tau_c_2 / phi
         Omega <- parameters$params$Omega
+        w <- parameters$params$w
         zeta_c_minus <- 2 * Omega * c
         Sigma_half <- parameters$params$Sigma_half
         Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
