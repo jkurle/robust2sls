@@ -1,4 +1,4 @@
 library(testthat)
-library(r2sls)
+library(robust2sls)
 
-test_check("r2sls")
+test_check("robust2sls")
