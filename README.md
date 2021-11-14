@@ -27,7 +27,7 @@ devtools::install_github("jkurle/robust2sls")
 ## Introduction
 
 For a detailed introduction to the model framework, the different
-trimmed 2SLS algorithms, as well as examples, see the vignette *Introduction to
+trimmed 2SLS algorithms, and examples, see the vignette *Introduction to
 the robust2sls Package*.
 
 ``` r
