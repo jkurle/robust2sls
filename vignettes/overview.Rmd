@@ -169,7 +169,7 @@ of the different algorithms and statistical tests. We first load the necessary
 packages.
 
 ```{r, echo = FALSE}
-library(r2sls)
+library(robust2sls)
 library(AER) # for 2sls regression
 ```
 

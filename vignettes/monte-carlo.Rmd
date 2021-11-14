@@ -57,7 +57,7 @@ such that the structural error is uncorrelated to the instruments. Instead of
 random parameters, they can also - partly or fully - be specified by the user.
 
 ```{r}
-library(r2sls)
+library(robust2sls)
 p <- generate_param(dx1 = 3, dx2 = 2, dz2 = 3, intercept = TRUE, seed = 10)
 ```
 
@@ -77,7 +77,7 @@ instruments. $\Pi$ is the matrix of first stage coefficients.
 # Step 2: Outlier detection algorithm
 
 The workhorse command for different types of trimmed 2SLS algorithms in the
-*r2sls* package is `outlier_detection()`. The main decisions are
+*robust2sls* package is `outlier_detection()`. The main decisions are
 
 * which initial estimator to use
 * how the sample is trimmed, which is governed by
