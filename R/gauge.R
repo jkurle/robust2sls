@@ -161,7 +161,7 @@ outlier <- function(robust2sls_object, obs) {
 gauge_avar <- function(ref_dist = c("normal"), sign_level,
                        initial_est = c("robustified", "saturated"),
                        iteration, parameters, split) {
-
+browser()
   if (!is.numeric(sign_level) | !identical(length(sign_level), 1L)) {
     stop(strwrap("Argument 'sign_level' must be a numeric vector of length 1",
                  prefix = " ", initial = ""))
@@ -232,6 +232,7 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
       tau_2 <- 1
       tau_4 <- 3
       varsigma_c_2 <- tau_c_2 / phi
+      sigma <- parameters$params$sigma
       Omega <- parameters$params$Omega
       w <- Omega * tau_c_2
       zeta_c_minus <- 2 * Omega * c
@@ -268,16 +269,16 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
         # vector with scalars
         v1 <- rbind(1, -c*f*vss, -c*f*vsuu)
         # vector with vectors
-        v21 <- t(vbb*zeta_c_minus + 2*c*f/tauc2*vsb*((c^2-varsigmac2)/2*zeta_c_minus - 2*c/psi*w) - 2*c*vss*Omega) %*% Sigma_half %*% Mxx_tilde_inv
-        v22 <- t(vbxu*zeta_c_minus + 2*c*(vsxu*((c^2-varsigmac2)/2*zeta_c_minus - 2*c/psi*w) - vsuu/psi*w)) %*% Sigma_half %*% Mxx_tilde_inv
+        v21 <- t(vbb*zeta_c_minus + 2*c*f/tau_c_2*vsb*((c^2-varsigma_c_2)/2*zeta_c_minus - 2*c/phi*w) - 2*c*vss*Omega) %*% Sigma_half %*% Mxx_tilde_inv
+        v22 <- t(vbxu*zeta_c_minus + 2*c*(vsxu*((c^2-varsigma_c_2)/2*zeta_c_minus - 2*c/phi*w) - vsuu/phi*w)) %*% Sigma_half %*% Mxx_tilde_inv
         v2 <- -f/sigma * t(cbind(v21, v22))
 
         # var-cov matrices
-        var1 <- cbind(gamma*psi, psi-tauc2, 0)
-        var1 <- rbind(var1, cbind(psi-tauc2, tau4-1, tauc4-tauc2*varsigmac2))
-        var1 <- rbind(var1, cbind(0, tauc4-tauc2*varsigmac2, tauc4-tauc2*varsigmac2))
-        var2 <- cbind(Mxx_tilde_inv*sigma^2, Mxx_tilde_inv*sigma^2*tauc2)
-        var2 <- rbind(var2, cbind(Mxx_tilde_inv*sigma^2*tauc2, Mxx_tilde_inv*sigma^2*tauc2))
+        var1 <- cbind(gamma*phi, phi-tau_c_2, 0)
+        var1 <- rbind(var1, cbind(phi-tau_c_2, tau_4-1, tau_c_4-tau_c_2*varsigma_c_2))
+        var1 <- rbind(var1, cbind(0, tau_c_4-tau_c_2*varsigma_c_2, tau_c_4-tau_c_2*varsigma_c_2))
+        var2 <- cbind(Mxx_tilde_inv*sigma^2, Mxx_tilde_inv*sigma^2*tau_c_2)
+        var2 <- rbind(var2, cbind(Mxx_tilde_inv*sigma^2*tau_c_2, Mxx_tilde_inv*sigma^2*tau_c_2))
 
         # calculate avar
         avar <- t(v1) %*% var1 %*% v1 + t(v2) %*% var2 %*% v2

@@ -98,6 +98,9 @@ estimate_param_null <- function(robust2SLS_object) {
   u_std_hat <- full$residuals / full$sigma
   MRu_hat <- colMeans(R2_hat * u_std_hat)
 
+  # sigma
+  sigma <- full$sigma
+
   # estimate Omega2
   Omega2_hat <- Sigma2_half_inv_hat %*% MRu_hat
 
@@ -115,7 +118,7 @@ estimate_param_null <- function(robust2SLS_object) {
               formula = robust2SLS_object$cons$formula, dx1 = dx1, dx2 = dx2,
               dz2 = dz2)
   nam <- list(y = fml$y_var, x1 = fml$x1_var, x2 = fml$x2_var, z2 = fml$z2_var)
-  par <- list(Omega = Omega_hat, Sigma_half = Sigma_half_hat,
+  par <- list(sigma = sigma, Omega = Omega_hat, Sigma_half = Sigma_half_hat,
               Mxx_tilde_inv = Mxx_tilde_inv_hat)
   out <- list(params = par, setting = set, names = nam)
   return(out)
