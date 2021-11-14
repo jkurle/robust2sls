@@ -5,7 +5,7 @@
 
 <!-- badges: start -->
 
-![R-CMD-check](https://github.com/jkurle/r2sls/workflows/R-CMD-check/badge.svg?branch=master)
+![R-CMD-check](https://github.com/jkurle/robust2sls/workflows/R-CMD-check/badge.svg?branch=master)
 <!-- badges: end -->
 
 The goal of robust2sls is to provide easy-to-use tools for
@@ -21,7 +21,7 @@ You can install the development version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jkurle/r2sls")
+devtools::install_github("jkurle/robust2sls")
 ```
 
 ## Introduction
@@ -31,7 +31,7 @@ trimmed 2SLS algorithms, and examples, see the vignette *Introduction to
 the robust2sls Package*.
 
 ``` r
-utils::vignette("overview", package = "r2sls")
+utils::vignette("overview", package = "robust2sls")
 ```
 
 ## Note about Versions of Dependencies
