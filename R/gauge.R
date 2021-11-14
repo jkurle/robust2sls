@@ -161,7 +161,7 @@ outlier <- function(robust2sls_object, obs) {
 gauge_avar <- function(ref_dist = c("normal"), sign_level,
                        initial_est = c("robustified", "saturated"),
                        iteration, parameters, split) {
-browser()
+
   if (!is.numeric(sign_level) | !identical(length(sign_level), 1L)) {
     stop(strwrap("Argument 'sign_level' must be a numeric vector of length 1",
                  prefix = " ", initial = ""))
