@@ -14,7 +14,7 @@ outlier_detection(
   iterations = 1,
   convergence_criterion = NULL,
   shuffle = FALSE,
-  shuffle_seed,
+  shuffle_seed = NULL,
   split = 0.5,
   verbose = FALSE
 )

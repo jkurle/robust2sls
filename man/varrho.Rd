@@ -28,5 +28,5 @@ required for calculating the coefficients.
 }
 \description{
 \code{varrho} calculates the coefficients for the asymptotic variance of the
-gauge (false positive rate) for a specific iteration m >= 1.
+gauge (false outlier detection rate) for a specific iteration m >= 1.
 }

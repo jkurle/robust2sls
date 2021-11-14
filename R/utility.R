@@ -465,7 +465,7 @@ conv_diff <- function(current, counter) {
 #' Calculate varrho coefficients
 #'
 #' \code{varrho} calculates the coefficients for the asymptotic variance of the
-#' gauge (false positive rate) for a specific iteration m >= 1.
+#' gauge (false outlier detection rate) for a specific iteration m >= 1.
 #'
 #' @param sign_level A numeric value between 0 and 1 that determines the cutoff
 #' in the reference distribution against which observations are judged as
@@ -543,7 +543,7 @@ varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
       (tau_c_2^m * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))
     # varrho sigma beta
     vsb_fun <- function(m, l, c, f, phi, varsigma_c_2, tau_c_2) {
-      ele <- (2*c*f/phi)^(m-l-1) * ((c*(c^2 - varsigma_c_2)*f) / tau_c_2)^(l+1)
+      ele <- (2*c*f/phi)^(m-l-1) * ((c*(c^2 - varsigma_c_2)*f) / tau_c_2)^l
       return(ele)
     }
     vsb_parts <- vapply(X = 0:(m-1), FUN = vsb_fun, FUN.VALUE = double(1),
@@ -551,17 +551,9 @@ varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
                         tau_c_2 = tau_c_2)
     vsb <- sum(vsb_parts)
     # varrho sigma tildex u
-    vsxu_fun <- function(m, l, c, f, phi, varsigma_c_2, tau_c_2) {
-      ele <- (2*c*f/phi)^(m-l-1) * ((c*(c^2 - varsigma_c_2)*f) / tau_c_2)^l
-      return(ele)
-    }
-    vsxu_parts <- vapply(X = 0:(m-1), FUN = vsxu_fun, FUN.VALUE = double(1),
-                         m = m, c = c, f = f, phi = phi,
-                         varsigma_c_2 = varsigma_c_2, tau_c_2 = tau_c_2)
     vsxu <- (((tau_c_2^m - (c * (c^2 - varsigma_c_2) * f)^m) /
                 (tau_c_2^(m-1) * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))) -
-               sum(vsxu_parts)) * c * (c^2 - varsigma_c_2) * f /
-      (tau_c_2 * (phi - 2 * c * f))
+               vsb) * f / (tau_c_2 * (phi - 2 * c * f))
 
     # also provide fixed point elements
     vbb_fp <- 0
@@ -569,8 +561,7 @@ varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
     vss_fp <- 0
     vsuu_fp <- 1 / (tau_c_2 - c * (c^2 - varsigma_c_2) * f)
     vsb_fp <- 0
-    vsxu_fp <- c * (c^2 - varsigma_c_2) * f /
-      ((phi - 2 * c * f) * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))
+    vsxu_fp <- f / ((phi - 2 * c * f) * (tau_c_2 - c * (c^2 - varsigma_c_2) * f))
 
   } # end normal
 
@@ -605,16 +596,15 @@ varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
 #'
 #' @return \code{estimate_param} returns a list with a similar structure as the
 #' output of the Monte Carlo functionality \link{generate_param}. Hence, the
-#' resulting list can be given to the function \link{gauge_avar_mc} as argument
+#' resulting list can be given to the function \link{gauge_avar} as argument
 #' \code{parameters} to return an estimate of the asymptotic variance of the
 #' gauge.
 #'
 #' @section Warning:
 #' The function is not yet fully developed. The estimators of the moments are
 #' at the moment not guaranteed to be consistent for the population moments. DO
-#' NOT USE! Also note that \link{gauge_avar_mc} will later be replaced by a
-#' generic function \code{gauge_avar} to make explicit that it is not only for
-#' true parameters from a Monte Carlo experiment.
+#' NOT USE!
+#'
 #' @export
 
 estimate_param <- function(robust2SLS_object, iteration) {

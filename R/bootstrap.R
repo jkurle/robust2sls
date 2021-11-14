@@ -471,9 +471,9 @@ evaluate_boot <- function(r2sls_boot, iterations) {
 
     # estimate parameters for theoretical avar of gauge; then estimate avar
     p_est <- estimate_param_null(r2sls_boot$original)
-    avar_est <- gauge_avar_mc(ref_dist = ref_dist, sign_level = sign_level,
-                              initial_est = initial_est, iteration = i,
-                              parameters = p_est, split = split)
+    avar_est <- gauge_avar(ref_dist = ref_dist, sign_level = sign_level,
+                           initial_est = initial_est, iteration = i,
+                           parameters = p_est, split = split)
 
     sd$theory_gauge <- sqrt(avar_est / n)
     sd$m <- i

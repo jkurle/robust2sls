@@ -8,7 +8,7 @@ knitr::opts_chunk$set(
 Sys.setenv(LANGUAGE="en")
 
 ## -----------------------------------------------------------------------------
-library(r2sls)
+library(robust2sls)
 p <- generate_param(dx1 = 3, dx2 = 2, dz2 = 3, intercept = TRUE, seed = 10)
 
 ## -----------------------------------------------------------------------------

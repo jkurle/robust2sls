@@ -1,7 +1,7 @@
-Package: r2sls
+Package: robust2sls
 Type: Package
 Title: Outlier Robust Two-Stage Least Squares Inference and Testing
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person("Kurle", "Jonas", email = "mail@jonaskurle.com", 
     role = c("aut","cre"), comment = (ORCID = "0000-0003-2197-2012")))
@@ -12,8 +12,8 @@ Description: An implementation of easy tools for outlier robust inference in
     provided. Furthermore, several statistical tests for the false outlier 
     detection rate can be calculated. The outlier removing algorithm can be 
     iterated a fixed number of times or until the procedure converges.
-URL: https://github.com/jkurle/r2sls
-BugReports: https://github.com/jkurle/r2sls/issues
+URL: https://github.com/jkurle/robust2sls
+BugReports: https://github.com/jkurle/robust2sls/issues
 License: GPL-3
 Encoding: UTF-8
 Suggests:
