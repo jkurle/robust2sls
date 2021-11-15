@@ -18,7 +18,7 @@ parameters to calculate corrected standard errors.}
 }
 \value{
 \code{beta_test_avar} returns a dx by dx variance-covariance matrix of
-the difference between the robust and full sample strucutral parameter
+the difference between the robust and full sample structural parameter
 estimates of the 2SLS model.
 }
 \description{

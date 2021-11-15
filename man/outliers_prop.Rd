@@ -18,6 +18,6 @@ iteration as determined by the outlier-detection algorithm.
 }
 \description{
 \code{outliers_prop} calculates the proportion of outliers relative to all
-non-missing observations in the full sample from a \code{"robust2sls"} obejct
+non-missing observations in the full sample from a \code{"robust2sls"} object
 for a given iteration.
 }
