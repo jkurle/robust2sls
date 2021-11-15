@@ -255,7 +255,7 @@ beta_inf <- function(robust2sls_object, iteration = 1, exact = FALSE,
 #' (TRUE) or the exact iteration asymptotic variance should be computed (FALSE).
 #'
 #' @return \code{beta_test_avar} returns a dx by dx variance-covariance matrix of
-#' the difference between the robust and full sample strucutral parameter
+#' the difference between the robust and full sample structural parameter
 #' estimates of the 2SLS model.
 #'
 #' @details

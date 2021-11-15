@@ -51,7 +51,7 @@ outliers <- function(robust2sls_object, iteration) {
 #' Proportion of outliers
 #'
 #' \code{outliers_prop} calculates the proportion of outliers relative to all
-#' non-missing observations in the full sample from a \code{"robust2sls"} obejct
+#' non-missing observations in the full sample from a \code{"robust2sls"} object
 #' for a given iteration.
 #'
 #' @inheritParams outliers
@@ -103,7 +103,7 @@ outliers_prop <- function(robust2sls_object, iteration) {
 #' @param obs An index (row number) of an observation
 #'
 #' @return \code{outlier} returns a vector that contains the 'type' value for
-#' the given obsverations across the different iterations. There are three
+#' the given observations across the different iterations. There are three
 #' possible values: 1 if the observations is judged to be an outlier, 0 if not,
 #' and -1 if any of its x, y, or z values required for estimation is missing.
 #'
