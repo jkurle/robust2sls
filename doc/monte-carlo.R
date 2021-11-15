@@ -7,8 +7,8 @@ knitr::opts_chunk$set(
 ## ---- include = FALSE, echo = FALSE-------------------------------------------
 Sys.setenv(LANGUAGE="en")
 
-## ---- echo = FALSE------------------------------------------------------------
-utils::vignette("overview", package = "robust2sls")
+## ---- eval = FALSE------------------------------------------------------------
+#  utils::vignette("overview", package = "robust2sls")
 
 ## -----------------------------------------------------------------------------
 library(robust2sls)

@@ -41,7 +41,7 @@ See the vignette *Introduction to the robust2sls Package* for more details on
 the model setup (step 1) and the different algorithms (step 2) that are
 implemented.
 
-```{r, echo = FALSE}
+```{r, eval = FALSE}
 utils::vignette("overview", package = "robust2sls")
 ```
 

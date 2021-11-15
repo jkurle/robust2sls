@@ -131,13 +131,13 @@ Suppose we assume a standard normal distribution of the standardized residuals.
 A cut-off value of $c = 1.96$ corresponds to a probability of false outlier
 detection of approximately 5%. Remember that we classify observations as
 outliers if the absolute value of the standardized residual is larger than the
-cu-off value $c$, i.e. for values that are larger than $1.96$ or smaller than
+cut-off value $c$, i.e. for values that are larger than $1.96$ or smaller than
 $-1.96$. Instead, we could target the expected false outlier detection rate, for
 example by targeting 1%. Together with the reference distribution being standard
 normal, this yields a cut-off value of approximately $c = 2.58$.
 
 It is usually easier to think about the expected false outlier detection rate
-than the cut-off itself, which is why te user actually sets $\gamma_{c}$ in
+than the cut-off itself, which is why the user actually sets $\gamma_{c}$ in
 `outlier_detection()` using the argument `sign_level`. Remember that the
 expected false outlier detection rate refers to the scenario in which we have no
 actual outliers in the sample. This is our null hypothesis. It just happens that
@@ -371,10 +371,7 @@ between using the correction factor for the exact iteration 3 or using the
 correction factor for the fixed point.
 
 Instead of corrected standard errors, the researcher could also use bootstrapped
-standard errors for inference. This should work well when there are actually no
-outliers but might be problematic when the sample is actually contaminated.
-Since outliers might be also be re-sampled, the obtained standard errors might
-be too large. This functionality is still under development.
+standard errors for inference. This functionality is still under development.
 
 ```{r}
 # use case re-sampling (to save time, use low iteration m = 1)
@@ -464,7 +461,7 @@ detected_0 <- which(robustified_conv$type$m0 == 0)
 detected_7 <- which(robustified_conv$type$m7 == 0)
 
 # overlap between deterministic outliers
-sum(outlier_location %in% detected_0) # initial found 28 of 30
+sum(outlier_location %in% detected_0) # initial found all 30 (+1 in addition)
 sum(outlier_location %in% detected_7) # converged found all 30 (+ 15 in addition)
 ```
 Let us now compare the coefficient estimates between the contaminated full
