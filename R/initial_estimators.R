@@ -54,8 +54,25 @@ robustified_init <- function(data, formula, cutoff) {
 #' parameters are used to calculate the residuals.
 #'
 #' @section Warning:
-#' Check REFERENCE TO PAPER about conditions on the initial estimator that
-#' should be satisfied for the initial estimator (e.g. they have to be Op(1)).
+#' Check \href{https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view}{Jiao (2019)}
+#' about conditions on the initial estimator that should be satisfied for the
+#' initial estimator (e.g. they have to be Op(1)).
+#'
+#' @return \code{user_init} returns a list with five elements. The first
+#' four are vectors whose length equals the number of observations in the data
+#' set. Unlike the residuals stored in a model object (usually accessible via
+#' \code{model$residuals}), it does not ignore observations where any of y, x
+#' or z are missing. It instead sets their values to \code{NA}.
+#'
+#' The first element is a double vector containing the residuals for each
+#' observation based on the model estimates. The second element contains the
+#' standardised residuals, the third one a logical vector with \code{TRUE} if
+#' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
+#' and \code{NA} if any of y, x, or z are missing. The fourth element of the
+#' list is an integer vector with three values: 1 if the observations is judged
+#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
+#' stores the \code{\link[AER]{ivreg}} user-specified model object based on
+#' which the four vectors were calculated.
 #'
 #' @export
 
@@ -99,6 +116,22 @@ user_init <- function(data, formula, cutoff, user_model) {
 #' @section Warning:
 #' The estimator may have bad properties if the \code{split} is too unequal and
 #' the sample size is not large enough.
+#'
+#' @return \code{saturated_init} returns a list with five elements. The first
+#' four are vectors whose length equals the number of observations in the data
+#' set. Unlike the residuals stored in a model object (usually accessible via
+#' \code{model$residuals}), it does not ignore observations where any of y, x
+#' or z are missing. It instead sets their values to \code{NA}.
+#'
+#' The first element is a double vector containing the residuals for each
+#' observation based on the model estimates. The second element contains the
+#' standardised residuals, the third one a logical vector with \code{TRUE} if
+#' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
+#' and \code{NA} if any of y, x, or z are missing. The fourth element of the
+#' list is an integer vector with three values: 1 if the observations is judged
+#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
+#' is a list with the two initial \code{\link[AER]{ivreg}} model objects based
+#' on the two different sub-samples.
 #'
 #' @export
 
@@ -174,7 +207,6 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
     split1_name <- paste("split1_", i, sep = "")
     i <- i + 1
   }
-  remove(i)
 
   i <- 1
   split2_name <- "split2"
@@ -182,7 +214,6 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
     split2_name <- paste("split2_", i, sep = "")
     i <- i + 1
   }
-  remove(i)
 
   data[[split1_name]] <- FALSE
   data[[split1_name]][split1] <- TRUE

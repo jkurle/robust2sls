@@ -28,6 +28,23 @@ data set before splitting it. Only used if \code{shuffle == TRUE}.}
 \item{split}{A numeric value strictly between 0 and 1 that determines
 in which proportions the sample will be split.}
 }
+\value{
+\code{saturated_init} returns a list with five elements. The first
+four are vectors whose length equals the number of observations in the data
+set. Unlike the residuals stored in a model object (usually accessible via
+\code{model$residuals}), it does not ignore observations where any of y, x
+or z are missing. It instead sets their values to \code{NA}.
+
+The first element is a double vector containing the residuals for each
+observation based on the model estimates. The second element contains the
+standardised residuals, the third one a logical vector with \code{TRUE} if
+the observation is judged as not outlying, \code{FALSE} if it is an outlier,
+and \code{NA} if any of y, x, or z are missing. The fourth element of the
+list is an integer vector with three values: 1 if the observations is judged
+to be an outlier, 0 if not, and -1 if missing. The fifth and last element
+is a list with the two initial \code{\link[AER]{ivreg}} model objects based
+on the two different sub-samples.
+}
 \description{
 \code{saturated_init} splits the sample into two sub-samples. The 2SLS model
 is estimated on both sub-samples and the estimates of one sub-sample are

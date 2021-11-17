@@ -620,7 +620,6 @@ estimate_param <- function(robust2SLS_object, iteration) {
     selection_name <- paste("selection_", i, sep = "")
     i <- i + 1
   }
-  remove(i)
   data[[selection_name]] <- robust2SLS_object$sel[[iteration + 1]]
 
   # calculate first stage linear projections

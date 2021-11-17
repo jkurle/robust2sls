@@ -20,13 +20,31 @@ the observations is classified as an outlier.}
 \item{user_model}{A model object of \link{class} \link[AER]{ivreg} whose
 parameters are used to calculate the residuals.}
 }
+\value{
+\code{user_init} returns a list with five elements. The first
+four are vectors whose length equals the number of observations in the data
+set. Unlike the residuals stored in a model object (usually accessible via
+\code{model$residuals}), it does not ignore observations where any of y, x
+or z are missing. It instead sets their values to \code{NA}.
+
+The first element is a double vector containing the residuals for each
+observation based on the model estimates. The second element contains the
+standardised residuals, the third one a logical vector with \code{TRUE} if
+the observation is judged as not outlying, \code{FALSE} if it is an outlier,
+and \code{NA} if any of y, x, or z are missing. The fourth element of the
+list is an integer vector with three values: 1 if the observations is judged
+to be an outlier, 0 if not, and -1 if missing. The fifth and last element
+stores the \code{\link[AER]{ivreg}} user-specified model object based on
+which the four vectors were calculated.
+}
 \description{
 \code{user_init} uses a model supplied by the user as the initial estimator.
 Based on this estimator, observations are classified as outliers or not.
 }
 \section{Warning}{
 
-Check REFERENCE TO PAPER about conditions on the initial estimator that
-should be satisfied for the initial estimator (e.g. they have to be Op(1)).
+Check \href{https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view}{Jiao (2019)}
+about conditions on the initial estimator that should be satisfied for the
+initial estimator (e.g. they have to be Op(1)).
 }
 

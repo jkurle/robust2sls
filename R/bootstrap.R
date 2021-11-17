@@ -266,8 +266,6 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
   o.intermediate$gauge <- o.gauges
   o.intermediate$r <- 0
   orig <- o.intermediate
-  rm(list=ls(pattern="^o\\..")) # cleaning up
-
 
   if (parallel == FALSE) {
 

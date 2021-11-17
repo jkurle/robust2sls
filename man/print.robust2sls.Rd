@@ -15,6 +15,9 @@ whether detailed (\code{TRUE}) or shortened (\code{FALSE}) should be printed.}
 \item{...}{Further arguments passed to or from other methods, see
 \link[base]{print}.}
 }
+\value{
+No return value, prints model summary.
+}
 \description{
 \code{robust2sls} allows the user to create an object of \link{class}
 \code{"robust2sls"} by specifying the different components of the list. The

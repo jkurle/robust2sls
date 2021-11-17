@@ -10,7 +10,9 @@ Description: An implementation of easy tools for outlier robust inference in
     After removing the outliers, adjusted standard errors are automatically 
     provided. Furthermore, several statistical tests for the false outlier 
     detection rate can be calculated. The outlier removing algorithm can be 
-    iterated a fixed number of times or until the procedure converges.
+    iterated a fixed number of times or until the procedure converges. The 
+    algorithms and robust inference are described in more detail in Jiao (2019) 
+    <https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view>.
 URL: https://github.com/jkurle/robust2sls
 BugReports: https://github.com/jkurle/robust2sls/issues
 License: GPL-3

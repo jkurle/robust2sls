@@ -184,7 +184,6 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
     selection_name <- paste("selection_", i, sep = "")
     i <- i + 1
   }
-  remove(i)
 
   # initialise counter: how many iterations were done?
   counter <- 1

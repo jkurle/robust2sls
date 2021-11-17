@@ -29,6 +29,9 @@ new_robust2sls <- function(x = list()) {
 #'
 #' @param x An object whose validity of class \code{"robust2sls"} is tested.
 #'
+#' @return If the object is a valid \code{"robust2sls"} object then the function
+#' returns the object. No return value otherwise.
+#'
 #' @export
 
 validate_robust2sls <- function(x) {
@@ -509,6 +512,8 @@ validate_robust2sls <- function(x) {
 #' whether detailed (\code{TRUE}) or shortened (\code{FALSE}) should be printed.
 #' @param ... Further arguments passed to or from other methods, see
 #' \link[base]{print}.
+#'
+#' @return No return value, prints model summary.
 #'
 #' @export
 

@@ -156,6 +156,8 @@ outlier <- function(robust2sls_object, obs) {
 #' @param split A numeric value strictly between 0 and 1 that determines
 #' in which proportions the sample will be split.
 #'
+#' @return \code{gauge_avar} returns a numeric value.
+#'
 #' @export
 
 gauge_avar <- function(ref_dist = c("normal"), sign_level,

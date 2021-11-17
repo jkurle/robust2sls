@@ -16,7 +16,7 @@ p <- generate_param(dx1 = 3, dx2 = 2, dz2 = 3, intercept = TRUE, seed = 10)
 
 ## -----------------------------------------------------------------------------
 library(parallel)
-ncores <- min(max(detectCores() - 1, 1), 2)
+ncores <- 2
 cl <- makeCluster(ncores)
 # export libraries to all workers in the cluster
 invisible(clusterCall(cl = cl, function(x) .libPaths(x), .libPaths()))

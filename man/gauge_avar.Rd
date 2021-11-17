@@ -39,6 +39,9 @@ fixed point value if set to \code{"convergence"}.}
 \item{split}{A numeric value strictly between 0 and 1 that determines
 in which proportions the sample will be split.}
 }
+\value{
+\code{gauge_avar} returns a numeric value.
+}
 \description{
 \code{gauge_avar} calculates the asymptotic variance of the gauge for a
 given iteration using a given set of parameters (true or estimated).
