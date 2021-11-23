@@ -14,7 +14,7 @@ outlier-robust inference and outlier testing in two-stage least squares
 
 ## Installation
 
-You can install the released version from
+You can install the released version from 
 [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
