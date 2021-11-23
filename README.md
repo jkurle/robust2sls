@@ -14,7 +14,12 @@ outlier-robust inference and outlier testing in two-stage least squares
 
 ## Installation
 
-There is no released version on [CRAN](https://CRAN.R-project.org) yet.
+You can install the released version from
+[CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("robust2sls")
+```
 
 You can install the development version from
 [GitHub](https://github.com/) with:
