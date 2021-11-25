@@ -14,8 +14,9 @@ mc_grid(
   sign_level,
   initial_est,
   iterations,
+  convergence_criterion = NULL,
   shuffle = FALSE,
-  shuffle_seed,
+  shuffle_seed = 10,
   split = 0.5,
   path = FALSE,
   verbose = FALSE
@@ -55,9 +56,15 @@ model based on which observations are classified as outliers.}
 \item{iterations}{An integer >= 0 that specifies how often the outlier
 detection algorithm is iterated and for which summary statistics will be
 calculated. The value \code{0} means that outlier classification based on the
-initial estimator is done.}
+initial estimator is done. Alternatively, the character \code{"convergence"}
+for iteration until convergence.}
 
-\item{shuffle}{A logical value or \code{NULL}. Only used if
+\item{convergence_criterion}{A numeric value that determines whether the
+algorithm has converged as measured by the L2 norm of the difference in
+coefficients between the current and the previous iteration. Only used when
+argument \code{iterations} is set to \code{"convergence"}.}
+
+\item{shuffle}{A logical value or \code{NULL}.
 \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled
 before creating the subsamples.}
 
