@@ -251,6 +251,8 @@ nonmissing <- function(data, formula) {
 #' outlier-detection algorithm stops by comparing it to the sum of squared
 #' differences between the m- and (m-1)-step parameter estimates. NULL if
 #' convergence criterion should not be used.
+#' @param max_iter A numeric value that determines after which iteration the
+#' algorithm stops in case it does not converge.
 #' @param user_model A model object of \link{class} \link[AER]{ivreg}. Only
 #' required if argument \code{initial_est} is set to \code{"user"}, otherwise
 #' \code{NULL}.
@@ -286,7 +288,9 @@ nonmissing <- function(data, formula) {
 #'   of the outlier-detection algorithm: \code{$criterion} is the user-specified
 #'   convergence criterion (\code{NULL} if argument not used),
 #'   \code{$difference} is initialised as \code{NULL}. \code{$converged} is
-#'   initialised as \code{NULL}. \code{$iter} is initialised as \code{NULL}.}
+#'   initialised as \code{NULL}. \code{$iter} is initialised as \code{NULL}.
+#'   \code{$max_iter} the maximum number of iterations if does not converge
+#'   (\code{NULL} if not used or applicable).}
 #'   \item{\code{$iterations}}{A list storing information about the iterations
 #'   of the algorithm. \code{$setting} stores the user-specified
 #'   \code{iterations} argument. \code{$actual} is initialised as \code{NULL}
@@ -297,7 +301,7 @@ nonmissing <- function(data, formula) {
 
 constants <- function(call, formula, data, reference = c("normal"), sign_level,
                       estimator, split, shuffle, shuffle_seed, iter,
-                      criterion, user_model) {
+                      criterion, max_iter, user_model, verbose) {
 
   ref <- match.arg(reference) # throws error if not in selection
 
@@ -320,7 +324,7 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
   initial <- list(estimator = estimator, split = split, shuffle = shuffle,
                   shuffle_seed = NULL, user = user_model)
   convergence <- list(criterion = criterion, difference = NULL,
-                      converged = NULL, iter = NULL)
+                      converged = NULL, iter = NULL, max_iter = max_iter)
   iterations <- list(setting = iter, actual = NULL)
 
   if (identical(estimator, "saturated") & identical(shuffle, TRUE)) {

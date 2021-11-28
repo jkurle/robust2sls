@@ -16,7 +16,9 @@ constants(
   shuffle_seed,
   iter,
   criterion,
-  user_model
+  max_iter,
+  user_model,
+  verbose
 )
 }
 \arguments{
@@ -53,6 +55,9 @@ outlier-detection algorithm.}
 outlier-detection algorithm stops by comparing it to the sum of squared
 differences between the m- and (m-1)-step parameter estimates. NULL if
 convergence criterion should not be used.}
+
+\item{max_iter}{A numeric value that determines after which iteration the
+algorithm stops in case it does not converge.}
 
 \item{user_model}{A model object of \link{class} \link[AER]{ivreg}. Only
 required if argument \code{initial_est} is set to \code{"user"}, otherwise
@@ -91,7 +96,9 @@ which is returned by \link{outlier_detection}.
   of the outlier-detection algorithm: \code{$criterion} is the user-specified
   convergence criterion (\code{NULL} if argument not used),
   \code{$difference} is initialised as \code{NULL}. \code{$converged} is
-  initialised as \code{NULL}. \code{$iter} is initialised as \code{NULL}.}
+  initialised as \code{NULL}. \code{$iter} is initialised as \code{NULL}.
+  \code{$max_iter} the maximum number of iterations if does not converge
+  (\code{NULL} if not used or applicable).}
   \item{\code{$iterations}}{A list storing information about the iterations
   of the algorithm. \code{$setting} stores the user-specified
   \code{iterations} argument. \code{$actual} is initialised as \code{NULL}
