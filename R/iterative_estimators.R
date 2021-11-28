@@ -47,6 +47,11 @@
 #' difference is measured by the L2 norm. If the argument is set to a numeric
 #' value but \code{iterations} is an integer > 0 then the algorithm stops either
 #' when it converged or when \code{iterations} is reached.
+#' @param max_iter A numeric value or NULL. If \code{iterations = "convergence"}
+#' is chosen, then the algorithm is stopped after at most \code{max_iter}
+#' iterations. If also a \code{convergence_criterion} is chosen then the
+#' algorithm stops when either the criterion is fulfilled or the maximum number
+#' of iterations is reached.
 #' @param shuffle A logical value or \code{NULL}. Only used if
 #' \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled
 #' before creating the subsamples.
@@ -86,7 +91,8 @@
 #'   used or only initial estimator calculated). \code{$converged} is a logical
 #'   value indicating whether the algorithm has converged, i.e. whether the
 #'   difference is smaller than the convergence criterion (\code{NULL} if
-#'   argument not used). \cr \cr
+#'   argument not used). \code{$max_iter} is the maximum iteration set by the
+#'   user (\code{NULL} if argument not used or not set). \cr \cr
 #'   \code{$iterations} contains information about the user-specified iterations
 #'   argument (\code{$setting}) and the actual number of iterations that were
 #'   done (\code{$actual}). The actual number can be lower if the algorithm
@@ -124,8 +130,8 @@
 
 outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   initial_est = c("robustified", "saturated", "user"), user_model = NULL,
-  iterations = 1, convergence_criterion = NULL, shuffle = FALSE,
-  shuffle_seed = NULL, split = 0.5, verbose = FALSE) {
+  iterations = 1, convergence_criterion = NULL, max_iter = NULL,
+  shuffle = FALSE, shuffle_seed = NULL, split = 0.5, verbose = FALSE) {
 
   # capture the original function call
   cll <- sys.call()
@@ -140,7 +146,8 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
                         estimator = initial_est, split = split,
                         shuffle = shuffle, shuffle_seed = shuffle_seed,
                         iter = iterations, criterion = convergence_criterion,
-                        user_model = user_model)
+                        user_model = user_model, verbose = verbose,
+                        max_iter = max_iter)
   if (exists("verbose")) { constant$verbose <- verbose}
   out$cons <- constant
   out <- new_robust2sls(x = out) # turn into object of class "robust2sls"

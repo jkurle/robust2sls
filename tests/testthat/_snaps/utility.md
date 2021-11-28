@@ -90,6 +90,9 @@
     $convergence$iter
     NULL
     
+    $convergence$max_iter
+    NULL
+    
     
     $iterations
     $iterations$setting
@@ -190,6 +193,9 @@
     NULL
     
     $convergence$iter
+    NULL
+    
+    $convergence$max_iter
     NULL
     
     
@@ -294,6 +300,9 @@
     $convergence$iter
     NULL
     
+    $convergence$max_iter
+    NULL
+    
     
     $iterations
     $iterations$setting
@@ -394,6 +403,9 @@
     NULL
     
     $convergence$iter
+    NULL
+    
+    $convergence$max_iter
     NULL
     
     

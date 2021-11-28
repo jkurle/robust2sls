@@ -150,44 +150,44 @@ test_that("constants() works correctly", {
   test1 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
             iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
-            shuffle_seed = 42, split = 0.5)
+            shuffle_seed = 42, split = 0.5, max_iter = NULL)
   call1 <- sys.call()
   test2 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
             iterations = 5, convergence_criterion = 0, shuffle = NULL,
-            shuffle_seed = NULL, split = NULL)
+            shuffle_seed = NULL, split = NULL, max_iter = NULL)
   call2 <- sys.call()
   test3 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
             iterations = "convergence", convergence_criterion = 0.5,
-            shuffle = TRUE, shuffle_seed = 42, split = 0.5)
+            shuffle = TRUE, shuffle_seed = 42, split = 0.5, max_iter = NULL)
   call3 <- sys.call()
   test4 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
             iterations = "convergence", convergence_criterion = 1,
-            shuffle = FALSE, shuffle_seed = 42, split = 0.5)
+            shuffle = FALSE, shuffle_seed = 42, split = 0.5, max_iter = NULL)
   call4 <- sys.call()
 
   c1 <- constants(call = call1, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "robustified", split = 0.5, shuffle = FALSE,
                   shuffle_seed = 42, iter = 5, criterion = NULL,
-                  user_model = NULL)
+                  user_model = NULL, verbose = FALSE, max_iter = NULL)
   c2 <- constants(call = call2, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "robustified", split = NULL, shuffle = NULL,
                   shuffle_seed = NULL, iter = 5, criterion = 0,
-                  user_model = NULL)
+                  user_model = NULL, verbose = FALSE, max_iter = NULL)
   c3 <- constants(call = call3, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "saturated", split = 0.5, shuffle = TRUE,
                   shuffle_seed = 42, iter = 5, criterion = 0.5,
-                  user_model = NULL)
+                  user_model = NULL, verbose = FALSE, max_iter = NULL)
   c4 <- constants(call = call4, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "saturated", split = 0.5, shuffle = FALSE,
                   shuffle_seed = 42, iter = "convergence", criterion = 1,
-                  user_model = NULL)
+                  user_model = NULL, verbose = FALSE, max_iter = NULL)
 
   names <- c("call", "verbose", "formula", "data", "reference", "sign_level",
              "psi", "cutoff", "bias_corr", "initial", "convergence",
@@ -221,18 +221,18 @@ test_that("constants() works correctly", {
                c("estimator", "split", "shuffle", "shuffle_seed", "user"))
   expect_equal(names(c4$initial),
                c("estimator", "split", "shuffle", "shuffle_seed", "user"))
-  expect_equal(length(c1$convergence), 4)
-  expect_equal(length(c2$convergence), 4)
-  expect_equal(length(c3$convergence), 4)
-  expect_equal(length(c4$convergence), 4)
+  expect_equal(length(c1$convergence), 5)
+  expect_equal(length(c2$convergence), 5)
+  expect_equal(length(c3$convergence), 5)
+  expect_equal(length(c4$convergence), 5)
   expect_equal(class(c1$convergence), "list")
   expect_equal(class(c2$convergence), "list")
   expect_equal(class(c3$convergence), "list")
   expect_equal(class(c4$convergence), "list")
-  expect_equal(names(c1$convergence), c("criterion", "difference", "converged", "iter"))
-  expect_equal(names(c2$convergence), c("criterion", "difference", "converged", "iter"))
-  expect_equal(names(c3$convergence), c("criterion", "difference", "converged", "iter"))
-  expect_equal(names(c4$convergence), c("criterion", "difference", "converged", "iter"))
+  expect_equal(names(c1$convergence), c("criterion", "difference", "converged", "iter", "max_iter"))
+  expect_equal(names(c2$convergence), c("criterion", "difference", "converged", "iter", "max_iter"))
+  expect_equal(names(c3$convergence), c("criterion", "difference", "converged", "iter", "max_iter"))
+  expect_equal(names(c4$convergence), c("criterion", "difference", "converged", "iter", "max_iter"))
   expect_equal(length(c1$iterations), 2)
   expect_equal(length(c2$iterations), 2)
   expect_equal(length(c3$iterations), 2)
