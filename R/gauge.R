@@ -301,7 +301,7 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
 
         # here use explicit formula because is not too complicated (varrho then not even needed)
         term1 <- gamma*(1-gamma) + (c*f/(tau_c_2 - c*(c^2-varsigma_c_2)*f))^2 * (tau_c_4 - tau_c_2 * varsigma_c_2)
-        term2 <- tau_c_2 * (f / ((phi - 2*c*f)(tau_c_2 - c*(c^2-varsigma_c_2)*f)))^2 * t(2*c*w - tau_c_2*zeta_c_minus) %*%
+        term2 <- tau_c_2 * (f / ((phi - 2*c*f) * (tau_c_2 - c*(c^2-varsigma_c_2)*f)))^2 * t(2*c*w - tau_c_2*zeta_c_minus) %*%
           Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*% (2*c*w - tau_c_2*zeta_c_minus)
 
         avar <- term1 + term2
