@@ -752,11 +752,12 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
         count_reject_001 <- (count_p < 0.01)
         count_reject_005 <- (count_p < 0.05)
         count_reject_010 <- (count_p < 0.1)
+        conv <- last_it-1
 
-        data.frame(M, n, iterations, sign_level, num.outliers, num.expected,
-                   gauge, avar, avar_est, prop_t, prop_p, prop_reject_001,
-                   prop_reject_005, prop_reject_010, count_p, count_reject_001,
-                   count_reject_005, count_reject_010)
+        data.frame(M, n, iterations, conv, sign_level, num.outliers,
+                   num.expected, gauge, avar, avar_est, prop_t, prop_p,
+                   prop_reject_001, prop_reject_005, prop_reject_010, count_p,
+                   count_reject_001, count_reject_005, count_reject_010)
 
       } # end foreach
 
@@ -794,11 +795,13 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
       count_size_005 <- mean(results$count_reject_005)
       count_size_010 <- mean(results$count_reject_010)
 
+      conv_freq <- as.list(table(results$conv))
+
       res <- data.frame(M, n, iterations, sign_level, initial_est, split,
                         mean_gauge, avar, mean_avar_est, var_gauge, var_ratio, var_ratio2,
                         mean_prop_t, mean_prop_p, prop_size_001, prop_size_005,
                         prop_size_010, mean_count_p, count_size_001,
-                        count_size_005, count_size_010)
+                        count_size_005, count_size_010, conv_freq = I(list(conv_freq)))
 
       results_all <- rbind(results_all, res)
 
