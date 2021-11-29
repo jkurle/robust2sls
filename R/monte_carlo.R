@@ -803,7 +803,9 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 
       conv_freq <- as.list(table(results$conv))
 
-      res <- data.frame(M, n, iterations, sign_level, initial_est, split,
+      if (is.null(max_iter)) {max <- "NULL"} else {max <- max_iter}
+
+      res <- data.frame(M, n, iterations, max, sign_level, initial_est, split,
                         mean_gauge, avar, mean_avar_est, var_gauge, var_ratio, var_ratio2,
                         mean_prop_t, mean_prop_p, prop_size_001, prop_size_005,
                         prop_size_010, mean_count_p, count_size_001,
