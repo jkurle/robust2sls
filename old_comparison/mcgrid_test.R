@@ -28,3 +28,25 @@ table(b$conv)
 out[2, "conv_freq"]
 # yes, correct
 
+# test the new "max_iter" functionality
+aprev <- table(a$conv)
+bprev <- table(b$conv)
+
+# now limit number of iterations to 5
+## expect:
+## a: 2:1, 3:3, 4:3, 5:3
+## b: 5:10
+
+out2 <- mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
+               formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+               sign_level = 0.05, initial_est = "robustified",
+               iterations = "convergence", convergence_criterion = 0, max_iter = 5,
+               path = pth)
+
+out2$conv_freq # is exactly as we expect, also confirmed below
+
+a <- readRDS("C:/Users/jonas/OneDrive - OnTheHub - The University of Oxford/Documents Sync/PhD/DPhil_R/r2sls/old_comparison/M10n1000g0.05irobustifieds0.5")
+b <- readRDS("C:/Users/jonas/OneDrive - OnTheHub - The University of Oxford/Documents Sync/PhD/DPhil_R/r2sls/old_comparison/M10n10000g0.05irobustifieds0.5")
+
+table(a$conv)
+table(b$conv)
