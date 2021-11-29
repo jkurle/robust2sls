@@ -142,6 +142,12 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   out <- list(cons = list(), model = list(), res = list(), stdres = list(),
               sel = list(), type = list())
 
+  # if iterations is numeric, must have max_iter = NULL even if specified
+  if (is.numeric(iterations) && !is.null(max_iter)) {
+    warning("'iterations' is numeric, so 'max_iter' does not apply and is set to NULL")
+    max_iter <- NULL
+  }
+
   # calculate and save the constant values
   constant <- constants(call = cll, formula = formula, data = data,
                         reference = ref_dist, sign_level = sign_level,

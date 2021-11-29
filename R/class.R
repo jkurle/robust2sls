@@ -399,6 +399,17 @@ validate_robust2sls <- function(x) {
     }
   } # end numeric iterations set
 
+  # check $cons$convergence$max_iter correct class
+  if (!(is.null(x$cons$convergence$max_iter) | is.numeric(x$cons$convergence$max_iter))) {
+    stop(strwrap("x$cons$convergence$max_iter must either be NULL or numeric",
+                 prefix = " ", initial = ""))
+  }
+  if (is.numeric(x$cons$iterations$setting) &&
+      !is.null(x$cons$convergence$max_iter)) {
+    stop(strwrap("When iterations is numeric, then max_iter must be NULL",
+                 prefix = " ", initial = ""))
+  }
+
   # check the elements of $model, $res, $stdres, $sel, $type
   if (identical(x$cons$initial$estimator, "saturated") &
     (x$cons$iterations$actual >= 0)) {
