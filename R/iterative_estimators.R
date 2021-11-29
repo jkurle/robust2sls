@@ -47,11 +47,11 @@
 #' difference is measured by the L2 norm. If the argument is set to a numeric
 #' value but \code{iterations} is an integer > 0 then the algorithm stops either
 #' when it converged or when \code{iterations} is reached.
-#' @param max_iter A numeric value or NULL. If \code{iterations = "convergence"}
-#' is chosen, then the algorithm is stopped after at most \code{max_iter}
-#' iterations. If also a \code{convergence_criterion} is chosen then the
-#' algorithm stops when either the criterion is fulfilled or the maximum number
-#' of iterations is reached.
+#' @param max_iter A numeric value >= 1 or NULL. If
+#' \code{iterations = "convergence"} is chosen, then the algorithm is stopped
+#' after at most \code{max_iter} iterations. If also a
+#' \code{convergence_criterion} is chosen then the algorithm stops when either
+#' the criterion is fulfilled or the maximum number of iterations is reached.
 #' @param shuffle A logical value or \code{NULL}. Only used if
 #' \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled
 #' before creating the subsamples.
@@ -123,8 +123,10 @@
 #' }
 #'
 #' @section Warning:
-#' Check REFERENCE TO PAPER about conditions on the initial estimator that
-#' should be satisfied for the initial estimator (e.g. they have to be Op(1)).
+#' Check \href{https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view}{Jiao (2019)}
+#' (as well as forthcoming working paper in the future) about conditions on the
+#' initial estimator that should be satisfied for the initial estimator (e.g.
+#' they have to be Op(1)).
 #'
 #' @export
 
@@ -200,7 +202,12 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
     # initialise difference > convergence_criterion so that while loop starts
     difference <- convergence_criterion + 1
 
-    while (difference > convergence_criterion) {
+    # if max_iter is NULL, then want to never stop due to iteration number
+    # so increase max_iter to same value as counter
+    max_it <- max_iter
+    if (is.null(max_iter)) { max_it <- counter }
+
+    while ((difference > convergence_criterion) & (counter <= max_it)) {
 
       # print progress if turned on
       if (verbose == TRUE) {
@@ -255,6 +262,8 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
       # update counter
       counter <- counter + 1
+      # if max_iter is NULL then update it as well so it continues running
+      if (is.null(max_iter)) { max_it <- counter }
 
     } # end while convergence
 
