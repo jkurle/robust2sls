@@ -15,6 +15,7 @@ mc_grid(
   initial_est,
   iterations,
   convergence_criterion = NULL,
+  max_iter = NULL,
   shuffle = FALSE,
   shuffle_seed = 10,
   split = 0.5,
@@ -63,6 +64,12 @@ for iteration until convergence.}
 algorithm has converged as measured by the L2 norm of the difference in
 coefficients between the current and the previous iteration. Only used when
 argument \code{iterations} is set to \code{"convergence"}.}
+
+\item{max_iter}{A numeric value >= 1 or NULL. If
+\code{iterations = "convergence"} is chosen, then the algorithm is stopped
+after at most \code{max_iter} iterations. If also a
+\code{convergence_criterion} is chosen then the algorithm stops when either
+the criterion is fulfilled or the maximum number of iterations is reached.}
 
 \item{shuffle}{A logical value or \code{NULL}.
 \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled

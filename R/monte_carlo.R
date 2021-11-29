@@ -513,6 +513,11 @@ generate_data <- function(parameters, n) {
 #'   algorithm has converged as measured by the L2 norm of the difference in
 #'   coefficients between the current and the previous iteration. Only used when
 #'   argument \code{iterations} is set to \code{"convergence"}.
+#' @param max_iter A numeric value >= 1 or NULL. If
+#' \code{iterations = "convergence"} is chosen, then the algorithm is stopped
+#' after at most \code{max_iter} iterations. If also a
+#' \code{convergence_criterion} is chosen then the algorithm stops when either
+#' the criterion is fulfilled or the maximum number of iterations is reached.
 #' @param shuffle A logical value or \code{NULL}.
 #' \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled
 #' before creating the subsamples.
@@ -558,8 +563,8 @@ generate_data <- function(parameters, n) {
 
 mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                     initial_est, iterations, convergence_criterion = NULL,
-                    shuffle = FALSE, shuffle_seed = 10, split = 0.5,
-                    path = FALSE, verbose = FALSE) {
+                    max_iter = NULL, shuffle = FALSE, shuffle_seed = 10,
+                    split = 0.5, path = FALSE, verbose = FALSE) {
 
   gamma <- sign_level
 
@@ -727,6 +732,7 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                                    initial_est = initial_est, user_model = NULL,
                                    iterations = iterations,
                                    convergence_criterion = convergence_criterion,
+                                   max_iter = max_iter,
                                    shuffle = shuffle, shuffle_seed = shuffle_seed,
                                    split = split, verbose = FALSE)
 
