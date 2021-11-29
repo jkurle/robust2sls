@@ -344,3 +344,33 @@
     15           0.30           0.30
     16           0.01           0.10
 
+# mc_grid() works correctly with convergence setting
+
+       M     n  iterations  max sign_level initial_est split mean_gauge      avar
+    1 10  1000 convergence NULL       0.05 robustified   0.5     0.0519 0.1188556
+    2 10 10000 convergence NULL       0.05 robustified   0.5     0.0496 0.1188556
+      mean_avar_est    var_gauge var_ratio var_ratio2 mean_prop_t mean_prop_p
+    1     0.1188556 1.058778e-04 0.8908104  0.8908104   0.7246317   0.5329563
+    2     0.1188556 2.068444e-05 1.7403007  1.7403007   1.0268180   0.4136282
+      prop_size_001 prop_size_005 prop_size_010 mean_count_p count_size_001
+    1             0           0.1           0.1    0.4228190            0.1
+    2             0           0.2           0.3    0.2921023            0.3
+      count_size_005 count_size_010    conv_freq
+    1            0.1            0.2 1, 3, 3,....
+    2            0.3            0.3 4, 2, 1,....
+
+---
+
+       M     n  iterations max sign_level initial_est split mean_gauge      avar
+    1 10  1000 convergence   5       0.05 robustified   0.5    0.05180 0.1188556
+    2 10 10000 convergence   5       0.05 robustified   0.5    0.04966 0.1188556
+      mean_avar_est    var_gauge var_ratio var_ratio2 mean_prop_t mean_prop_p
+    1     0.1188556 9.951111e-05  0.837244   0.837244   0.7154591   0.5314747
+    2     0.1188556 1.926711e-05  1.621052   1.621052   1.0036131   0.4134618
+      prop_size_001 prop_size_005 prop_size_010 mean_count_p count_size_001
+    1             0           0.0           0.1    0.4209751            0.1
+    2             0           0.2           0.3    0.2888137            0.3
+      count_size_005 count_size_010  conv_freq
+    1            0.1            0.2 1, 3, 3, 3
+    2            0.3            0.3         10
+
