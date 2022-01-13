@@ -221,7 +221,11 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
                  prefix = " ", initial = ""))
   }
 
-  if (initial_est == "robustified") {
+  # robustified and (saturated + split half) have identical expansion for m >= 0
+  # therefore if this is the case, can use the existing formulas for robustified
+  sat_split_half <- (initial_est == "saturated" && split == 0.5)
+
+  if (initial_est == "robustified" | sat_split_half) {
     if (ref_dist == "normal") {
 
       # create parameters needed for calculating asymptotic variance
@@ -340,8 +344,8 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
 
       } else { # m >= 1
 
-        stop(strwrap("No theory for m >= 1 and saturated initial estimator
-                     available", prefix = " ", initial = ""))
+        stop(strwrap("No theory for m >= 1 if saturated initial estimator is not
+                     split in half", prefix = " ", initial = ""))
 
       } # end m >= 1
     } # end normal
