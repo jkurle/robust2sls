@@ -566,6 +566,8 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                     max_iter = NULL, shuffle = FALSE, shuffle_seed = 10,
                     split = 0.5, path = FALSE, verbose = FALSE) {
 
+  sink(file = "progress.txt", )
+
   gamma <- sign_level
 
   # robustified does not vary with split, shuffle, shuffle_seed
