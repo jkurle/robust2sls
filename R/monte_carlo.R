@@ -566,8 +566,6 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                     max_iter = NULL, shuffle = FALSE, shuffle_seed = 10,
                     split = 0.5, path = FALSE, verbose = FALSE) {
 
-  sink(file = "progress.txt", )
-
   gamma <- sign_level
 
   # robustified does not vary with split, shuffle, shuffle_seed
@@ -619,11 +617,6 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
       # store results in a data frame
       results <- foreach::foreach(m = (1:M), .combine = "rbind",
                                   .options.RNG = seed) %dorng% {
-
-
-        if (((m %% 1000) == 0) & (verbose == TRUE)) {
-          cat(paste(m/1000, "k ", sep = ""))
-        }
 
         # draw random data of the 2SLS model, sample size n
         d <- generate_data(parameters = parameters, n = n)
@@ -729,10 +722,6 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
       # store results in a data frame
       results <- foreach::foreach(m = (1:M), .combine = "rbind",
                                   .options.RNG = seed) %dorng% {
-
-        if (((m %% 1000) == 0) & (verbose == TRUE)) {
-          cat(paste(m/1000, "k ", sep = ""))
-        }
 
         # draw random data of the 2SLS model, sample size n
         d <- generate_data(parameters = parameters, n = n)

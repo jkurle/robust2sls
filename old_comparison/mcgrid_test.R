@@ -50,3 +50,12 @@ b <- readRDS("C:/Users/jonas/OneDrive - OnTheHub - The University of Oxford/Docu
 
 table(a$conv)
 table(b$conv)
+
+library(doFuture)
+library(robust2sls)
+plan(cluster, workers = 2)
+p <- generate_param(dx1 = 2, dx2 = 1, dz2 = 1, seed = 42)
+out <- mc_grid(M = 3000, n = c(100, 1000), seed = 20, parameters = p,
+               formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+               sign_level = 0.05, initial_est = "robustified",
+               iterations = 0, convergence_criterion = 0)
