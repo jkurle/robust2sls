@@ -598,3 +598,28 @@ test_that("varrho() works correctly", {
                "'iteration' must be weakly larger than 1")
 
 })
+
+test_that("mvn_sup() works correctly", {
+
+  m <- c(0, 1)
+  S <- matrix(c(2, 1, 1, 3), 2, 2)
+
+  expect_error(mvn_sup(1.3, m, S), "Argument 'n' is not an integer")
+  expect_error(mvn_sup("1", m, S), "Argument 'n' is not an integer")
+  expect_error(mvn_sup(10, c("a", "b"), S), "'mu' is not a numeric vector")
+  expect_error(mvn_sup(10, m, as.character(S)), "'Sigma' is not a numeric matrix")
+  expect_error(mvn_sup(10, m, as.data.frame(S)), "'Sigma' is not a numeric matrix")
+  expect_error(mvn_sup(10, c(0, 1, 0), S), "'mu' is not compatible with var-cov matrix 'Sigma'")
+
+  a <- round(mvn_sup(2, m, S, seed = 40), 2)
+  b <- mvn_sup(10, m, S, seed = 40)
+  expect_identical(a, c(1.34, 1.33))
+  expect_snapshot_output(b)
+
+  # all output must be weakly positive because we take absolute value
+  c <- mvn_sup(10000, m, S, seed = 40)
+  expect_equal((c >= 0), rep(TRUE, 10000))
+  # output must have length of n (not mu)
+  expect_equal(length(c), 10000L)
+
+})

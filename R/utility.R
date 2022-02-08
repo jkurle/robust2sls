@@ -728,9 +728,54 @@ estimate_param <- function(robust2SLS_object, iteration) {
 }
 
 
+#' Multivariate normal supremum simulation
+#'
+#' \code{mvn_sup} simulates the distribution of the supremum of the specified
+#' multivariate normal distribution by drawing repeatedly from the multivariate
+#' normal distribution and calculating the maximum of each vector.
+#'
+#' @param n An integer determining the number of draws from the multivariate
+#' normal distribution.
+#' @param mu A numeric vector representing the mean of the multivariate normal
+#' distribution.
+#' @param Sigma A numeric matrix representing the variance-covariance matrix of
+#' the mutlivariate normal distribution.
+#' @param seed An integer setting the random seed or \code{NULL} if it should
+#' not be set.
+#'
+#' @return \code{mvn_sup} returns a vector of suprema of length \code{n}.
 
+mvn_sup <- function(n, mu, Sigma, seed = NULL) {
 
+if (!is.numeric(n) || !(n %% 1 == 0)) {
+  stop("Argument 'n' is not an integer.")
+}
 
+if (!is.numeric(mu)) {
+  stop("Argument 'mu' is not a numeric vector.")
+}
+
+if (!is.numeric(Sigma) | !is.matrix(Sigma)) {
+  stop("Argument 'Sigma' is not a numeric matrix.")
+}
+
+if (!identical(length(mu), NROW(Sigma)) | !identical(length(mu), NCOL(Sigma))) {
+  stop("Vector 'mu' is not compatible with var-cov matrix 'Sigma'.")
+}
+
+if (!is.null(seed)) {
+  set.seed(seed = seed)
+}
+
+sim <- MASS::mvrnorm(n = n, mu = mu, Sigma = Sigma)
+# sim returns an (n) by (length of mvn vector) matrix
+# to get supremum (discrete = maximum) take maximum across rows
+
+sup <- apply(X = abs(sim), MARGIN = 1, FUN = max)
+
+return(sup)
+
+}
 
 
 
