@@ -744,36 +744,37 @@ estimate_param <- function(robust2SLS_object, iteration) {
 #' not be set.
 #'
 #' @return \code{mvn_sup} returns a vector of suprema of length \code{n}.
+#' @export
 
 mvn_sup <- function(n, mu, Sigma, seed = NULL) {
 
-if (!is.numeric(n) || !(n %% 1 == 0)) {
-  stop("Argument 'n' is not an integer.")
-}
+  if (!is.numeric(n) || !(n %% 1 == 0)) {
+    stop("Argument 'n' is not an integer.")
+  }
 
-if (!is.numeric(mu)) {
-  stop("Argument 'mu' is not a numeric vector.")
-}
+  if (!is.numeric(mu)) {
+    stop("Argument 'mu' is not a numeric vector.")
+  }
 
-if (!is.numeric(Sigma) | !is.matrix(Sigma)) {
-  stop("Argument 'Sigma' is not a numeric matrix.")
-}
+  if (!is.numeric(Sigma) | !is.matrix(Sigma)) {
+    stop("Argument 'Sigma' is not a numeric matrix.")
+  }
 
-if (!identical(length(mu), NROW(Sigma)) | !identical(length(mu), NCOL(Sigma))) {
-  stop("Vector 'mu' is not compatible with var-cov matrix 'Sigma'.")
-}
+  if (!identical(length(mu), NROW(Sigma)) | !identical(length(mu), NCOL(Sigma))) {
+    stop("Vector 'mu' is not compatible with var-cov matrix 'Sigma'.")
+  }
 
-if (!is.null(seed)) {
-  set.seed(seed = seed)
-}
+  if (!is.null(seed)) {
+    set.seed(seed = seed)
+  }
 
-sim <- MASS::mvrnorm(n = n, mu = mu, Sigma = Sigma)
-# sim returns an (n) by (length of mvn vector) matrix
-# to get supremum (discrete = maximum) take maximum across rows
+  sim <- MASS::mvrnorm(n = n, mu = mu, Sigma = Sigma)
+  # sim returns an (n) by (length of mvn vector) matrix
+  # to get supremum (discrete = maximum) take maximum across rows
 
-sup <- apply(X = abs(sim), MARGIN = 1, FUN = max)
+  sup <- apply(X = abs(sim), MARGIN = 1, FUN = max)
 
-return(sup)
+  return(sup)
 
 }
 
