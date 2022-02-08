@@ -42,7 +42,51 @@ test_cpv <- function(dist, teststat, p) {
 
 }
 
+#' Simes (1986) procedure for multiple testing
+#'
+#' \code{simes()} takes a vector of p-values corresponding to individual null
+#' hypotheses and performs the Simes (1986) procedure for the global null
+#' hypothesis. The global null hypothesis is the intersection of all individual
+#' null hypotheses.
+#'
+#' @param pvals A numeric vector of p-values corresponding to the p-values of
+#' the individual null hypotheses.
+#' @param alpha A numeric value representing the global significance level.
+#'
+#' @return \code{simes()} returns a list with three named elements.
+#' \code{$reject} stores a logical value whether the global null hypothesis has
+#' been rejected. \code{$alpha} stores the significance level that was chosen.
+#' \code{$details} stores a matrix of the individual null hypothesis p-values,
+#' the adjusted significance level according to Simes' procedure, and the
+#' rejection decision for each individual hypothesis test.
+#'
+#' @details See
+#' \href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
 
+simes <- function(pvals, alpha) {
+
+  if(!is.numeric(pvals) | !is.vector(pvals)) {
+    stop("Argument 'pvals' must be a numeric vector.")
+  }
+  if(!all(pvals >= 0 & pvals <= 1)) {
+    stop("Elements of 'pvals' must lie between 0 and 1.")
+  }
+  if(!is.numeric(alpha) | !identical(length(alpha), 1L)) {
+    stop("Argument 'alpha' must be a single numeric value.")
+  }
+  if(!(alpha >= 0 & alpha <= 1)) {
+    stop("Argument 'alpha' must lie between 0 and 1.")
+  }
+
+  pvals <- sort(pvals, decreasing = FALSE)
+  alpha_adj <- seq(1:length(pvals)) * alpha / length(pvals)
+  comp <- pvals <= alpha_adj
+  reject <- any(comp)
+
+  details <- data.frame(pvals = pvals, alpha_adj = alpha_adj, reject = comp)
+  out <- list(reject = reject, alpha = alpha, details = details)
+
+}
 
 
 

@@ -19,3 +19,49 @@ test_that("test_cpv() works correctly", {
   expect_snapshot_output(a)
 
 })
+
+test_that("simes() works correctly", {
+
+  expect_error(simes(pvals = c("a", "b"), alpha = 0.05), "'pvals' must be a numeric vector")
+  expect_error(simes(pvals = c(0.1, 0.05, 1.1), alpha = 0.05), "'pvals' must lie between 0 and 1")
+  expect_error(simes(pvals = c(0.3, 0.4), alpha = "a"), "'alpha' must be a single numeric value")
+  expect_error(simes(pvals = c(0.3, 0.4), alpha = c(0.01, 0.05)), "'alpha' must be a single numeric value")
+  expect_error(simes(pvals = c(0.3, 0.4), alpha = -0.1), "'alpha' must lie between 0 and 1")
+  expect_error(simes(pvals = c(0.3, 0.4), alpha = 2), "'alpha' must lie between 0 and 1")
+
+  p <- c(0.3, 0.2, 0.15)
+  a <- 0.1
+  s1 <- simes(pvals = p, alpha = a)
+  expect_length(s1, 3)
+  expect_type(s1, "list")
+  expect_named(s1, c("reject", "alpha", "details"))
+  expect_type(s1$reject, "logical")
+  expect_type(s1$alpha, "double")
+  expect_type(s1$details, "list")
+  expect_equal(class(s1$details), "data.frame")
+  expect_identical(s1$reject, FALSE)
+  expect_identical(s1$alpha, a)
+  df <- data.frame(pvals = c(0.15, 0.2, 0.3), alpha_adj = c(0.1/3, 0.2/3, 0.1),
+                   reject = c(FALSE, FALSE, FALSE))
+  expect_equal(s1$details, df)
+
+  p <- c(0.01, 0.2, 0.5)
+  a <- 0.1
+  s2 <- simes(pvals = p, alpha = a)
+  expect_length(s2, 3)
+  expect_type(s2, "list")
+  expect_named(s2, c("reject", "alpha", "details"))
+  expect_type(s2$reject, "logical")
+  expect_type(s2$alpha, "double")
+  expect_type(s2$details, "list")
+  expect_equal(class(s2$details), "data.frame")
+  expect_identical(s2$reject, TRUE)
+  expect_identical(s2$alpha, a)
+  df <- data.frame(pvals = c(0.01, 0.2, 0.5), alpha_adj = c(0.1/3, 0.2/3, 0.1),
+                   reject = c(TRUE, FALSE, FALSE))
+  expect_equal(s2$details, df)
+
+  expect_snapshot_output(s1)
+  expect_snapshot_output(s2)
+
+})
