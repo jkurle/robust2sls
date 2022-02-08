@@ -25,7 +25,6 @@ Suggests:
     ggplot2,
     grDevices,
     knitr,
-    MASS,
     parallel,
     rmarkdown,
     testthat,
@@ -36,6 +35,7 @@ Imports:
     AER,
     doRNG,
     foreach,
+    MASS,
     pracma,
     stats
 VignetteBuilder: knitr
