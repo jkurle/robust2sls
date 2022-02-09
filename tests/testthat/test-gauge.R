@@ -284,5 +284,8 @@ test_that("gauge_avar() gives correct errors", {
                "'split' must lie strictly between 0 and 1")
   expect_error(gauge_avar("normal", 0.01, "saturated", 0, p, 2.4),
                "'split' must lie strictly between 0 and 1")
+  expect_error(gauge_avar("normal", 0.01, "saturated", 1, p, NULL),
+               "'split' cannot be NULL unless initial estimator is 'robustified'")
+  expect_silent(gauge_avar("normal", 0.01, "robustified", 1, p, NULL))
 
 })

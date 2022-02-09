@@ -154,7 +154,8 @@ outlier <- function(robust2sls_object, obs) {
 #' @param parameters A list created by \link{generate_param} or
 #' \link{estimate_param_null} that stores the parameters (true or estimated).
 #' @param split A numeric value strictly between 0 and 1 that determines
-#' in which proportions the sample will be split.
+#' in which proportions the sample will be split. Can be \code{NULL} if
+#' \code{initial_est == "robustified"}.
 #'
 #' @return \code{gauge_avar} returns a numeric value.
 #'
@@ -201,13 +202,18 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
                    prefix = " ", initial = ""))
     }
   }
-  if (!is.numeric(split) | !identical(length(split), 1L)) {
-    stop(strwrap("Argument 'split' must be a numeric vector of length 1",
-                 prefix = " ", initial = ""))
+  if (is.null(split) & !identical(initial_est, "robustified")) {
+    stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified'")
   }
-  if (!(split > 0) | !(split < 1)) {
-    stop(strwrap("Argument 'split' must lie strictly between 0 and 1",
-                 prefix = " ", initial = ""))
+  if (!is.null(split)) { # only need to check these when is not NULL
+    if (!is.numeric(split) | !identical(length(split), 1L)) {
+      stop(strwrap("Argument 'split' must be a numeric vector of length 1",
+                   prefix = " ", initial = ""))
+    }
+    if (!(split > 0) | !(split < 1)) {
+      stop(strwrap("Argument 'split' must lie strictly between 0 and 1",
+                   prefix = " ", initial = ""))
+    }
   }
   if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
     stop(strwrap("Argument 'initial_est' must be a character vector of

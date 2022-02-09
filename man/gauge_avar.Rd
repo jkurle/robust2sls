@@ -37,7 +37,8 @@ fixed point value if set to \code{"convergence"}.}
 \link{estimate_param_null} that stores the parameters (true or estimated).}
 
 \item{split}{A numeric value strictly between 0 and 1 that determines
-in which proportions the sample will be split.}
+in which proportions the sample will be split. Can be \code{NULL} if
+\code{initial_est == "robustified"}.}
 }
 \value{
 \code{gauge_avar} returns a numeric value.
