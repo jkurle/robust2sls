@@ -65,3 +65,100 @@ test_that("simes() works correctly", {
   expect_snapshot_output(s2)
 
 })
+
+test_that("multi_cutoff() works correctly", {
+
+  library(robust2sls)
+  p <- generate_param(1, 1, 1, seed = 40)
+  d <- generate_data(parameters = p, n = 1000)$data
+  f <- p$setting$formula
+
+  expect_error(multi_cutoff(gamma = c("a", "b"), data = d, formula = f,
+                            ref_dist = "normal", initial_est = "robustified",
+                            iterations = 1),
+               "'gamma' must be a numeric vector")
+  expect_error(multi_cutoff(gamma = c(-0.1, 0.2), data = d, formula = f,
+                            ref_dist = "normal", initial_est = "robustified",
+                            iterations = 1),
+               "'gamma' must lie between 0 and 1")
+  expect_error(multi_cutoff(gamma = c(3, 0.2), data = d, formula = f,
+                            ref_dist = "normal", initial_est = "robustified",
+                            iterations = 1),
+               "'gamma' must lie between 0 and 1")
+
+  # test two different backends
+  gamma1 <- c(0.01, 0.02)
+  library(doFuture, quietly = TRUE)
+  registerDoFuture()
+  plan(cluster, workers = 2)
+  a0 <- multi_cutoff(gamma = gamma1, data = d, formula = f, ref_dist = "normal",
+                     initial_est = "robustified", iterations = 0)
+  plan(sequential)
+  b0 <- multi_cutoff(gamma = gamma1, data = d, formula = f, ref_dist = "normal",
+                     initial_est = "robustified", iterations = 0)
+  # they will differ in their environments, so need to set to 0 manually
+  attr(a0$gamma0.01$cons$formula, '.Environment') <- NULL
+  attr(b0$gamma0.01$cons$formula, '.Environment') <- NULL
+  attr(a0$gamma0.01$model$m0$formula, '.Environment') <- NULL
+  attr(b0$gamma0.01$model$m0$formula, '.Environment') <- NULL
+  attr(a0$gamma0.01$model$m0$terms$regressors, '.Environment') <- NULL
+  attr(b0$gamma0.01$model$m0$terms$regressors, '.Environment') <- NULL
+  attr(a0$gamma0.01$model$m0$terms$instruments, '.Environment') <- NULL
+  attr(b0$gamma0.01$model$m0$terms$instruments, '.Environment') <- NULL
+  attr(a0$gamma0.01$model$m0$terms$full, '.Environment') <- NULL
+  attr(b0$gamma0.01$model$m0$terms$full, '.Environment') <- NULL
+  attr(attr(a0$gamma0.01$model$m0$model, 'terms'), '.Environment') <- NULL
+  attr(attr(b0$gamma0.01$model$m0$model, 'terms'), '.Environment') <- NULL
+  attr(a0$gamma0.02$cons$formula, '.Environment') <- NULL
+  attr(b0$gamma0.02$cons$formula, '.Environment') <- NULL
+  attr(a0$gamma0.02$model$m0$formula, '.Environment') <- NULL
+  attr(b0$gamma0.02$model$m0$formula, '.Environment') <- NULL
+  attr(a0$gamma0.02$model$m0$terms$regressors, '.Environment') <- NULL
+  attr(b0$gamma0.02$model$m0$terms$regressors, '.Environment') <- NULL
+  attr(a0$gamma0.02$model$m0$terms$instruments, '.Environment') <- NULL
+  attr(b0$gamma0.02$model$m0$terms$instruments, '.Environment') <- NULL
+  attr(a0$gamma0.02$model$m0$terms$full, '.Environment') <- NULL
+  attr(b0$gamma0.02$model$m0$terms$full, '.Environment') <- NULL
+  attr(attr(a0$gamma0.02$model$m0$model, 'terms'), '.Environment') <- NULL
+  attr(attr(b0$gamma0.02$model$m0$model, 'terms'), '.Environment') <- NULL
+  expect_equal(a0, b0)
+
+  # now do manually
+  cpart1 <- outlier_detection(data = d, formula = f, ref_dist = "normal",
+                              initial_est = "robustified", iterations = 0,
+                              sign_level = 0.01)
+  cpart2 <- outlier_detection(data = d, formula = f, ref_dist = "normal",
+                              initial_est = "robustified", iterations = 0,
+                              sign_level = 0.02)
+  c0 <- list(gamma0.01 = cpart1, gamma0.02 = cpart2)
+  # environments but also call will be different, so need to remove manually
+  attr(c0$gamma0.01$cons$formula, '.Environment') <- NULL
+  attr(c0$gamma0.02$cons$formula, '.Environment') <- NULL
+  attr(c0$gamma0.01$model$m0$formula, '.Environment') <- NULL
+  attr(c0$gamma0.02$model$m0$formula, '.Environment') <- NULL
+  attr(c0$gamma0.01$model$m0$terms$regressors, '.Environment') <- NULL
+  attr(c0$gamma0.02$model$m0$terms$regressors, '.Environment') <- NULL
+  attr(c0$gamma0.01$model$m0$terms$instruments, '.Environment') <- NULL
+  attr(c0$gamma0.02$model$m0$terms$instruments, '.Environment') <- NULL
+  attr(c0$gamma0.01$model$m0$terms$full, '.Environment') <- NULL
+  attr(c0$gamma0.02$model$m0$terms$full, '.Environment') <- NULL
+  attr(attr(c0$gamma0.01$model$m0$model, 'terms'), '.Environment') <- NULL
+  attr(attr(c0$gamma0.02$model$m0$model, 'terms'), '.Environment') <- NULL
+  a0$gamma0.01$cons$call <- NULL
+  c0$gamma0.01$cons$call <- NULL
+  a0$gamma0.02$cons$call <- NULL
+  c0$gamma0.02$cons$call <- NULL
+  expect_equal(a0, c0)
+
+  # reset to original
+  a0 <- multi_cutoff(gamma = gamma1, data = d, formula = f, ref_dist = "normal",
+                     initial_est = "robustified", iterations = 0)
+  expect_type(a0, "list")
+  expect_length(a0, length(gamma1))
+  expect_named(a0, c("gamma0.01", "gamma0.02"))
+  expect_equal(class(a0$gamma0.01), "robust2sls")
+  expect_equal(class(a0$gamma0.02), "robust2sls")
+
+  expect_snapshot_output(a0)
+
+})

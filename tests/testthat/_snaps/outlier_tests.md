@@ -38,3 +38,22 @@
     3  0.50 0.10000000  FALSE
     
 
+# multi_cutoff() works correctly
+
+    $gamma0.01
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 | x1 + z2 
+    Iterations:  0 
+    Final selection:  Outliers found:  9     Outliers proportion:  0.009 
+    
+    $gamma0.02
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 | x1 + z2 
+    Iterations:  0 
+    Final selection:  Outliers found:  21     Outliers proportion:  0.021 
+    
+
