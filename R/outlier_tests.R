@@ -386,18 +386,27 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #' \loadmathjax
 #' \mjdeqn{ \sqrt{n}(\widehat{\gamma_{c}} - \gamma_{c}) }{sqrt(n)(gamma_hat - gamma)}
 #'
-#' @param r A list of \code{"robust2sls"} objects.
+#' @param robust2sls_object A list of \code{"robust2sls"} objects.
 #'
 #' @details See \code{\link[=outlier_detection]{outlier_detection()}} and
 #' \code{\link[=multi_cutoff]{multi_cutoff()}} for creating an object of class
 #' \code{"robust2sls"} or a list thereof.
 #'
 #' @return A numeric vector of the centered FODR values.
+#'
+#' @export
 
-multi_cutoff_to_fodr_vec <- function(r, iteration) {
+multi_cutoff_to_fodr_vec <- function(robust2sls_object, iteration) {
 
-  centered_fodr <- function(robust2sls_object, iteration) {
-
+  centered_fodr <- function(r, iteration) {
+    n <- sum(nonmissing(data = r$cons$data, formula = r$cons$formula))
+    gamma_hat <- outliers_prop(robust2sls_object = r, iteration = iteration)
+    gamma <- r$cons$sign_level
+    out <- sqrt(n) * (gamma_hat - gamma)
+    return(out)
   }
+
+  vec <- sapply(X = robust2sls_object, FUN = centered_fodr, iteration = iteration)
+  return(vec)
 
 }

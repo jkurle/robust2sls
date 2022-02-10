@@ -4,10 +4,10 @@
 \alias{multi_cutoff_to_fodr_vec}
 \title{Creates a vector of the centered FODR across different cut-offs}
 \usage{
-multi_cutoff_to_fodr_vec(r)
+multi_cutoff_to_fodr_vec(robust2sls_object, iteration)
 }
 \arguments{
-\item{r}{A list of \code{"robust2sls"} objects.}
+\item{robust2sls_object}{A list of \code{"robust2sls"} objects.}
 }
 \value{
 A numeric vector of the centered FODR values.
