@@ -162,3 +162,345 @@ test_that("multi_cutoff() works correctly", {
   expect_snapshot_output(a0)
 
 })
+
+test_that("proptest() works correctly", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.1, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = "convergence", convergence_criterion = 0,
+                         max_iter = 200)
+
+  # store this so that notice if output changes, which would affect other tests
+  expect_snapshot_output(models)
+
+  # for smaller gammas seems to converge (quicker) but for larger ones not
+  # 0.07, 0.08, 0.1 it goes up to 200 iterations
+  a <- proptest(models, alpha = 0.05, iteration = 0, one_sided = FALSE)
+  b <- proptest(models, alpha = 0.05, iteration = 1, one_sided = FALSE)
+  c <- proptest(models, alpha = 0.05, iteration = "convergence",
+                one_sided = FALSE)
+
+  expect_equal(class(a), "data.frame")
+  expect_equal(class(b), "data.frame")
+  expect_equal(class(c), "data.frame")
+  expect_equal(NROW(a), length(gammas))
+  expect_equal(NROW(b), length(gammas))
+  expect_equal(NROW(c), length(gammas))
+  expect_equal(NCOL(a), 8)
+  expect_equal(NCOL(b), 8)
+  expect_equal(NCOL(c), 8)
+  expect_equal(a$iter_test, rep(0, 10))
+  expect_equal(b$iter_test, rep(1, 10))
+  expect_equal(c$iter_test, rep("convergence", 10))
+  expect_equal(a$iter_act, rep(0, 10))
+  expect_equal(b$iter_act, rep(1, 10))
+  expect_equal(c$iter_act, c(4, 3, 3, 3, 6, 7, 200, 200, 6, 200))
+  expect_equal(a$gamma, seq(0.01, 0.1, 0.01))
+  expect_equal(b$gamma, seq(0.01, 0.1, 0.01))
+  expect_equal(c$gamma, seq(0.01, 0.1, 0.01))
+  expect_equal(a$type, rep("two-sided", 10))
+  expect_equal(b$type, rep("two-sided", 10))
+  expect_equal(c$type, rep("two-sided", 10))
+  expect_equal(a$alpha, rep(0.05, 10))
+  expect_equal(b$alpha, rep(0.05, 10))
+  expect_equal(c$alpha, rep(0.05, 10))
+  expect_equal(a$reject, c(FALSE, FALSE, FALSE, TRUE, rep(FALSE, 6)))
+  expect_equal(b$reject, c(FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE,
+                           TRUE, FALSE, FALSE))
+  expect_equal(c$reject, rep(FALSE, 10))
+
+  expect_snapshot_output(a)
+  expect_snapshot_output(b)
+  expect_snapshot_output(c)
+
+  # try different setting
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 10)
+  a <- proptest(models, alpha = 0.05, iteration = 3, one_sided = TRUE)
+  b <- proptest(models, alpha = 0.01, iteration = 5, one_sided = FALSE)
+  expect_equal(class(a), "data.frame")
+  expect_equal(class(b), "data.frame")
+  expect_equal(NROW(a), length(gammas))
+  expect_equal(NROW(b), length(gammas))
+  expect_equal(NCOL(a), 8)
+  expect_equal(NCOL(b), 8)
+  expect_equal(a$alpha, rep(0.05, 10))
+  expect_equal(b$alpha, rep(0.01, 10))
+  expect_equal(a$iter_test, rep(3, 10))
+  expect_equal(b$iter_test, rep(5, 10))
+  expect_equal(a$iter_act, rep(3, 10))
+  expect_equal(b$iter_act, rep(5, 10))
+  expect_equal(a$type, rep("one-sided", 10))
+  expect_equal(b$type, rep("two-sided", 10))
+
+  expect_snapshot_output(a)
+  expect_snapshot_output(b)
+
+  # try a single robust2sls_object instead of a list
+  model <- outlier_detection(data = d, formula = p$setting$formula,
+                             initial_est = "saturated", ref_dist = "normal",
+                             sign_level = 0.05, iterations = 3, split = 0.5)
+  a <- proptest(model, alpha = 0.1, iteration = 1, one_sided = FALSE)
+  b <- proptest(model, alpha = 0.1, iteration = 1, one_sided = TRUE)
+  expect_equal(NROW(a), 1)
+  expect_equal(NROW(b), 1)
+  expect_equal(NCOL(a), 8)
+  expect_equal(NCOL(b), 8)
+  expect_equal(a$iter_test, 1)
+  expect_equal(b$iter_test, 1)
+  expect_equal(a$iter_act, 1)
+  expect_equal(b$iter_act, 1)
+  expect_equal(a$gamma, 0.05)
+  expect_equal(b$gamma, 0.05)
+  expect_equal(a$t, b$t) # should get same t statistic
+  expect_equal(a$type, "two-sided")
+  expect_equal(b$type, "one-sided")
+  expect_equal(a$alpha, 0.1)
+  expect_equal(b$alpha, 0.1)
+  expect_equal(a$reject, FALSE)
+  expect_equal(b$reject, FALSE)
+  expect_snapshot_output(a)
+  expect_snapshot_output(b)
+  # re-build test statistic and p-values manually
+  sample_fodr <- outliers_prop(model, iteration = 1)
+  expected_fodr <- 0.05
+  n <- NROW(d) # there are no missings, so each observation is actually used
+  param_est <- estimate_param_null(model)
+  avar_est <- gauge_avar(ref_dist = "normal", sign_level = 0.05,
+                         initial_est = "saturated", iteration = 1,
+                         parameters = param_est, split = 0.5)
+  tval <- sqrt(n) * (sample_fodr - expected_fodr) / sqrt(avar_est)
+  tval <- c(tval)# need to put in c() to convert 1x1 matrix to scalar
+  expect_identical(tval, a$t)
+
+  pval1side <- pnorm(q = tval, mean = 0, sd = 1, lower.tail = FALSE) # reject for large positive values
+  pval2side <- 2*pnorm(q = abs(tval), mean = 0, sd = 1, lower.tail = FALSE)
+  expect_identical(pval1side, b$pval)
+  expect_identical(pval2side, a$pval)
+
+})
+
+test_that("proptest() raises correct errors", {
+
+  expect_error(proptest(robust2sls_object = 1, alpha = 0.05, iteration = 1,
+                        one_sided = TRUE),
+               "'robust2sls_object' must be of class 'robust2sls' or a list")
+  expect_error(proptest(robust2sls_object = list(1, 2), alpha = 0.05,
+                        iteration = 1, one_sided = FALSE),
+               "is a list but not all elements have class 'robust2sls'")
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.05, 0.1)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 2)
+
+  expect_error(proptest(models, alpha = "a", iteration = 1, one_sided = TRUE),
+               "'alpha' must be a numeric value of length one")
+  expect_error(proptest(models, alpha = c(1,1), iteration = 1,
+                        one_sided = TRUE),
+               "'alpha' must be a numeric value of length one")
+  expect_error(proptest(models, alpha = 1.2, iteration = 1, one_sided = FALSE),
+               "'alpha' must be between 0 and 1")
+  expect_error(proptest(models, alpha = -4, iteration = 1, one_sided = FALSE),
+               "'alpha' must be between 0 and 1")
+  expect_error(proptest(models, alpha = 0.05, iteration = FALSE,
+                        one_sided = FALSE),
+               "'iteration' must either be a numeric")
+  expect_error(proptest(models, alpha = 0.05, iteration = "abc",
+                        one_sided = FALSE),
+               "'iteration' must either be a numeric or the string 'convergence'")
+  expect_error(proptest(models, alpha = 0.05, iteration = c(1, 2),
+                        one_sided = FALSE),
+               "'iteration' must be of length one")
+  expect_error(proptest(models, alpha = 0.05, iteration = 1.3,
+                        one_sided = FALSE),
+               "'iteration' must be an integer")
+  expect_error(proptest(models, alpha = 0.01, iteration = 1,
+                        one_sided = "FALSE"),
+               "'one_sided' must be a logical value of length one")
+  expect_error(proptest(models, alpha = 0.01, iteration = 1,
+                        one_sided = c(TRUE, FALSE)),
+               "'one_sided' must be a logical value of length one")
+
+})
+
+test_that("counttest() raises correct errors", {
+
+  expect_error(counttest(robust2sls_object = 1, alpha = 0.05, iteration = 1,
+                        one_sided = TRUE),
+               "'robust2sls_object' must be of class 'robust2sls' or a list")
+  expect_error(counttest(robust2sls_object = list(1, 2), alpha = 0.05,
+                        iteration = 1, one_sided = FALSE),
+               "is a list but not all elements have class 'robust2sls'")
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.05, 0.1)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 2)
+
+  expect_error(counttest(models, alpha = "a", iteration = 1, one_sided = TRUE),
+               "'alpha' must be a numeric value of length one")
+  expect_error(counttest(models, alpha = c(1,1), iteration = 1,
+                        one_sided = TRUE),
+               "'alpha' must be a numeric value of length one")
+  expect_error(counttest(models, alpha = 1.2, iteration = 1, one_sided = FALSE),
+               "'alpha' must be between 0 and 1")
+  expect_error(counttest(models, alpha = -4, iteration = 1, one_sided = FALSE),
+               "'alpha' must be between 0 and 1")
+  expect_error(counttest(models, alpha = 0.05, iteration = FALSE,
+                        one_sided = FALSE),
+               "'iteration' must either be a numeric")
+  expect_error(counttest(models, alpha = 0.05, iteration = "abc",
+                        one_sided = FALSE),
+               "'iteration' must either be a numeric or the string 'convergence'")
+  expect_error(counttest(models, alpha = 0.05, iteration = c(1, 2),
+                        one_sided = FALSE),
+               "'iteration' must be of length one")
+  expect_error(counttest(models, alpha = 0.05, iteration = 1.3,
+                        one_sided = FALSE),
+               "'iteration' must be an integer")
+  expect_error(counttest(models, alpha = 0.01, iteration = 1,
+                        one_sided = "FALSE"),
+               "'one_sided' must be a logical value of length one")
+  expect_error(counttest(models, alpha = 0.01, iteration = 1,
+                        one_sided = c(TRUE, FALSE)),
+               "'one_sided' must be a logical value of length one")
+
+})
+
+test_that("counttest() works correctly", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.1, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = "convergence", convergence_criterion = 0,
+                         max_iter = 200)
+
+  # store this so that notice if output changes, which would affect other tests
+  expect_snapshot_output(models)
+
+  # for smaller gammas seems to converge (quicker) but for larger ones not
+  # 0.07, 0.08, 0.1 it goes up to 200 iterations
+  a <- counttest(models, alpha = 0.05, iteration = 0, one_sided = FALSE)
+  b <- counttest(models, alpha = 0.05, iteration = 1, one_sided = FALSE)
+  c <- counttest(models, alpha = 0.05, iteration = "convergence",
+                one_sided = FALSE)
+
+  expect_equal(class(a), "data.frame")
+  expect_equal(class(b), "data.frame")
+  expect_equal(class(c), "data.frame")
+  expect_equal(NROW(a), length(gammas))
+  expect_equal(NROW(b), length(gammas))
+  expect_equal(NROW(c), length(gammas))
+  expect_equal(NCOL(a), 9)
+  expect_equal(NCOL(b), 9)
+  expect_equal(NCOL(c), 9)
+  expect_equal(colnames(a), c("iter_test", "iter_act", "gamma", "num_act",
+                              "num_exp", "type", "pval", "alpha", "reject"))
+  expect_equal(colnames(b), c("iter_test", "iter_act", "gamma", "num_act",
+                              "num_exp", "type", "pval", "alpha", "reject"))
+  expect_equal(colnames(c), c("iter_test", "iter_act", "gamma", "num_act",
+                              "num_exp", "type", "pval", "alpha", "reject"))
+  expect_equal(a$iter_test, rep(0, 10))
+  expect_equal(b$iter_test, rep(1, 10))
+  expect_equal(c$iter_test, rep("convergence", 10))
+  expect_equal(a$iter_act, rep(0, 10))
+  expect_equal(b$iter_act, rep(1, 10))
+  expect_equal(c$iter_act, c(4, 3, 3, 3, 6, 7, 200, 200, 6, 200))
+  expect_equal(a$gamma, seq(0.01, 0.1, 0.01))
+  expect_equal(b$gamma, seq(0.01, 0.1, 0.01))
+  expect_equal(c$gamma, seq(0.01, 0.1, 0.01))
+  expect_equal(a$type, rep("two-sided", 10))
+  expect_equal(b$type, rep("two-sided", 10))
+  expect_equal(c$type, rep("two-sided", 10))
+  expect_equal(a$alpha, rep(0.05, 10))
+  expect_equal(b$alpha, rep(0.05, 10))
+  expect_equal(c$alpha, rep(0.05, 10))
+  expect_equal(a$reject, rep(FALSE, 10))
+  expect_equal(b$reject, c(FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE,
+                           TRUE, FALSE, FALSE))
+  expect_equal(c$reject, c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE,
+                           FALSE, FALSE))
+  expect_snapshot_output(a)
+  expect_snapshot_output(b)
+  expect_snapshot_output(c)
+
+  # try different setting
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 10)
+  a <- counttest(models, alpha = 0.05, iteration = 3, one_sided = TRUE)
+  b <- counttest(models, alpha = 0.01, iteration = 5, one_sided = FALSE)
+  expect_equal(class(a), "data.frame")
+  expect_equal(class(b), "data.frame")
+  expect_equal(NROW(a), length(gammas))
+  expect_equal(NROW(b), length(gammas))
+  expect_equal(NCOL(a), 9)
+  expect_equal(NCOL(b), 9)
+  expect_equal(colnames(a), c("iter_test", "iter_act", "gamma", "num_act",
+                              "num_exp", "type", "pval", "alpha", "reject"))
+  expect_equal(colnames(b), c("iter_test", "iter_act", "gamma", "num_act",
+                              "num_exp", "type", "pval", "alpha", "reject"))
+  expect_equal(a$alpha, rep(0.05, 10))
+  expect_equal(b$alpha, rep(0.01, 10))
+  expect_equal(a$iter_test, rep(3, 10))
+  expect_equal(b$iter_test, rep(5, 10))
+  expect_equal(a$iter_act, rep(3, 10))
+  expect_equal(b$iter_act, rep(5, 10))
+  expect_equal(a$type, rep("one-sided", 10))
+  expect_equal(b$type, rep("two-sided", 10))
+
+  expect_snapshot_output(a)
+  expect_snapshot_output(b)
+
+  # try a single robust2sls_object instead of a list
+  model <- outlier_detection(data = d, formula = p$setting$formula,
+                             initial_est = "saturated", ref_dist = "normal",
+                             sign_level = 0.05, iterations = 3, split = 0.5)
+  a <- counttest(model, alpha = 0.1, iteration = 1, one_sided = FALSE)
+  b <- counttest(model, alpha = 0.1, iteration = 1, one_sided = TRUE)
+  expect_equal(NROW(a), 1)
+  expect_equal(NROW(b), 1)
+  expect_equal(NCOL(a), 9)
+  expect_equal(NCOL(b), 9)
+  expect_equal(colnames(a), c("iter_test", "iter_act", "gamma", "num_act",
+                              "num_exp", "type", "pval", "alpha", "reject"))
+  expect_equal(colnames(b), c("iter_test", "iter_act", "gamma", "num_act",
+                              "num_exp", "type", "pval", "alpha", "reject"))
+  expect_equal(a$iter_test, 1)
+  expect_equal(b$iter_test, 1)
+  expect_equal(a$iter_act, 1)
+  expect_equal(b$iter_act, 1)
+  expect_equal(a$gamma, 0.05)
+  expect_equal(b$gamma, 0.05)
+  expect_equal(a$num_act, b$num_act) # should get same
+  expect_equal(a$num_exp, b$num_exp) # should get same
+  expect_equal(a$type, "two-sided")
+  expect_equal(b$type, "one-sided")
+  expect_equal(a$alpha, 0.1)
+  expect_equal(b$alpha, 0.1)
+  expect_equal(a$reject, FALSE)
+  expect_equal(b$reject, FALSE)
+  expect_snapshot_output(a)
+  expect_snapshot_output(b)
+  # re-build p-values manually
+  num_act <- outliers(model, iteration = 1)
+  num_exp <- model$cons$sign_level * NROW(d)
+  pval2side <- stats::poisson.test(x = num_act, r = num_exp,
+                                   alternative = "two.sided")$p.value
+  pval1side <- stats::poisson.test(x = num_act, r = num_exp,
+                                   alternative = "greater")$p.value
+  expect_identical(a$pval, pval2side)
+  expect_identical(b$pval, pval1side)
+
+})

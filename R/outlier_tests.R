@@ -63,6 +63,8 @@ test_cpv <- function(dist, teststat, p) {
 #'
 #' @details See
 #' \href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
+#'
+#' @export
 
 simes <- function(pvals, alpha) {
 
@@ -151,26 +153,64 @@ multi_cutoff <- function(gamma, ...) {
 #' list of such objects.
 #' @param alpha A numeric value between 0 and 1 representing the significance
 #' level of the test.
-#' @param iteration An integer >= 0 that determines which iteration is used for
-#' the test.
+#' @param iteration An integer >= 0 or the character "convergence" that
+#' determines which iteration is used for the test.
+#' @param one_sided A logical value whether a two-sided test (\code{FALSE})
+#'   should be conducted or a one-sided test (\code{TRUE}) that rejects only
+#'   when the false outlier detection rate is above its expected value.
 #'
 #' @details See \code{\link[=outlier_detection]{outlier_detection()}} and
 #' \code{\link[=multi_cutoff]{multi_cutoff()}} for creating an object of class
 #' \code{"robust2sls"} or a list thereof.
 #'
-#' @return \code{proptest()} returns a data frame with the setting of the
-#' cut-off (and corresponding probability of exceeding the cut-off, gamma),
-#' the value of the test statistic, its p-value, the significance level
-#' \code{alpha}, and the decision. The number of rows of the data frame
-#' corresponds to the length of the argument \code{robust2sls_object}.
+#' @return \code{proptest()} returns a data frame with the iteration (m) to be
+#' tested, the actual iteration that was tested (generally coincides with the
+#' iteration that was specified to be tested but is the convergent iteration if
+#' the fixed point is tested), the setting of the probability of exceeding the
+#' cut-off (gamma), the type of t-test (one- or two-sided), the value of the
+#' test statistic, its p-value, the significance level \code{alpha}, and the
+#' decision. The number of rows of the data frame corresponds to the length of
+#' the argument \code{robust2sls_object}.
 #'
 #' @export
 
-proptest <- function(robust2sls_object, alpha, iteration) {
+proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
+
+  # check input values
+  if (!(identical(class(robust2sls_object), "robust2sls") | identical(class(robust2sls_object), "list"))) {
+    stop("Argument 'robust2sls_object' must be of class 'robust2sls' or a list of such objects.")
+  }
+  classes <- sapply(X = robust2sls_object, FUN = class)
+  if (identical(class(robust2sls_object), "list") && !all(classes == "robust2sls")) {
+    stop("Argument 'robust2sls_object' is a list but not all elements have class 'robust2sls'.")
+  }
+  if (!is.numeric(alpha) | !identical(length(alpha), 1L)) {
+    stop("Argument 'alpha' must be a numeric value of length one.")
+  }
+  if (!(alpha >= 0 & alpha <= 1)) {
+    stop("Argument 'alpha' must be between 0 and 1.")
+  }
+  if (!(is.numeric(iteration) | identical(iteration, "convergence"))) {
+    stop("Argument 'iteration' must either be a numeric or the string 'convergence'.")
+  }
+  if (is.numeric(iteration) & !identical(length(iteration), 1L)) {
+    stop("Argument 'iteration' must be of length one.")
+  }
+  if (is.numeric(iteration) && !((iteration %% 1) == 0)) {
+    stop("Argument 'iteration' must be an integer.")
+  }
+  if (!is.logical(one_sided) | !identical(length(one_sided), 1L)) {
+    stop("Argument 'one_sided' must be a logical value of length one.")
+  }
 
   # define auxiliary function
-  proptest_fun <- function(r, alpha, iter) {
-    actual_prop <- outliers_prop(robust2sls_object = r, iteration = iter)
+  proptest_fun <- function(r, iter) {
+    if (iter == "convergence") {
+      final_iter <- r$cons$iterations$actual
+      actual_prop <- outliers_prop(robust2sls_object = r, iteration = final_iter)
+    } else {
+      actual_prop <- outliers_prop(robust2sls_object = r, iteration = iter)
+    }
     expected_prop <- r$cons$sign_level
     n <- sum(nonmissing(data = r$cons$data, formula = r$cons$formula))
     est_param <- estimate_param_null(robust2SLS_object = r)
@@ -185,33 +225,179 @@ proptest <- function(robust2sls_object, alpha, iteration) {
   }
 
   # check that selected iteration is actually available in robust2sls_object(s)
-  if(identical(class(robust2sls_object), "robust2sls")) {
+  if (identical(class(robust2sls_object), "robust2sls")) {
     iter_set <- robust2sls_object$cons$iterations$setting
-    iter_act <- robust2sls_object$cons$iterations$actual
+    if (identical(iteration, "convergence")) {
+      iter_act <- robust2sls_object$cons$iterations$actual
+    } else {
+      iter_act <- iteration
+    }
+    iter_max <- robust2sls_object$cons$convergence$max_iter
     gamma <- robust2sls_object$cons$sign_level
-    t <- proptest_fun(r = robust2sls_object, alpha = alpha, iter = iteration)
-    pval <- 2*pnorm(q = abs(t), mean = 0, sd = 1, lower.tail = FALSE)
+    t <- proptest_fun(r = robust2sls_object, iter = iteration)
+    if (isTRUE(one_sided)) {
+      type <- "one-sided"
+      pval <- pnorm(q = t, mean = 0, sd = 1, lower.tail = FALSE)
+    } else {
+      type <- "two-sided"
+      pval <- 2*pnorm(q = abs(t), mean = 0, sd = 1, lower.tail = FALSE)
+    }
   } else if (identical(class(robust2sls_object), "list")) {
     # return list because could be different types (numeric or character for convergence)
-    iter_set <- lapply(X = robust2sls_object, FUN = function(x) x$cons$iterations$setting)
-    iter_act <- lapply(X = robust2sls_object, FUN = function(x) x$cons$iterations$actual)
+    iter_set <- sapply(X = robust2sls_object, FUN = function(x) x$cons$iterations$setting)
+    if (identical(iteration, "convergence")) {
+      iter_act <- sapply(X = robust2sls_object, FUN = function(x) x$cons$iterations$actual)
+    } else {
+      iter_act <- iteration
+    }
+    iter_max <- sapply(X = robust2sls_object, FUN = function(x) x$cons$convergence$max_iter)
     # return vector because know it must be numeric
     gamma <- sapply(X = robust2sls_object, FUN = function(x) x$cons$sign_level)
-    t <- sapply(X = robust2sls_object, FUN = proptest_fun, alpha = alpha, iter = iteration)
-    pval <- sapply(X = t, FUN = function(x) 2*pnorm(q = abs(x), mean = 0, sd = 1, lower.tail = FALSE))
+    t <- sapply(X = robust2sls_object, FUN = proptest_fun, iter = iteration)
+    if (isTRUE(one_sided)) {
+      type <- "one-sided"
+      pval <- sapply(X = t, FUN = function(x) pnorm(q = x, mean = 0, sd = 1, lower.tail = FALSE))
+    } else {
+      type <- "two-sided"
+      pval <- sapply(X = t, FUN = function(x) 2*pnorm(q = abs(x), mean = 0, sd = 1, lower.tail = FALSE))
+    }
   } else {
     stop("Argument 'robust2sls_object' invalid input type.")
   }
 
-  out <- data.frame(iteration = iteration, gamma = gamma, t = t, pval = pval,
-                    alpha = alpha, reject = (pval <= alpha))
+  out <- data.frame(iter_test = iteration, iter_act = iter_act, gamma = gamma, t = t, type = type,
+                    pval = pval, alpha = alpha, reject = (pval <= alpha))
 
   return(out)
 
 }
 
+#' Count test
+#'
+#' \code{counttest()} conducts a test whether the number of detected outliers
+#' deviates significantly from the expected number of outliers under the null
+#' hypothesis that there are no outliers in the sample.
+#' @inheritParams proptest
+#' @param one_sided A logical value whether a two-sided test (\code{FALSE})
+#'   should be conducted or a one-sided test (\code{TRUE}) that rejects only
+#'   when the number of detected outliers is above the expected number.
+#'
+#' @details See \code{\link[=outlier_detection]{outlier_detection()}} and
+#' \code{\link[=multi_cutoff]{multi_cutoff()}} for creating an object of class
+#' \code{"robust2sls"} or a list thereof.
+#'
+#' @return \code{proptest()} returns a data frame with the iteration (m) to be
+#' tested, the actual iteration that was tested (generally coincides with the
+#' iteration that was specified to be tested but is the convergent iteration if
+#' the fixed point is tested), the setting of the probability of exceeding the
+#' cut-off (gamma), the number of detected outliers, the expected number of
+#' outliers under the null hypothesis that there are no outliers, the type of
+#' test (one- or two-sided), the p-value, the significance level \code{alpha},
+#' and the decision. The number of rows of the data frame corresponds to the
+#' length of the argument \code{robust2sls_object}.
+#'
+#' @export
 
+counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 
+  # check input values
+  if (!(identical(class(robust2sls_object), "robust2sls") | identical(class(robust2sls_object), "list"))) {
+    stop("Argument 'robust2sls_object' must be of class 'robust2sls' or a list of such objects.")
+  }
+  classes <- sapply(X = robust2sls_object, FUN = class)
+  if (identical(class(robust2sls_object), "list") && !all(classes == "robust2sls")) {
+    stop("Argument 'robust2sls_object' is a list but not all elements have class 'robust2sls'.")
+  }
+  if (!is.numeric(alpha) | !identical(length(alpha), 1L)) {
+    stop("Argument 'alpha' must be a numeric value of length one.")
+  }
+  if (!(alpha >= 0 & alpha <= 1)) {
+    stop("Argument 'alpha' must be between 0 and 1.")
+  }
+  if (!(is.numeric(iteration) | identical(iteration, "convergence"))) {
+    stop("Argument 'iteration' must either be a numeric or the string 'convergence'.")
+  }
+  if (is.numeric(iteration) & !identical(length(iteration), 1L)) {
+    stop("Argument 'iteration' must be of length one.")
+  }
+  if (is.numeric(iteration) && !((iteration %% 1) == 0)) {
+    stop("Argument 'iteration' must be an integer.")
+  }
+  if (!is.logical(one_sided) | !identical(length(one_sided), 1L)) {
+    stop("Argument 'one_sided' must be a logical value of length one.")
+  }
 
+  # define auxiliary function
+  counttest_fun <- function(r, iter, type) {
+    if (isTRUE(type)) {
+      alt <- "greater"
+    } else {
+      alt <- "two.sided"
+    }
+    if (iter == "convergence") {
+      iter_act <- r$cons$iterations$actual
+    } else {
+      iter_act <- iter
+    }
+    num_act <- outliers(robust2sls_object = r, iteration = iter_act)
+    n <- sum(nonmissing(data = r$cons$data, formula = r$cons$formula))
+    gamma <- r$cons$sign_level
+    num_exp <- gamma * n
+    pvalue <- stats::poisson.test(x = num_act, r = num_exp,
+                                  alternative = alt)$p.value
 
+    if (identical(alt, "greater")) {
+      alt2 <- "one-sided"
+    } else {
+      alt2 <- "two-sided"
+    }
 
+    out <- c(iter, iter_act, gamma, num_act, num_exp, alt2, pvalue)
+    out <- data.frame(iter_test = iter, iter_act = iter_act, gamma = gamma,
+                      num_act = num_act, num_exp = num_exp, type = alt2,
+                      pval = pvalue)
+    return(out)
+
+  }
+
+  if (identical(class(robust2sls_object), "robust2sls")) {
+    result <- counttest_fun(r = robust2sls_object, iter = iteration, type = one_sided)
+  } else if (identical(class(robust2sls_object), "list")) {
+    iter_max <- sapply(X = robust2sls_object, FUN = function(x) x$cons$convergence$max_iter)
+    result <- do.call(rbind, lapply(X = robust2sls_object, FUN = counttest_fun, iter = iteration, type = one_sided))
+  } else {
+    stop("Argument 'robust2sls_object' invalid input type.")
+  }
+
+  colnames(result) <- c("iter_test", "iter_act", "gamma", "num_act", "num_exp",
+                        "type", "pval")
+  result <- as.data.frame(result)
+  result <- cbind(result, data.frame(alpha = alpha))
+  result <- cbind(result, reject = (result$pval <= result$alpha))
+  return(result)
+
+}
+
+#' Creates a vector of the centered FODR across different cut-offs
+#'
+#' \code{multi_cutoff_to_fodr_vec()} takes a list of \code{"robust2sls"} objects
+#' and returns a vector of the centered FODR (sample - expected) for different
+#' values of the cut-off c (equivalently gamma):
+#' \loadmathjax
+#' \mjdeqn{ \sqrt{n}(\widehat{\gamma_{c}} - \gamma_{c}) }{sqrt(n)(gamma_hat - gamma)}
+#'
+#' @param r A list of \code{"robust2sls"} objects.
+#'
+#' @details See \code{\link[=outlier_detection]{outlier_detection()}} and
+#' \code{\link[=multi_cutoff]{multi_cutoff()}} for creating an object of class
+#' \code{"robust2sls"} or a list thereof.
+#'
+#' @return A numeric vector of the centered FODR values.
+
+multi_cutoff_to_fodr_vec <- function(r, iteration) {
+
+  centered_fodr <- function(robust2sls_object, iteration) {
+
+  }
+
+}
