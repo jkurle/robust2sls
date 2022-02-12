@@ -14,7 +14,7 @@
 #' vector of sample quantiles in the distribution \code{dist} corresponding to
 #' the probabilities specified in \code{p}.
 #'
-#' @export
+#' @keywords internal
 
 test_cpv <- function(dist, teststat, p) {
 
@@ -64,7 +64,7 @@ test_cpv <- function(dist, teststat, p) {
 #' @details See
 #' \href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
 #'
-#' @export
+#' @keywords internal
 
 simes <- function(pvals, alpha) {
 
@@ -395,7 +395,7 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #'
 #' @return A numeric vector of the centered FODR values.
 #'
-#' @export
+#' @keywords internal
 
 multi_cutoff_to_fodr_vec <- function(robust2sls_object, iteration) {
 
@@ -574,7 +574,6 @@ sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #' \code{p}.
 #'
 #' @export
-#'
 
 suptest <- function(robust2sls_object, alpha, iteration, p = c(0.9, 0.95, 0.99),
                     R = 50000) {

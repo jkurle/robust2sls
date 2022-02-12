@@ -27,3 +27,4 @@ See \code{\link[=outlier_detection]{outlier_detection()}} and
 \code{\link[=multi_cutoff]{multi_cutoff()}} for creating an object of class
 \code{"robust2sls"} or a list thereof.
 }
+\keyword{internal}

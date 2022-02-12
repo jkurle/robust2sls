@@ -30,3 +30,4 @@ null hypotheses.
 See
 \href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
 }
+\keyword{internal}

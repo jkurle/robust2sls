@@ -25,3 +25,4 @@ the probabilities specified in \code{p}.
 \code{test_cpv} returns the critical value corresponding to a given
 quantile of the simulated distribution and the p-value of the test statistic.
 }
+\keyword{internal}
