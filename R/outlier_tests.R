@@ -387,6 +387,7 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #' \mjdeqn{ \sqrt{n}(\widehat{\gamma_{c}} - \gamma_{c}) }{sqrt(n)(gamma_hat - gamma)}
 #'
 #' @param robust2sls_object A list of \code{"robust2sls"} objects.
+#' @inheritParams proptest
 #'
 #' @details See \code{\link[=outlier_detection]{outlier_detection()}} and
 #' \code{\link[=multi_cutoff]{multi_cutoff()}} for creating an object of class
@@ -398,9 +399,30 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 
 multi_cutoff_to_fodr_vec <- function(robust2sls_object, iteration) {
 
+  if (!identical(class(robust2sls_object), "list")) {
+    stop("Argument 'robust2sls_object' must be a list of 'robust2sls' objects.")
+  }
+  classes <- sapply(X = robust2sls_object, FUN = class)
+  if (is.list(robust2sls_object) && !all(classes == "robust2sls")) {
+    stop("Argument 'robust2sls_object' must be a list of 'robust2sls' objects.")
+  }
+  if (!(is.numeric(iteration) | identical(iteration, "convergence"))) {
+    stop("Argument 'iteration' must be numeric or the string 'convergence'.")
+  }
+  if (is.numeric(iteration)) {
+    if (!((iteration %% 1) == 0) | iteration < 0) {
+      stop("Argument 'iteration' must be an integer >= 0 if numeric.")
+    }
+  }
+
   centered_fodr <- function(r, iteration) {
+    if (identical(iteration, "convergence")) {
+      iter_act <- r$cons$iterations$actual
+    } else {
+      iter_act <- iteration
+    }
     n <- sum(nonmissing(data = r$cons$data, formula = r$cons$formula))
-    gamma_hat <- outliers_prop(robust2sls_object = r, iteration = iteration)
+    gamma_hat <- outliers_prop(robust2sls_object = r, iteration = iter_act)
     gamma <- r$cons$sign_level
     out <- sqrt(n) * (gamma_hat - gamma)
     return(out)

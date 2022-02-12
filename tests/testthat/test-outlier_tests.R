@@ -504,3 +504,95 @@ test_that("counttest() works correctly", {
   expect_identical(b$pval, pval1side)
 
 })
+
+test_that("multi_cutoff_to_fodr_vec() raises correct errors", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.1, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = "convergence", convergence_criterion = 0,
+                         max_iter = 20)
+  model <- outlier_detection(data = d, formula = p$setting$formula,
+                             ref_dist = "normal", iterations = 3,
+                             sign_level = 0.01, initial_est = "robustified")
+
+  expect_error(multi_cutoff_to_fodr_vec(c("a", "b"), 0),
+               "'robust2sls_object' must be a list of 'robust2sls' objects")
+  expect_error(multi_cutoff_to_fodr_vec(list(a = "a", b = "b"), 0),
+               "'robust2sls_object' must be a list of 'robust2sls' objects")
+  expect_error(multi_cutoff_to_fodr_vec(model, 0),
+               "'robust2sls_object' must be a list of 'robust2sls' objects")
+  expect_error(multi_cutoff_to_fodr_vec(models, "nope"),
+               "'iteration' must be numeric or the string 'convergence'")
+  expect_error(multi_cutoff_to_fodr_vec(models, TRUE),
+               "'iteration' must be numeric or the string 'convergence'")
+  expect_error(multi_cutoff_to_fodr_vec(models, 1.4),
+               "'iteration' must be an integer >= 0 if numeric")
+  expect_error(multi_cutoff_to_fodr_vec(models, -3),
+               "'iteration' must be an integer >= 0 if numeric")
+
+})
+
+test_that("multi_cutoff_to_fodr_vec() works correctly", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.1, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = "convergence", convergence_criterion = 0,
+                         max_iter = 20)
+
+  # ensure we notice if the input changes, then may not be the problem of to_vec
+  expect_snapshot_output(models)
+
+  # test iteration 0
+  a <- multi_cutoff_to_fodr_vec(models, iteration = 0)
+  expect_snapshot_output(a)
+  expect_length(a, length(models))
+  expect_identical(class(a), "numeric")
+  expect_named(a, c("gamma0.01", "gamma0.02", "gamma0.03", "gamma0.04",
+                    "gamma0.05", "gamma0.06", "gamma0.07", "gamma0.08",
+                    "gamma0.09", "gamma0.1"))
+
+  # do some calculations manually
+  # gamma 0.01
+  share <- sum(models[[1]]$type$m0 == 0) / 1000
+  res <- sqrt(1000) * (share - 0.01)
+  names(res) <- "gamma0.01"
+  expect_identical(a[1], res)
+  # gamma 0.1
+  share <- sum(models[[10]]$type$m0 == 0) / 1000
+  res <- sqrt(1000) * (share - 0.1)
+  names(res) <- "gamma0.1"
+  expect_equal(a[10], res, tolerance = 0.0000000000001)
+
+  # test iteration convergence
+  a <- multi_cutoff_to_fodr_vec(models, iteration = "convergence")
+  expect_snapshot_output(a)
+  expect_length(a, length(models))
+  expect_identical(class(a), "numeric")
+  expect_named(a, c("gamma0.01", "gamma0.02", "gamma0.03", "gamma0.04",
+                    "gamma0.05", "gamma0.06", "gamma0.07", "gamma0.08",
+                    "gamma0.09", "gamma0.1"))
+
+  # check whether correct iteration (final one) was used for convergence
+  # gamma 0.01 converged at iteration 4
+  share <- sum(models[[1]]$type$m4 == 0) / 1000
+  res <- sqrt(1000) * (share - 0.01)
+  names(res) <- "gamma0.01"
+  expect_identical(a[1], res)
+  # gamma 0.02 converged at iteration 3
+  share <- sum(models[[2]]$type$m3 == 0) / 1000
+  res <- sqrt(1000) * (share - 0.02)
+  names(res) <- "gamma0.02"
+  expect_identical(a[2], res)
+  # gamma 0.1 did not converge, stopped at iteration 20
+  share <- sum(models[[10]]$type$m20 == 0) / 1000
+  res <- sqrt(1000) * (share - 0.1)
+  names(res) <- "gamma0.1"
+  expect_equal(a[10], res, tolerance = 0.00000000000001)
+
+})

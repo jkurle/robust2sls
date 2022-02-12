@@ -8,6 +8,9 @@ multi_cutoff_to_fodr_vec(robust2sls_object, iteration)
 }
 \arguments{
 \item{robust2sls_object}{A list of \code{"robust2sls"} objects.}
+
+\item{iteration}{An integer >= 0 or the character "convergence" that
+determines which iteration is used for the test.}
 }
 \value{
 A numeric vector of the centered FODR values.

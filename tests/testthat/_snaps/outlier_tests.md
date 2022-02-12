@@ -449,3 +449,100 @@
       iter_test iter_act gamma num_act num_exp      type      pval alpha reject
     1         1        1  0.05      38      50 one-sided 0.9660451   0.1  FALSE
 
+# multi_cutoff_to_fodr_vec() works correctly
+
+    $gamma0.01
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  4 
+    Final selection:  Outliers found:  4     Outliers proportion:  0.004 
+    
+    $gamma0.02
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  3 
+    Final selection:  Outliers found:  13     Outliers proportion:  0.013 
+    
+    $gamma0.03
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  3 
+    Final selection:  Outliers found:  21     Outliers proportion:  0.021 
+    
+    $gamma0.04
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  3 
+    Final selection:  Outliers found:  26     Outliers proportion:  0.026 
+    
+    $gamma0.05
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  6 
+    Final selection:  Outliers found:  32     Outliers proportion:  0.032 
+    
+    $gamma0.06
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  7 
+    Final selection:  Outliers found:  39     Outliers proportion:  0.039 
+    
+    $gamma0.07
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  20 
+    Final selection:  Outliers found:  44     Outliers proportion:  0.044 
+    
+    $gamma0.08
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  20 
+    Final selection:  Outliers found:  52     Outliers proportion:  0.052 
+    
+    $gamma0.09
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  6 
+    Final selection:  Outliers found:  83     Outliers proportion:  0.083 
+    
+    $gamma0.1
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  20 
+    Final selection:  Outliers found:  92     Outliers proportion:  0.092 
+    
+
+---
+
+      gamma0.01   gamma0.02   gamma0.03   gamma0.04   gamma0.05   gamma0.06 
+    -0.12649111 -0.18973666 -0.18973666 -0.28460499 -0.22135944 -0.25298221 
+      gamma0.07   gamma0.08   gamma0.09    gamma0.1 
+    -0.22135944 -0.25298221  0.00000000  0.03162278 
+
+---
+
+     gamma0.01  gamma0.02  gamma0.03  gamma0.04  gamma0.05  gamma0.06  gamma0.07 
+    -0.1897367 -0.2213594 -0.2846050 -0.4427189 -0.5692100 -0.6640783 -0.8221922 
+     gamma0.08  gamma0.09   gamma0.1 
+    -0.8854377 -0.2213594 -0.2529822 
+
