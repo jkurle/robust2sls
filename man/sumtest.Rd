@@ -24,8 +24,8 @@ when the false outlier detection rate is above its expected value.}
 iteration that was tested, the value of the test statistic (t-test), the
 type of the test (one- or two-sided), the corresponding p-value, the
 significance level, and whether the null hypothesis is rejected. The data
-frame also contains an attributed named \code{"gammas"} that records which
-gammas dettermining the different cut-offs were used in the scaling sum test.
+frame also contains an attribute named \code{"gammas"} that records which
+gammas determining the different cut-offs were used in the scaling sum test.
 }
 \description{
 \code{sumtest()} uses the estimations across several cut-offs to test whether

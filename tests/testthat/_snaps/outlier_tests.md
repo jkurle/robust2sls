@@ -652,3 +652,61 @@
       iter_test         t      type       pval alpha reject
     1         0 -2.255126 two-sided 0.02412544  0.05   TRUE
 
+# suptest() works correctly
+
+      iter_test test_value    pval alpha reject
+    1         0   0.284605 0.08934  0.05  FALSE
+
+---
+
+      iter_test test_value    pval alpha reject
+    1         1  0.4427189 0.09846   0.1   TRUE
+
+---
+
+    $gamma0.01
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  4 
+    Final selection:  Outliers found:  4     Outliers proportion:  0.004 
+    
+    $gamma0.02
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  3 
+    Final selection:  Outliers found:  13     Outliers proportion:  0.013 
+    
+    $gamma0.03
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  3 
+    Final selection:  Outliers found:  21     Outliers proportion:  0.021 
+    
+    $gamma0.04
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  3 
+    Final selection:  Outliers found:  26     Outliers proportion:  0.026 
+    
+    $gamma0.05
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  6 
+    Final selection:  Outliers found:  32     Outliers proportion:  0.032 
+    
+
+---
+
+        iter_test test_value    pval alpha reject
+    1 convergence    0.56921 0.12024  0.05  FALSE
+

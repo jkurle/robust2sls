@@ -727,3 +727,110 @@ test_that("sumtest() works correctly", {
                "requires several different cutoffs")
 
 })
+
+
+test_that("suptest() raises correct error", {
+
+  expect_error(suptest(robust2sls_object = 1, alpha = 0.05, iteration = 1),
+               "'robust2sls_object' must be a list of 'robust2sls' objects")
+  expect_error(suptest(robust2sls_object = list(1, 2), alpha = 0.05,
+                       iteration = 1),
+               "'robust2sls_object' must be a list of 'robust2sls' objects")
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.05, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 2)
+
+  expect_error(suptest(models, alpha = "a", iteration = 1),
+               "'alpha' must be a numeric value of length one")
+  expect_error(suptest(models, alpha = c(1,1), iteration = 1),
+               "'alpha' must be a numeric value of length one")
+  expect_error(suptest(models, alpha = 1.2, iteration = 1),
+               "'alpha' must be between 0 and 1")
+  expect_error(suptest(models, alpha = -4, iteration = 1),
+               "'alpha' must be between 0 and 1")
+  expect_error(suptest(models, alpha = 0.05, iteration = FALSE),
+               "'iteration' must either be a numeric")
+  expect_error(suptest(models, alpha = 0.05, iteration = "abc"),
+               "'iteration' must either be a numeric or the string 'convergence'")
+  expect_error(suptest(models, alpha = 0.05, iteration = c(1, 2)),
+               "'iteration' must be of length one")
+  expect_error(suptest(models, alpha = 0.05, iteration = 1.3),
+               "'iteration' must be an integer")
+  expect_error(suptest(models, alpha = 0.01, iteration = 1, p = "a"),
+               "Argument 'p' must be a numeric vector")
+  expect_error(suptest(models, alpha = 0.01, iteration = 1, p = c(0.1, 1.2)),
+               "Argument 'p' can only contain elements between 0 and 1")
+  expect_error(suptest(models, alpha = 0.01, iteration = 1, p = c(-0.1, 0.5)),
+               "Argument 'p' can only contain elements between 0 and 1")
+
+})
+
+test_that("suptest() works correctly", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.05, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 2)
+
+  a <- suptest(models, alpha = 0.05, iteration = 0, p = c(0.1, 0.5, 0.9))
+  b <- suptest(models, alpha = 0.1, iteration = 1)
+  expect_snapshot_output(a)
+  expect_snapshot_output(b)
+
+  expect_equal(class(a), "data.frame")
+  expect_equal(NROW(a), 1)
+  expect_equal(NCOL(a), 5)
+  expect_named(a, c("iter_test", "test_value", "pval", "alpha", "reject"))
+  expect_equal(attr(a, "gammas"), gammas)
+  expect_equal(names(attr(a, "critical")), c("10%", "50%", "90%"))
+  expect_equal(a$iter_test, 0)
+  expect_equal(a$alpha, 0.05)
+  expect_equal(a$reject, FALSE)
+
+  expect_equal(class(b), "data.frame")
+  expect_equal(NROW(b), 1)
+  expect_equal(NCOL(b), 5)
+  expect_named(b, c("iter_test", "test_value", "pval", "alpha", "reject"))
+  expect_equal(attr(b, "gammas"), gammas)
+  expect_equal(names(attr(b, "critical")), c("90%", "95%", "99%"))
+  expect_equal(b$iter_test, 1)
+  expect_equal(b$alpha, 0.1)
+  expect_equal(b$reject, TRUE)
+
+  # expect error if give only a single model
+  models <- multi_cutoff(gamma = 0.05, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 2)
+  expect_error(suptest(models, 0.1, 0),
+               "requires several different cutoffs")
+
+  # test convergence iteration
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = "convergence", convergence_criterion = 0,
+                         max_iter = 20)
+  # so that notice if input changes, might not be change in suptest
+  expect_snapshot_output(models)
+  a <- suptest(models, alpha = 0.05, iteration = "convergence")
+  expect_snapshot_output(a)
+
+  # 0.01 converges at 4, 0.02 at 3, 0.03 at 3, 0.04 at 3, 0.05 at 6
+  # check whether value is correct
+  pest <- estimate_param_null(models[[1]])
+  diffs <- c(0.004-0.01, 0.013-0.02, 0.021-0.03, 0.026-0.04, 0.032-0.05)
+  val <- max(abs(diffs)) * sqrt(1000)
+  varcov <- matrix(NA, 5, 5)
+  for (i in 1:5) {
+    for (j in 1:5) {
+      varcov[i, j] <- gauge_covar("normal", gammas[i], gammas[j], "robustified", "convergence", pest, split = NULL)
+    }
+  }
+  expect_identical(a$test_value, val)
+
+})

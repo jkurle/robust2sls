@@ -440,7 +440,7 @@ multi_cutoff_to_fodr_vec <- function(robust2sls_object, iteration) {
 #' the sum of the deviations between sample and population FODR differ
 #' significantly from its expected value.
 #' \loadmathjax
-#' \mjdeqn{ \sum_{k = 1}^{K} \sqrt{n}(\widehat{\gamma_{c_{k}}} - \gamma_{c_{k}}) }{}
+#' \mjdeqn{ \sum_{k = 1}^{K} \sqrt{n}(\widehat{\gamma}_{c_{k}} - \gamma_{c_{k}}) }{}
 #'
 #' @param robust2sls_object A list of \code{"robust2sls"} objects.
 #' @inheritParams proptest
@@ -449,8 +449,8 @@ multi_cutoff_to_fodr_vec <- function(robust2sls_object, iteration) {
 #' iteration that was tested, the value of the test statistic (t-test), the
 #' type of the test (one- or two-sided), the corresponding p-value, the
 #' significance level, and whether the null hypothesis is rejected. The data
-#' frame also contains an attributed named \code{"gammas"} that records which
-#' gammas dettermining the different cut-offs were used in the scaling sum test.
+#' frame also contains an attribute named \code{"gammas"} that records which
+#' gammas determining the different cut-offs were used in the scaling sum test.
 #'
 #' @export
 
@@ -550,3 +550,109 @@ sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 
 }
 
+#' Supremum proportion test across different cut-offs
+#'
+#' \code{suptest()} uses the estimations across several cut-offs to test whether
+#' the supremum/maximum of the deviations between sample and population FODR
+#' differs significantly from its expected value.
+#' \loadmathjax
+#' \mjdeqn{ \sup_{c} |\sqrt{n}(\widehat{\gamma}_{c} - \gamma_{c})| }{}
+#'
+#' @inheritParams sumtest
+#' @inheritParams test_cpv
+#' @param R An integer specifying the number of replications for simulating the
+#' distribution of the test statistic.
+#'
+#' @return \code{suptest()} returns a data frame with one row storing the
+#' iteration that was tested, the value of the test statistic, the corresponding
+#' p-value, the significance level, and whether the null hypothesis is rejected.
+#' The data frame also contains two named attributes. The first attribute is
+#' named \code{"gammas"} and records which gammas determining the different
+#' cut-offs were used in the scaling sup test. The second attribute is named
+#' \code{"critical"} and records the critical values corresponding to the
+#' different quantiles in the limiting distribution that were specified in
+#' \code{p}.
+#'
+#' @export
+#'
+
+suptest <- function(robust2sls_object, alpha, iteration, p = c(0.9, 0.95, 0.99),
+                    R = 50000) {
+
+  # input checks
+  if (!identical(class(robust2sls_object), "list")) {
+    stop("Argument 'robust2sls_object' must be a list of 'robust2sls' objects.")
+  }
+  classes <- sapply(X = robust2sls_object, FUN = class)
+  if (is.list(robust2sls_object) && !all(classes == "robust2sls")) {
+    stop("Argument 'robust2sls_object' must be a list of 'robust2sls' objects.")
+  }
+  if (identical(length(robust2sls_object), 1L)) {
+    stop("suptest() requires several different cutoffs. See proptest() and counttest() for single-value tests.")
+  }
+  if (!is.numeric(alpha) | !identical(length(alpha), 1L)) {
+    stop("Argument 'alpha' must be a numeric value of length one.")
+  }
+  if (!(alpha >= 0 & alpha <= 1)) {
+    stop("Argument 'alpha' must be between 0 and 1.")
+  }
+  if (!(is.numeric(iteration) | identical(iteration, "convergence"))) {
+    stop("Argument 'iteration' must either be a numeric or the string 'convergence'.")
+  }
+  if (is.numeric(iteration) & !identical(length(iteration), 1L)) {
+    stop("Argument 'iteration' must be of length one.")
+  }
+  if (is.numeric(iteration) && !((iteration %% 1) == 0)) {
+    stop("Argument 'iteration' must be an integer.")
+  }
+  if (!is.numeric(p)) {
+    stop("Argument 'p' must be a numeric vector.")
+  }
+  if (!all(p >= 0 & p <= 1)) {
+    stop("Argument 'p' can only contain elements between 0 and 1.")
+  }
+
+  # extract settings of the outlier detection
+  ref <- robust2sls_object[[1]]$cons$reference
+  init <- robust2sls_object[[1]]$cons$initial$estimator
+  split <- robust2sls_object[[1]]$cons$initial$split # could be NULL
+  param_est <- estimate_param_null(robust2SLS_object = robust2sls_object[[1]])
+
+  # extract which gammas are in the models
+  gammas <- sapply(X = robust2sls_object, FUN = function(x) x$cons$sign_level)
+
+  # turn list of robust2sls_objects to vector of the scaled FODR deviations
+  vec <- multi_cutoff_to_fodr_vec(robust2sls_object = robust2sls_object,
+                                  iteration = iteration)
+
+  # create value of the test statistic
+  test_value <- max(abs(vec))
+
+  # for critical value / p-value need to simulate the distribution of the sup
+  # create var-cov matrix of the Gaussian process
+  varcov <- sapply(X = gammas, FUN = function(x) sapply(X = gammas,
+                                                        FUN = gauge_covar,
+                                                        ref_dist = "normal",
+                                                        initial_est = init,
+                                                        iteration = iteration,
+                                                        parameters = param_est,
+                                                        split = split,
+                                                        sign_level1 = x))
+
+  sup_distr <- mvn_sup(n = R, mu = rep(0, length(gammas)), Sigma = varcov)
+
+  res <- test_cpv(dist = sup_distr, teststat = test_value,
+                  p = p)
+  pvalue <- res$pval
+  criticalvalues <- res$critical
+  rej <- pvalue <= alpha
+
+  out <- data.frame(iter_test = iteration, test_value = test_value,
+                    pval = pvalue, alpha = alpha, reject = rej)
+  names(gammas) <- NULL
+  attr(x = out, which = "gammas") <- gammas
+  attr(x = out, which = "critical") <- criticalvalues
+
+  return(out)
+
+}
