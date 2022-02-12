@@ -42,7 +42,7 @@ test_that("simes() works correctly", {
   expect_identical(s1$reject, FALSE)
   expect_identical(s1$alpha, a)
   df <- data.frame(pvals = c(0.15, 0.2, 0.3), alpha_adj = c(0.1/3, 0.2/3, 0.1),
-                   reject = c(FALSE, FALSE, FALSE))
+                   reject_adj = c(FALSE, FALSE, FALSE))
   expect_equal(s1$details, df)
 
   p <- c(0.01, 0.2, 0.5)
@@ -58,7 +58,7 @@ test_that("simes() works correctly", {
   expect_identical(s2$reject, TRUE)
   expect_identical(s2$alpha, a)
   df <- data.frame(pvals = c(0.01, 0.2, 0.5), alpha_adj = c(0.1/3, 0.2/3, 0.1),
-                   reject = c(TRUE, FALSE, FALSE))
+                   reject_adj = c(TRUE, FALSE, FALSE))
   expect_equal(s2$details, df)
 
   expect_snapshot_output(s1)
@@ -834,3 +834,95 @@ test_that("suptest() works correctly", {
   expect_identical(a$test_value, val)
 
 })
+
+test_that("globaltest() raises correct errors", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.05, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 2)
+  tests <- proptest(models, alpha = 0.05, iteration = 0)
+
+  expect_error(globaltest(tests = list(1, 2), global_alpha = 0.05),
+               "Argument 'tests' must be a data frame")
+  expect_error(globaltest(tests = data.frame(a = "a", b = "b"),
+                          global_alpha = 0.05),
+               "Argument 'tests' must contain a column named 'pval'")
+  expect_error(globaltest(tests = tests, global_alpha = c(0.05, 0.1)),
+               "Argument 'global_alpha' must be a numeric value of length one")
+  expect_error(globaltest(tests = tests, global_alpha = "0.07"),
+               "Argument 'global_alpha' must be a numeric value of length one")
+  expect_error(globaltest(tests = tests, global_alpha = -0.1),
+               "Argument 'global_alpha' must be between 0 and 1")
+  expect_error(globaltest(tests = tests, global_alpha = 2),
+               "Argument 'global_alpha' must be between 0 and 1")
+
+})
+
+test_that("globaltest() works correctly", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.05, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 2)
+  # check to find if models has changed
+  expect_snapshot_output(models)
+
+  # proportion tests
+  tests <- proptest(models, alpha = 0.05, iteration = 0)
+  a <- globaltest(tests = tests, global_alpha = 0.05)
+  expect_snapshot_output(a)
+  expect_equal(class(a), "list")
+  expect_length(a, 3)
+  expect_named(a, c("reject", "global_alpha", "tests"))
+  expect_equal(class(a$tests), "data.frame")
+  expect_equal(NROW(a$tests), length(gammas))
+  expect_equal(NCOL(a$tests), NCOL(tests) + 2)
+  expect_true(all(c("alpha_adj", "reject_adj") %in% colnames(a$tests)))
+  expect_equal(a$tests$alpha_adj, c(0.05, 0.02, 0.03, 0.01, 0.04))
+  expect_equal(a$tests$reject_adj, rep(FALSE, 5))
+  expect_equal(a$reject, FALSE)
+  expect_equal(a$global_alpha, 0.05)
+
+  # count tests
+  tests <- counttest(models, alpha = 0.05, iteration = 0)
+  a <- globaltest(tests = tests, global_alpha = 0.05)
+  expect_snapshot_output(a)
+  expect_equal(class(a), "list")
+  expect_length(a, 3)
+  expect_named(a, c("reject", "global_alpha", "tests"))
+  expect_equal(class(a$tests), "data.frame")
+  expect_equal(NROW(a$tests), length(gammas))
+  expect_equal(NCOL(a$tests), NCOL(tests) + 2)
+  expect_true(all(c("alpha_adj", "reject_adj") %in% colnames(a$tests)))
+  expect_equal(a$tests$alpha_adj, c(0.03, 0.02, 0.04, 0.01, 0.05))
+  expect_equal(a$tests$reject_adj, rep(FALSE, 5))
+  expect_equal(a$reject, FALSE)
+  expect_equal(a$global_alpha, 0.05)
+
+  # try "convergence" and "saturated", e.g. proptest
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "saturated",
+                         iterations = "convergence", convergence_criterion = 0,
+                         max_iter = 20, split = 0.5)
+  tests <- proptest(models, alpha = 0.05, iteration = "convergence")
+  a <- globaltest(tests = tests, global_alpha = 0.05)
+  expect_snapshot_output(a)
+  expect_equal(class(a), "list")
+  expect_length(a, 3)
+  expect_named(a, c("reject", "global_alpha", "tests"))
+  expect_equal(class(a$tests), "data.frame")
+  expect_equal(NROW(a$tests), length(gammas))
+  expect_equal(NCOL(a$tests), NCOL(tests) + 2)
+  expect_true(all(c("alpha_adj", "reject_adj") %in% colnames(a$tests)))
+  expect_equal(a$tests$alpha_adj, c(0.03, 0.05, 0.04, 0.01, 0.02))
+  expect_equal(a$tests$reject_adj, rep(FALSE, 5))
+  expect_equal(a$reject, FALSE)
+  expect_equal(a$global_alpha, 0.05)
+
+})
+

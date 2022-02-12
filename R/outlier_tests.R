@@ -86,7 +86,7 @@ simes <- function(pvals, alpha) {
   comp <- pvals <= alpha_adj
   reject <- any(comp)
 
-  details <- data.frame(pvals = pvals, alpha_adj = alpha_adj, reject = comp)
+  details <- data.frame(pvals = pvals, alpha_adj = alpha_adj, reject_adj = comp)
   out <- list(reject = reject, alpha = alpha, details = details)
 
 }
@@ -656,3 +656,64 @@ suptest <- function(robust2sls_object, alpha, iteration, p = c(0.9, 0.95, 0.99),
   return(out)
 
 }
+
+#' Global test correcting for multiple hypothesis testing
+#'
+#' \code{globaltest()} uses several proportion or count tests with different
+#' cut-offs to test a global hypothesis of no outliers using the Simes (1986)
+#' procedure to account for multiple testing.
+#'
+#' @param tests A data frame that contains a column named \code{$pval}
+#' containing the different p-values for different hypothesis tests, each
+#' stored in a row.
+#' @param global_alpha A numeric value representing the global significance
+#' level.
+#'
+#' @seealso [proptest()], [counttest()]
+#'
+#' @details See
+#' \href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
+#'
+#' @return A list with three entries. The first entry named \code{$reject}
+#'   contains the global rejection decision. The second entry named
+#'   \code{$global_alpha} stores the global significance level. The third entry
+#'   named \code{$tests} returns the input data frame \code{tests}, appended
+#'   with two columns containing the adjusted significance level and respective
+#'   rejection decision.
+#'
+#' @export
+
+globaltest <- function(tests, global_alpha) {
+
+  if (!is.data.frame(tests)) {
+    stop("Argument 'tests' must be a data frame.")
+  }
+  if (!("pval" %in% colnames(tests))) {
+    stop("Argument 'tests' must contain a column named 'pval' containing the p-values of the individual tests.")
+  }
+  if (!(is.numeric(global_alpha)) | !identical(length(global_alpha), 1L)) {
+    stop("Argument 'global_alpha' must be a numeric value of length one.")
+  }
+  if (!(global_alpha >= 0 & global_alpha <= 1)) {
+    stop("Argument 'global_alpha' must be between 0 and 1.")
+  }
+
+  # calculate decisions based on Simes procedure
+  pvalues <- tests$pval
+  simes_res <- simes(pvals = pvalues, alpha = global_alpha)
+
+  # add column that saves the original order
+  tests$id <- 1:NROW(tests)
+  # sort "tests" by p-value, as the simes() function does
+  tests <- tests[order(tests$pval), ]
+  tests$alpha_adj <- simes_res$details$alpha_adj
+  tests$reject_adj <- simes_res$details$reject_adj
+  tests <- tests[order(tests$id), ]
+  tests <- subset(tests, select = -id)
+
+  out <- list(reject = simes_res$reject, global_alpha = global_alpha,
+              tests = tests)
+  return(out)
+
+}
+

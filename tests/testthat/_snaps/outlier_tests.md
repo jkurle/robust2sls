@@ -17,10 +17,10 @@
     [1] 0.1
     
     $details
-      pvals  alpha_adj reject
-    1  0.15 0.03333333  FALSE
-    2  0.20 0.06666667  FALSE
-    3  0.30 0.10000000  FALSE
+      pvals  alpha_adj reject_adj
+    1  0.15 0.03333333      FALSE
+    2  0.20 0.06666667      FALSE
+    3  0.30 0.10000000      FALSE
     
 
 ---
@@ -32,10 +32,10 @@
     [1] 0.1
     
     $details
-      pvals  alpha_adj reject
-    1  0.01 0.03333333   TRUE
-    2  0.20 0.06666667  FALSE
-    3  0.50 0.10000000  FALSE
+      pvals  alpha_adj reject_adj
+    1  0.01 0.03333333       TRUE
+    2  0.20 0.06666667      FALSE
+    3  0.50 0.10000000      FALSE
     
 
 # multi_cutoff() works correctly
@@ -709,4 +709,116 @@
 
         iter_test test_value    pval alpha reject
     1 convergence    0.56921 0.12024  0.05  FALSE
+
+# globaltest() works correctly
+
+    $gamma0.01
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  2 
+    Final selection:  Outliers found:  4     Outliers proportion:  0.004 
+    
+    $gamma0.02
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  2 
+    Final selection:  Outliers found:  13     Outliers proportion:  0.013 
+    
+    $gamma0.03
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  2 
+    Final selection:  Outliers found:  21     Outliers proportion:  0.021 
+    
+    $gamma0.04
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  2 
+    Final selection:  Outliers found:  26     Outliers proportion:  0.026 
+    
+    $gamma0.05
+    Outlier-Robust 2SLS Model 
+    Initial estimator:  robustified 
+    Reference distribution:  normal 
+    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Iterations:  2 
+    Final selection:  Outliers found:  36     Outliers proportion:  0.036 
+    
+
+---
+
+    $reject
+    [1] FALSE
+    
+    $global_alpha
+    [1] 0.05
+    
+    $tests
+              iter_test iter_act gamma         t      type       pval alpha reject
+    gamma0.01         0        0  0.01 -1.498485 two-sided 0.13400726  0.05  FALSE
+    gamma0.02         0        0  0.02 -1.738476 two-sided 0.08212701  0.05  FALSE
+    gamma0.03         0        0  0.03 -1.519491 two-sided 0.12863889  0.05  FALSE
+    gamma0.04         0        0  0.04 -2.085486 two-sided 0.03702521  0.05   TRUE
+    gamma0.05         0        0  0.05 -1.518281 two-sided 0.12894347  0.05  FALSE
+              alpha_adj reject_adj
+    gamma0.01      0.05      FALSE
+    gamma0.02      0.02      FALSE
+    gamma0.03      0.03      FALSE
+    gamma0.04      0.01      FALSE
+    gamma0.05      0.04      FALSE
+    
+
+---
+
+    $reject
+    [1] FALSE
+    
+    $global_alpha
+    [1] 0.05
+    
+    $tests
+              iter_test iter_act gamma num_act num_exp      type      pval alpha
+    gamma0.01         0        0  0.01       6      10 two-sided 0.2656770  0.05
+    gamma0.02         0        0  0.02      14      20 two-sided 0.2170493  0.05
+    gamma0.03         0        0  0.03      24      30 two-sided 0.3146255  0.05
+    gamma0.04         0        0  0.04      31      40 two-sided 0.1779894  0.05
+    gamma0.05         0        0  0.05      43      50 two-sided 0.3576795  0.05
+              reject alpha_adj reject_adj
+    gamma0.01  FALSE      0.03      FALSE
+    gamma0.02  FALSE      0.02      FALSE
+    gamma0.03  FALSE      0.04      FALSE
+    gamma0.04  FALSE      0.01      FALSE
+    gamma0.05  FALSE      0.05      FALSE
+    
+
+---
+
+    $reject
+    [1] FALSE
+    
+    $global_alpha
+    [1] 0.05
+    
+    $tests
+                iter_test iter_act gamma         t      type       pval alpha
+    gamma0.01 convergence        5  0.01 -1.612366 two-sided 0.10688228  0.05
+    gamma0.02 convergence       20  0.02 -1.218902 two-sided 0.22288139  0.05
+    gamma0.03 convergence        4  0.03 -1.458982 two-sided 0.14457020  0.05
+    gamma0.04 convergence        5  0.04 -1.731116 two-sided 0.08343101  0.05
+    gamma0.05 convergence        7  0.05 -1.651060 two-sided 0.09872642  0.05
+              reject alpha_adj reject_adj
+    gamma0.01  FALSE      0.03      FALSE
+    gamma0.02  FALSE      0.05      FALSE
+    gamma0.03  FALSE      0.04      FALSE
+    gamma0.04  FALSE      0.01      FALSE
+    gamma0.05  FALSE      0.02      FALSE
+    
 
