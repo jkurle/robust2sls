@@ -596,3 +596,134 @@ test_that("multi_cutoff_to_fodr_vec() works correctly", {
   expect_equal(a[10], res, tolerance = 0.00000000000001)
 
 })
+
+test_that("sumtest() raises correct errors", {
+
+  expect_error(sumtest(robust2sls_object = 1, alpha = 0.05, iteration = 1,
+                        one_sided = TRUE),
+               "'robust2sls_object' must be a list of 'robust2sls' objects")
+  expect_error(sumtest(robust2sls_object = list(1, 2), alpha = 0.05,
+                        iteration = 1, one_sided = FALSE),
+               "'robust2sls_object' must be a list of 'robust2sls' objects")
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.05, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 2)
+
+  expect_error(sumtest(models, alpha = "a", iteration = 1, one_sided = TRUE),
+               "'alpha' must be a numeric value of length one")
+  expect_error(sumtest(models, alpha = c(1,1), iteration = 1,
+                        one_sided = TRUE),
+               "'alpha' must be a numeric value of length one")
+  expect_error(sumtest(models, alpha = 1.2, iteration = 1, one_sided = FALSE),
+               "'alpha' must be between 0 and 1")
+  expect_error(sumtest(models, alpha = -4, iteration = 1, one_sided = FALSE),
+               "'alpha' must be between 0 and 1")
+  expect_error(sumtest(models, alpha = 0.05, iteration = FALSE,
+                        one_sided = FALSE),
+               "'iteration' must either be a numeric")
+  expect_error(sumtest(models, alpha = 0.05, iteration = "abc",
+                        one_sided = FALSE),
+               "'iteration' must either be a numeric or the string 'convergence'")
+  expect_error(sumtest(models, alpha = 0.05, iteration = c(1, 2),
+                        one_sided = FALSE),
+               "'iteration' must be of length one")
+  expect_error(sumtest(models, alpha = 0.05, iteration = 1.3,
+                        one_sided = FALSE),
+               "'iteration' must be an integer")
+  expect_error(sumtest(models, alpha = 0.01, iteration = 1,
+                        one_sided = "FALSE"),
+               "'one_sided' must be a logical value of length one")
+  expect_error(sumtest(models, alpha = 0.01, iteration = 1,
+                        one_sided = c(TRUE, FALSE)),
+               "'one_sided' must be a logical value of length one")
+
+})
+
+test_that("sumtest() works correctly", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  gammas <- seq(0.01, 0.05, 0.01)
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = 2)
+
+  a <- sumtest(models, alpha = 0.05, iteration = 0, one_sided = FALSE)
+  b <- sumtest(models, alpha = 0.05, iteration = 1, one_sided = TRUE)
+  expect_snapshot_output(a)
+  expect_snapshot_output(b)
+
+  expect_equal(class(a), "data.frame")
+  expect_equal(NROW(a), 1)
+  expect_equal(NCOL(a), 6)
+  expect_named(a, c("iter_test", "t", "type", "pval", "alpha", "reject"))
+  expect_equal(a$iter_test, 0)
+  expect_equal(a$type, "two-sided")
+  expect_equal(a$alpha, 0.05)
+  expect_equal(a$reject, TRUE)
+  expect_equal(attr(a, "gammas"), seq(0.01, 0.05, 0.01))
+  expect_equal(class(b), "data.frame")
+  expect_equal(NROW(b), 1)
+  expect_equal(NCOL(b), 6)
+  expect_named(b, c("iter_test", "t", "type", "pval", "alpha", "reject"))
+  expect_equal(b$iter_test, 1)
+  expect_equal(b$type, "one-sided")
+  expect_equal(b$alpha, 0.05)
+  expect_equal(b$reject, FALSE)
+  expect_equal(attr(b, "gammas"), seq(0.01, 0.05, 0.01))
+
+  # test convergence iteration
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "robustified",
+                         iterations = "convergence", convergence_criterion = 0,
+                         max_iter = 20)
+  # so that notice if input changes, might not be change in sumtest
+  expect_snapshot_output(models)
+  a <- sumtest(models, alpha = 0.05, iteration = "convergence", one_sided = FALSE)
+  expect_snapshot_output(a)
+
+  # 0.01 converges at 4, 0.02 at 3, 0.03 at 3, 0.04 at 3, 0.05 at 6
+  # check whether value is correct
+  pest <- estimate_param_null(models[[1]])
+  val <- (0.004 + 0.013 + 0.021 + 0.026 + 0.032 - 0.01 - 0.02 - 0.03 - 0.04 - 0.05) * sqrt(1000)
+  varcov <- matrix(NA, 5, 5)
+  for (i in 1:5) {
+    for (j in 1:5) {
+      varcov[i, j] <- gauge_covar("normal", gammas[i], gammas[j], "robustified", "convergence", pest, split = NULL)
+    }
+  }
+  t <- val/sqrt(sum(varcov))
+  expect_equal(a$t, t, tolerance = 0.00000000000001)
+
+  # check saturated 2sls as input
+  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "saturated",
+                         iterations = 2, split = 0.3)
+  expect_snapshot_output(models)
+  c <- sumtest(models, alpha = 0.05, iteration = 0, one_sided = FALSE)
+  expect_snapshot_output(c)
+  expect_equal(class(c), "data.frame")
+  expect_equal(NROW(c), 1)
+  expect_equal(NCOL(c), 6)
+  expect_named(c, c("iter_test", "t", "type", "pval", "alpha", "reject"))
+  expect_equal(c$iter_test, 0)
+  expect_equal(c$type, "two-sided")
+  expect_equal(c$alpha, 0.05)
+  expect_equal(c$reject, TRUE)
+  expect_equal(attr(c, "gammas"), seq(0.01, 0.05, 0.01))
+
+  # no theory for unequal split and m > 0, so should give error
+  expect_error(sumtest(models, alpha = 0.05, iteration = 5))
+
+  # when input a list of length 1, then get error -> doesn't make sense then
+  models <- multi_cutoff(gamma = 0.01, data = d, formula = p$setting$formula,
+                         ref_dist = "normal", initial_est = "saturated",
+                         iterations = 2, split = 0.5)
+  expect_error(sumtest(models, alpha = 0.05, iteration = 0, one_sided = FALSE),
+               "requires several different cutoffs")
+
+})

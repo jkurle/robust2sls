@@ -432,3 +432,121 @@ multi_cutoff_to_fodr_vec <- function(robust2sls_object, iteration) {
   return(vec)
 
 }
+
+
+#' Scaling sum proportion test across different cut-offs
+#'
+#' \code{sumtest()} uses the estimations across several cut-offs to test whether
+#' the sum of the deviations between sample and population FODR differ
+#' significantly from its expected value.
+#' \loadmathjax
+#' \mjdeqn{ \sum_{k = 1}^{K} \sqrt{n}(\widehat{\gamma_{c_{k}}} - \gamma_{c_{k}}) }{}
+#'
+#' @param robust2sls_object A list of \code{"robust2sls"} objects.
+#' @inheritParams proptest
+#'
+#' @return \code{sumtest()} returns a data frame with one row storing the
+#' iteration that was tested, the value of the test statistic (t-test), the
+#' type of the test (one- or two-sided), the corresponding p-value, the
+#' significance level, and whether the null hypothesis is rejected. The data
+#' frame also contains an attributed named \code{"gammas"} that records which
+#' gammas dettermining the different cut-offs were used in the scaling sum test.
+#'
+#' @export
+
+sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
+
+  # input checks
+  if (!identical(class(robust2sls_object), "list")) {
+    stop("Argument 'robust2sls_object' must be a list of 'robust2sls' objects.")
+  }
+  classes <- sapply(X = robust2sls_object, FUN = class)
+  if (is.list(robust2sls_object) && !all(classes == "robust2sls")) {
+    stop("Argument 'robust2sls_object' must be a list of 'robust2sls' objects.")
+  }
+  if (identical(length(robust2sls_object), 1L)) {
+    stop("sumtest() requires several different cutoffs. See proptest() and counttest() for single-value tests.")
+  }
+  if (!is.numeric(alpha) | !identical(length(alpha), 1L)) {
+    stop("Argument 'alpha' must be a numeric value of length one.")
+  }
+  if (!(alpha >= 0 & alpha <= 1)) {
+    stop("Argument 'alpha' must be between 0 and 1.")
+  }
+  if (!(is.numeric(iteration) | identical(iteration, "convergence"))) {
+    stop("Argument 'iteration' must either be a numeric or the string 'convergence'.")
+  }
+  if (is.numeric(iteration) & !identical(length(iteration), 1L)) {
+    stop("Argument 'iteration' must be of length one.")
+  }
+  if (is.numeric(iteration) && !((iteration %% 1) == 0)) {
+    stop("Argument 'iteration' must be an integer.")
+  }
+  if (!is.logical(one_sided) | !identical(length(one_sided), 1L)) {
+    stop("Argument 'one_sided' must be a logical value of length one.")
+  }
+
+  # extract settings of the outlier detection
+  ref <- robust2sls_object[[1]]$cons$reference
+  init <- robust2sls_object[[1]]$cons$initial$estimator
+  split <- robust2sls_object[[1]]$cons$initial$split # could be NULL
+  param_est <- estimate_param_null(robust2SLS_object = robust2sls_object[[1]])
+
+  # extract which gammas are in the models
+  gammas <- sapply(X = robust2sls_object, FUN = function(x) x$cons$sign_level)
+
+  # turn list of robust2sls_objects to vector of the scaled FODR deviations
+  vec <- multi_cutoff_to_fodr_vec(robust2sls_object = robust2sls_object,
+                                  iteration = iteration)
+
+  # create value of the test statistic
+  test_value <- sum(vec)
+
+  # calculate the asymptotic variance of the test statistic
+  # technically can rely completely on gauge_covar and sum all entries
+  # as internal check, also calculate explicitly with gauge_avar
+  # variance part
+  var_part <- sapply(X = gammas, FUN = gauge_avar, ref_dist = ref,
+                     initial_est = init, iteration = iteration,
+                     parameters = param_est, split = split)
+  covar_part <- sapply(X = gammas, FUN = function(x) sapply(X = gammas,
+                                                            FUN = gauge_covar,
+                                                            ref_dist = "normal",
+                                                            initial_est = init,
+                                                            iteration = iteration,
+                                                            parameters = param_est,
+                                                            split = split,
+                                                            sign_level1 = x))
+
+  # covariance matrix should be symmetric, so implement an internal check
+  if (!isSymmetric.matrix(covar_part)) {
+    stop("Internal error. Covariance matrix of vector should be symmetric.")
+  }
+
+  test_var1 <- sum(var_part) + 2 * sum(covar_part[upper.tri(covar_part,
+                                                            diag = FALSE)])
+  test_var2 <- sum(covar_part)
+
+  if (!isTRUE(all.equal(test_var1, test_var2))) {
+    stop("Internal error. Two ways of calculating avar should coincide.")
+  }
+
+  # calculate test statistic and other outputs to be returned
+  t <- test_value / sqrt(test_var2)
+  if (isTRUE(one_sided)) {
+    type <- "one-sided"
+    pval <- pnorm(q = t, mean = 0, sd = 1, lower.tail = FALSE)
+  } else {
+    type <- "two-sided"
+    pval <- 2*pnorm(q = abs(t), mean = 0, sd = 1, lower.tail = FALSE)
+  }
+
+  out <- data.frame(iter_test = iteration, t = t, type = type,
+                    pval = pval, alpha = alpha, reject = (pval <= alpha))
+  names(gammas) <- NULL
+  attr(x = out, which = "gammas") <- gammas
+
+  return(out)
+
+}
+
