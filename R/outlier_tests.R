@@ -36,7 +36,7 @@ test_cpv <- function(dist, teststat, p) {
 
   # find the critical value corresponding to q (can be vector)
   dist <- sort(dist, decreasing = FALSE)
-  sampleq <- quantile(x = dist, probs = p, type = 8)
+  sampleq <- stats::quantile(x = dist, probs = p, type = 8)
 
   return(list(pval = pval, critical = sampleq))
 
@@ -128,7 +128,10 @@ multi_cutoff <- function(gamma, ...) {
     stop("Argument 'gamma' must lie between 0 and 1.")
   }
 
-  results <- foreach::foreach(i = seq_along(gamma)) %dopar% {
+  # binding for i
+  i <- NULL
+
+  results <- foreach::foreach(i = (1:length(gamma))) %dopar% {
     g <- gamma[i]
     outlier_detection(..., sign_level = g)
   }
@@ -237,10 +240,10 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
     t <- proptest_fun(r = robust2sls_object, iter = iteration)
     if (isTRUE(one_sided)) {
       type <- "one-sided"
-      pval <- pnorm(q = t, mean = 0, sd = 1, lower.tail = FALSE)
+      pval <- stats::pnorm(q = t, mean = 0, sd = 1, lower.tail = FALSE)
     } else {
       type <- "two-sided"
-      pval <- 2*pnorm(q = abs(t), mean = 0, sd = 1, lower.tail = FALSE)
+      pval <- 2 * stats::pnorm(q = abs(t), mean = 0, sd = 1, lower.tail = FALSE)
     }
   } else if (identical(class(robust2sls_object), "list")) {
     # return list because could be different types (numeric or character for convergence)
@@ -256,10 +259,10 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
     t <- sapply(X = robust2sls_object, FUN = proptest_fun, iter = iteration)
     if (isTRUE(one_sided)) {
       type <- "one-sided"
-      pval <- sapply(X = t, FUN = function(x) pnorm(q = x, mean = 0, sd = 1, lower.tail = FALSE))
+      pval <- sapply(X = t, FUN = function(x) stats::pnorm(q = x, mean = 0, sd = 1, lower.tail = FALSE))
     } else {
       type <- "two-sided"
-      pval <- sapply(X = t, FUN = function(x) 2*pnorm(q = abs(x), mean = 0, sd = 1, lower.tail = FALSE))
+      pval <- sapply(X = t, FUN = function(x) 2 * stats::pnorm(q = abs(x), mean = 0, sd = 1, lower.tail = FALSE))
     }
   } else {
     stop("Argument 'robust2sls_object' invalid input type.")
@@ -535,10 +538,10 @@ sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
   t <- test_value / sqrt(test_var2)
   if (isTRUE(one_sided)) {
     type <- "one-sided"
-    pval <- pnorm(q = t, mean = 0, sd = 1, lower.tail = FALSE)
+    pval <- stats::pnorm(q = t, mean = 0, sd = 1, lower.tail = FALSE)
   } else {
     type <- "two-sided"
-    pval <- 2*pnorm(q = abs(t), mean = 0, sd = 1, lower.tail = FALSE)
+    pval <- 2 * stats::pnorm(q = abs(t), mean = 0, sd = 1, lower.tail = FALSE)
   }
 
   out <- data.frame(iter_test = iteration, t = t, type = type,
@@ -702,13 +705,14 @@ globaltest <- function(tests, global_alpha) {
   simes_res <- simes(pvals = pvalues, alpha = global_alpha)
 
   # add column that saves the original order
+  colno <- NCOL(tests)
   tests$id <- 1:NROW(tests)
   # sort "tests" by p-value, as the simes() function does
   tests <- tests[order(tests$pval), ]
   tests$alpha_adj <- simes_res$details$alpha_adj
   tests$reject_adj <- simes_res$details$reject_adj
   tests <- tests[order(tests$id), ]
-  tests <- subset(tests, select = -id)
+  tests <- tests[, -(colno+1)]
 
   out <- list(reject = simes_res$reject, global_alpha = global_alpha,
               tests = tests)

@@ -25,7 +25,6 @@ Suggests:
     ggplot2,
     grDevices,
     knitr,
-    mathjaxr,
     parallel,
     rmarkdown,
     testthat,
@@ -37,6 +36,7 @@ Imports:
     doRNG,
     foreach,
     MASS,
+    mathjaxr,
     pracma,
     stats
 VignetteBuilder: knitr
