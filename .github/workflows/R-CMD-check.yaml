@@ -38,11 +38,6 @@ jobs:
           r-version: ${{ matrix.config.r }}
 
       - uses: r-lib/actions/setup-pandoc@master
-      
-      - name: add TeX deps
-        run: |
-          tinytex::tlmgr_install(pkgs = "makeindex")
-        shell: Rscript {0}
 
       - name: Query dependencies
         run: |
@@ -71,6 +66,7 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
+          remotes::install_cran("tinytex")
         shell: Rscript {0}
 
       - name: Check
