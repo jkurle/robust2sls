@@ -150,44 +150,49 @@ test_that("constants() works correctly", {
   test1 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
             iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
-            shuffle_seed = 42, split = 0.5)
+            shuffle_seed = 42, split = 0.5, max_iter = NULL)
   call1 <- sys.call()
   test2 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
             iterations = 5, convergence_criterion = 0, shuffle = NULL,
-            shuffle_seed = NULL, split = NULL)
+            shuffle_seed = NULL, split = NULL, max_iter = NULL)
   call2 <- sys.call()
   test3 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
             iterations = "convergence", convergence_criterion = 0.5,
-            shuffle = TRUE, shuffle_seed = 42, split = 0.5)
+            shuffle = TRUE, shuffle_seed = 42, split = 0.5, max_iter = NULL)
   call3 <- sys.call()
   test4 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
             iterations = "convergence", convergence_criterion = 1,
-            shuffle = FALSE, shuffle_seed = 42, split = 0.5)
+            shuffle = FALSE, shuffle_seed = 42, split = 0.5, max_iter = NULL)
   call4 <- sys.call()
 
   c1 <- constants(call = call1, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "robustified", split = 0.5, shuffle = FALSE,
                   shuffle_seed = 42, iter = 5, criterion = NULL,
-                  user_model = NULL)
+                  user_model = NULL, verbose = FALSE, max_iter = NULL)
   c2 <- constants(call = call2, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "robustified", split = NULL, shuffle = NULL,
                   shuffle_seed = NULL, iter = 5, criterion = 0,
-                  user_model = NULL)
+                  user_model = NULL, verbose = FALSE, max_iter = NULL)
   c3 <- constants(call = call3, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "saturated", split = 0.5, shuffle = TRUE,
                   shuffle_seed = 42, iter = 5, criterion = 0.5,
-                  user_model = NULL)
+                  user_model = NULL, verbose = FALSE, max_iter = NULL)
   c4 <- constants(call = call4, formula = formula, data = data,
                   reference = "normal", sign_level = 0.05,
                   estimator = "saturated", split = 0.5, shuffle = FALSE,
                   shuffle_seed = 42, iter = "convergence", criterion = 1,
-                  user_model = NULL)
+                  user_model = NULL, verbose = FALSE, max_iter = NULL)
+  c5 <- constants(call = call4, formula = formula, data = data,
+                  reference = "normal", sign_level = 0.05,
+                  estimator = "saturated", split = 0.5, shuffle = FALSE,
+                  shuffle_seed = 42, iter = "convergence", criterion = 1,
+                  user_model = NULL, verbose = FALSE, max_iter = 10)
 
   names <- c("call", "verbose", "formula", "data", "reference", "sign_level",
              "psi", "cutoff", "bias_corr", "initial", "convergence",
@@ -197,22 +202,27 @@ test_that("constants() works correctly", {
   expect_equal(length(c2), 12)
   expect_equal(length(c3), 12)
   expect_equal(length(c4), 12)
+  expect_equal(length(c5), 12)
   expect_equal(class(c1), "list")
   expect_equal(class(c2), "list")
   expect_equal(class(c3), "list")
   expect_equal(class(c4), "list")
+  expect_equal(class(c5), "list")
   expect_equal(names(c1), names)
   expect_equal(names(c2), names)
   expect_equal(names(c3), names)
   expect_equal(names(c4), names)
+  expect_equal(names(c5), names)
   expect_equal(length(c1$initial), 5)
   expect_equal(length(c2$initial), 5)
   expect_equal(length(c3$initial), 5)
   expect_equal(length(c4$initial), 5)
+  expect_equal(length(c5$initial), 5)
   expect_equal(class(c1$initial), "list")
   expect_equal(class(c2$initial), "list")
   expect_equal(class(c3$initial), "list")
   expect_equal(class(c4$initial), "list")
+  expect_equal(class(c5$initial), "list")
   expect_equal(names(c1$initial),
                c("estimator", "split", "shuffle", "shuffle_seed", "user"))
   expect_equal(names(c2$initial),
@@ -221,120 +231,159 @@ test_that("constants() works correctly", {
                c("estimator", "split", "shuffle", "shuffle_seed", "user"))
   expect_equal(names(c4$initial),
                c("estimator", "split", "shuffle", "shuffle_seed", "user"))
-  expect_equal(length(c1$convergence), 4)
-  expect_equal(length(c2$convergence), 4)
-  expect_equal(length(c3$convergence), 4)
-  expect_equal(length(c4$convergence), 4)
+  expect_equal(names(c5$initial),
+               c("estimator", "split", "shuffle", "shuffle_seed", "user"))
+  expect_equal(length(c1$convergence), 5)
+  expect_equal(length(c2$convergence), 5)
+  expect_equal(length(c3$convergence), 5)
+  expect_equal(length(c4$convergence), 5)
+  expect_equal(length(c5$convergence), 5)
   expect_equal(class(c1$convergence), "list")
   expect_equal(class(c2$convergence), "list")
   expect_equal(class(c3$convergence), "list")
   expect_equal(class(c4$convergence), "list")
-  expect_equal(names(c1$convergence), c("criterion", "difference", "converged", "iter"))
-  expect_equal(names(c2$convergence), c("criterion", "difference", "converged", "iter"))
-  expect_equal(names(c3$convergence), c("criterion", "difference", "converged", "iter"))
-  expect_equal(names(c4$convergence), c("criterion", "difference", "converged", "iter"))
+  expect_equal(class(c5$convergence), "list")
+  expect_equal(names(c1$convergence), c("criterion", "difference", "converged", "iter", "max_iter"))
+  expect_equal(names(c2$convergence), c("criterion", "difference", "converged", "iter", "max_iter"))
+  expect_equal(names(c3$convergence), c("criterion", "difference", "converged", "iter", "max_iter"))
+  expect_equal(names(c4$convergence), c("criterion", "difference", "converged", "iter", "max_iter"))
+  expect_equal(names(c5$convergence), c("criterion", "difference", "converged", "iter", "max_iter"))
   expect_equal(length(c1$iterations), 2)
   expect_equal(length(c2$iterations), 2)
   expect_equal(length(c3$iterations), 2)
   expect_equal(length(c4$iterations), 2)
+  expect_equal(length(c5$iterations), 2)
   expect_equal(class(c1$iterations), "list")
   expect_equal(class(c2$iterations), "list")
   expect_equal(class(c3$iterations), "list")
   expect_equal(class(c4$iterations), "list")
+  expect_equal(class(c5$iterations), "list")
   expect_equal(names(c1$iterations), c("setting", "actual"))
   expect_equal(names(c2$iterations), c("setting", "actual"))
   expect_equal(names(c3$iterations), c("setting", "actual"))
   expect_equal(names(c4$iterations), c("setting", "actual"))
+  expect_equal(names(c5$iterations), c("setting", "actual"))
 
   expect_snapshot_output(c1)
   expect_snapshot_output(c2)
   expect_snapshot_output(c3)
   expect_snapshot_output(c4)
+  expect_snapshot_output(c5)
+
 
   expect_equal(c1$formula, formula)
   expect_equal(c2$formula, formula)
   expect_equal(c3$formula, formula)
   expect_equal(c4$formula, formula)
+  expect_equal(c5$formula, formula)
 
   expect_equal(c1$verbose, FALSE)
   expect_equal(c2$verbose, FALSE)
   expect_equal(c3$verbose, FALSE)
   expect_equal(c4$verbose, FALSE)
+  expect_equal(c5$verbose, FALSE)
 
   expect_equal(c1$data, mtcars)
   expect_equal(c2$data, mtcars)
   expect_equal(c3$data, mtcars)
   expect_equal(c4$data, mtcars)
+  expect_equal(c5$data, mtcars)
 
   expect_equal(c1$reference, "normal")
   expect_equal(c2$reference, "normal")
   expect_equal(c3$reference, "normal")
   expect_equal(c4$reference, "normal")
+  expect_equal(c5$reference, "normal")
 
   expect_equal(c1$sign_level, 0.05)
   expect_equal(c2$sign_level, 0.05)
   expect_equal(c3$sign_level, 0.05)
   expect_equal(c4$sign_level, 0.05)
+  expect_equal(c5$sign_level, 0.05)
 
   expect_equal(c1$psi, 0.95)
   expect_equal(c2$psi, 0.95)
   expect_equal(c3$psi, 0.95)
   expect_equal(c4$psi, 0.95)
+  expect_equal(c5$psi, 0.95)
 
   expect_equal(c1$cutoff, 1.959964)
   expect_equal(c2$cutoff, 1.959964)
   expect_equal(c3$cutoff, 1.959964)
   expect_equal(c4$cutoff, 1.959964)
+  expect_equal(c5$cutoff, 1.959964)
 
   expect_equal(c1$bias_corr, 1.317798, tolerance = 0.0000001)
   expect_equal(c2$bias_corr, 1.317798, tolerance = 0.0000001)
   expect_equal(c3$bias_corr, 1.317798, tolerance = 0.0000001)
   expect_equal(c4$bias_corr, 1.317798, tolerance = 0.0000001)
+  expect_equal(c5$bias_corr, 1.317798, tolerance = 0.0000001)
 
   expect_equal(c1$initial$estimator, "robustified")
   expect_equal(c2$initial$estimator, "robustified")
   expect_equal(c3$initial$estimator, "saturated")
   expect_equal(c4$initial$estimator, "saturated")
+  expect_equal(c5$initial$estimator, "saturated")
 
   expect_equal(c1$initial$split, NULL)
   expect_equal(c2$initial$split, NULL)
   expect_equal(c3$initial$split, 0.5)
   expect_equal(c4$initial$split, 0.5)
+  expect_equal(c5$initial$split, 0.5)
 
   expect_equal(c1$initial$shuffle, NULL)
   expect_equal(c2$initial$shuffle, NULL)
   expect_equal(c3$initial$shuffle, TRUE)
   expect_equal(c4$initial$shuffle, FALSE)
+  expect_equal(c5$initial$shuffle, FALSE)
 
   expect_equal(c1$initial$shuffle_seed, NULL)
   expect_equal(c2$initial$shuffle_seed, NULL)
   expect_equal(c3$initial$shuffle_seed, 42)
   expect_equal(c4$initial$shuffle_seed, NULL)
+  expect_equal(c5$initial$shuffle_seed, NULL)
 
   expect_equal(c1$initial$user, NULL)
   expect_equal(c2$initial$user, NULL)
   expect_equal(c3$initial$user, NULL)
   expect_equal(c4$initial$user, NULL)
+  expect_equal(c5$initial$user, NULL)
 
   expect_equal(c1$iterations$setting, 5)
   expect_equal(c2$iterations$setting, 5)
   expect_equal(c3$iterations$setting, 5)
   expect_equal(c4$iterations$setting, "convergence")
+  expect_equal(c5$iterations$setting, "convergence")
 
   expect_equal(c1$iterations$actual, NULL)
   expect_equal(c2$iterations$actual, NULL)
   expect_equal(c3$iterations$actual, NULL)
   expect_equal(c4$iterations$actual, NULL)
+  expect_equal(c5$iterations$actual, NULL)
 
   expect_equal(c1$convergence$difference, NULL)
   expect_equal(c2$convergence$difference, NULL)
   expect_equal(c3$convergence$difference, NULL)
   expect_equal(c4$convergence$difference, NULL)
+  expect_equal(c5$convergence$difference, NULL)
 
   expect_equal(c1$convergence$converged, NULL)
   expect_equal(c2$convergence$converged, NULL)
   expect_equal(c3$convergence$converged, NULL)
   expect_equal(c4$convergence$converged, NULL)
+  expect_equal(c5$convergence$converged, NULL)
+
+  expect_equal(c1$convergence$iter, NULL)
+  expect_equal(c2$convergence$iter, NULL)
+  expect_equal(c3$convergence$iter, NULL)
+  expect_equal(c4$convergence$iter, NULL)
+  expect_equal(c5$convergence$iter, NULL)
+
+  expect_equal(c1$convergence$max_iter, NULL)
+  expect_equal(c2$convergence$max_iter, NULL)
+  expect_equal(c3$convergence$max_iter, NULL)
+  expect_equal(c4$convergence$max_iter, NULL)
+  expect_equal(c5$convergence$max_iter, 10)
 
   # test error messages
 
@@ -547,5 +596,30 @@ test_that("varrho() works correctly", {
                "'iteration' must be weakly larger than 1")
   expect_error(varrho(0.05, "normal", -1),
                "'iteration' must be weakly larger than 1")
+
+})
+
+test_that("mvn_sup() works correctly", {
+
+  m <- c(0, 1)
+  S <- matrix(c(2, 1, 1, 3), 2, 2)
+
+  expect_error(mvn_sup(1.3, m, S), "Argument 'n' is not an integer")
+  expect_error(mvn_sup("1", m, S), "Argument 'n' is not an integer")
+  expect_error(mvn_sup(10, c("a", "b"), S), "'mu' is not a numeric vector")
+  expect_error(mvn_sup(10, m, as.character(S)), "'Sigma' is not a numeric matrix")
+  expect_error(mvn_sup(10, m, as.data.frame(S)), "'Sigma' is not a numeric matrix")
+  expect_error(mvn_sup(10, c(0, 1, 0), S), "'mu' is not compatible with var-cov matrix 'Sigma'")
+
+  a <- round(mvn_sup(2, m, S, seed = 40), 2)
+  b <- mvn_sup(10, m, S, seed = 40)
+  expect_identical(a, c(1.34, 1.33))
+  expect_snapshot_output(b)
+
+  # all output must be weakly positive because we take absolute value
+  c <- mvn_sup(10000, m, S, seed = 40)
+  expect_equal((c >= 0), rep(TRUE, 10000))
+  # output must have length of n (not mu)
+  expect_equal(length(c), 10000L)
 
 })

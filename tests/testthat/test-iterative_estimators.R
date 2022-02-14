@@ -292,6 +292,48 @@ test_that("outlier_detection() produces correct output", {
   expect_equal(identical(t$model$m5, t$model$m4), TRUE)
   expect_equal(validate_robust2sls(t), t)
 
+  # test new max_iter argument
+  t <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                         sign_level = 0.05, initial_est = "robustified",
+                         iterations = "convergence", max_iter = 10,
+                         convergence_criterion = 0.05,
+                         shuffle = TRUE, shuffle_seed = 24, split = 0.5)
+  expect_equal(t$cons$convergence$max_iter, 10)
+  t <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                         sign_level = 0.05, initial_est = "robustified",
+                         iterations = "convergence", max_iter = NULL,
+                         convergence_criterion = 0.05,
+                         shuffle = TRUE, shuffle_seed = 24, split = 0.5)
+  expect_equal(t$cons$convergence$max_iter, NULL)
+  expect_warning(t <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                                        sign_level = 0.05, initial_est = "robustified",
+                                        iterations = 3, max_iter = 5,
+                                        convergence_criterion = 0.05,
+                                        shuffle = TRUE, shuffle_seed = 24, split = 0.5),
+                 "'iterations' is numeric, so 'max_iter' does not apply and is set to NULL")
+  expect_equal(t$cons$convergence$max_iter, NULL)
+
+  # check that max_iter is actually used
+  t <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                         sign_level = 0.05, initial_est = "robustified",
+                         iterations = "convergence", max_iter = NULL,
+                         convergence_criterion = 0,
+                         shuffle = TRUE, shuffle_seed = 24, split = 0.5)
+    # this runs 2 iterations
+  z <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                         sign_level = 0.05, initial_est = "robustified",
+                         iterations = "convergence", max_iter = 1,
+                         convergence_criterion = 0,
+                         shuffle = TRUE, shuffle_seed = 24, split = 0.5)
+  expect_equal(t$cons$iterations$setting, "convergence")
+  expect_equal(z$cons$iterations$setting, "convergence")
+  expect_equal(t$cons$iterations$actual, 2)
+  expect_equal(z$cons$iterations$actual, 1)
+  expect_equal(t$cons$convergence$converged, TRUE)
+  expect_equal(z$cons$convergence$converged, NULL)
+  expect_equal(t$cons$convergence$iter, 1) # is 1 because no change after m1
+  expect_equal(z$cons$convergence$iter, NULL)
+
 })
 
 

@@ -284,5 +284,141 @@ test_that("gauge_avar() gives correct errors", {
                "'split' must lie strictly between 0 and 1")
   expect_error(gauge_avar("normal", 0.01, "saturated", 0, p, 2.4),
                "'split' must lie strictly between 0 and 1")
+  expect_error(gauge_avar("normal", 0.01, "saturated", 1, p, NULL),
+               "'split' cannot be NULL unless initial estimator is 'robustified'")
+  expect_silent(gauge_avar("normal", 0.01, "robustified", 1, p, NULL))
+
+})
+
+
+test_that("gauge_covar() gives correct errors", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+
+  expect_error(gauge_covar(1, 0.01, 0.05, "robustified", 0, p, 0.5),
+               "'ref_dist' must be a character vector of length 1")
+  expect_error(gauge_covar(c("n", "n"), 0.01, 0.05, "robustified", 0, p, 0.5),
+               "'ref_dist' must be a character vector of length 1")
+  expect_error(gauge_covar("nonexist", 0.01, 0.05, "robustified", 1, p, 0.4),
+               "'ref_dist' must be one of the available reference")
+  expect_error(gauge_covar("normal", "a", 0.01, "saturated", 0, p, 0.4),
+               "'sign_level1' must be a numeric vector of length 1")
+  expect_error(gauge_covar("normal", c(0.01, 0.05), 0.01, "saturated", 0, p, 0.4),
+               "'sign_level1' must be a numeric vector of length 1")
+  expect_error(gauge_covar("normal", -0.3, 0.01, "robustified", 1, p, 0.5),
+               "'sign_level1' must lie strictly between 0 and 1")
+  expect_error(gauge_covar("normal", 1.2, 0.01, "robustified", 1, p, 0.5),
+               "'sign_level1' must lie strictly between 0 and 1")
+  expect_error(gauge_covar("normal", 0.01, "a", "saturated", 0, p, 0.4),
+               "'sign_level2' must be a numeric vector of length 1")
+  expect_error(gauge_covar("normal", 0.01, c(0.01, 0.05), "saturated", 0, p, 0.4),
+               "'sign_level2' must be a numeric vector of length 1")
+  expect_error(gauge_covar("normal", 0.01, -0.3, "robustified", 1, p, 0.5),
+               "'sign_level2' must lie strictly between 0 and 1")
+  expect_error(gauge_covar("normal", 0.01, 1.2, "robustified", 1, p, 0.5),
+               "'sign_level2' must lie strictly between 0 and 1")
+  expect_error(gauge_covar("normal", 0.05, 0.01, 2, 1, p, 0.5),
+               "'initial_est' must be a character vector of length 1")
+  expect_error(gauge_covar("normal", 0.05, 0.01, c("a", "b"), 1, p, 0.5),
+               "'initial_est' must be a character vector of length 1")
+  expect_error(gauge_covar("normal", 0.05, 0.01, "nonexist", 1, p, 0.5),
+               "'initial_est' must be one of the available initial estimators")
+  expect_error(gauge_covar("normal", 0.05, 0.01, "robustified", "1", p, 0.5),
+               "'iteration' must either be numeric or 'convergence'")
+  expect_error(gauge_covar("normal", 0.05, 0.01, "robustified", c(0,1), p, 0.5),
+               "'iteration' must be a numeric vector of length 1")
+  expect_error(gauge_covar("normal", 0.05, 0.01, "saturated", -2, p, 0.5),
+               "'iteration' must be weakly larger than 0")
+  expect_error(gauge_covar("normal", 0.05, 0.01, "saturated", 1.5, p, 0.5),
+               "'iteration' must be an integer")
+  expect_error(gauge_covar("normal", 0.01, 0.01, "saturated", 0, p, "0.5"),
+               "'split' must be a numeric vector of length 1")
+  expect_error(gauge_covar("normal", 0.01, 0.01, "saturated", 0, p, c(0.2, 0.5)),
+               "'split' must be a numeric vector of length 1")
+  expect_error(gauge_covar("normal", 0.01, 0.01, "saturated", 0, p, -1.5),
+               "'split' must lie strictly between 0 and 1")
+  expect_error(gauge_covar("normal", 0.01, 0.01, "saturated", 0, p, 2.4),
+               "'split' must lie strictly between 0 and 1")
+  expect_error(gauge_covar("normal", 0.01, 0.01, "saturated", 1, p, NULL),
+               "'split' cannot be NULL unless initial estimator is 'robustified'")
+  expect_silent(gauge_covar("normal", 0.01, 0.05, "robustified", 1, p, NULL))
+
+})
+
+test_that("gauge_covar() and gauge_avar() coincide for s=t=c", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+
+  avar1 <- gauge_avar(ref_dist = "normal", sign_level = 0.01,
+                      initial_est = "robustified", iteration = 0,
+                      parameters = p, split = NULL)
+  covar1 <- gauge_covar(ref_dist = "normal", sign_level = 0.01,
+                        sign_level2 = 0.01, initial_est = "robustified",
+                        iteration = 0, parameters = p, split = NULL)
+  expect_identical(avar1, covar1)
+  avar2 <- gauge_avar(ref_dist = "normal", sign_level = 0.05,
+                      initial_est = "robustified", iteration = 0,
+                      parameters = p, split = NULL)
+  covar2 <- gauge_covar(ref_dist = "normal", sign_level = 0.05,
+                        sign_level2 = 0.05, initial_est = "robustified",
+                        iteration = 0, parameters = p, split = NULL)
+  expect_identical(avar2, covar2)
+  avar3 <- gauge_avar(ref_dist = "normal", sign_level = 0.01,
+                      initial_est = "robustified", iteration = "convergence",
+                      parameters = p, split = NULL)
+  covar3 <- gauge_covar(ref_dist = "normal", sign_level = 0.01,
+                        sign_level2 = 0.01, initial_est = "robustified",
+                        iteration = "convergence", parameters = p, split = NULL)
+  expect_identical(avar3, covar3)
+  avar4 <- gauge_avar(ref_dist = "normal", sign_level = 0.01,
+                      initial_est = "robustified", iteration = 5,
+                      parameters = p, split = NULL)
+  covar4 <- gauge_covar(ref_dist = "normal", sign_level = 0.01,
+                        sign_level2 = 0.01, initial_est = "robustified",
+                        iteration = 5, parameters = p, split = NULL)
+  expect_identical(avar4, covar4)
+  avar5 <- gauge_avar(ref_dist = "normal", sign_level = 0.01,
+                      initial_est = "saturated", iteration = 0,
+                      parameters = p, split = 0.5)
+  covar5 <- gauge_covar(ref_dist = "normal", sign_level = 0.01,
+                        sign_level2 = 0.01, initial_est = "saturated",
+                        iteration = 0, parameters = p, split = 0.5)
+  expect_identical(avar5, covar5)
+  avar6 <- gauge_avar(ref_dist = "normal", sign_level = 0.01,
+                      initial_est = "saturated", iteration = 0,
+                      parameters = p, split = 0.25)
+  covar6 <- gauge_covar(ref_dist = "normal", sign_level = 0.01,
+                        sign_level2 = 0.01, initial_est = "saturated",
+                        iteration = 0, parameters = p, split = 0.25)
+  expect_identical(avar6, covar6)
+  avar7 <- gauge_avar(ref_dist = "normal", sign_level = 0.01,
+                      initial_est = "saturated", iteration = 0,
+                      parameters = p, split = 0.33)
+  covar7 <- gauge_covar(ref_dist = "normal", sign_level = 0.01,
+                        sign_level2 = 0.01, initial_est = "saturated",
+                        iteration = 0, parameters = p, split = 0.33)
+  expect_identical(avar7, covar7)
+  avar8 <- gauge_avar(ref_dist = "normal", sign_level = 0.01,
+                      initial_est = "saturated", iteration = 4,
+                      parameters = p, split = 0.5)
+  covar8 <- gauge_covar(ref_dist = "normal", sign_level = 0.01,
+                        sign_level2 = 0.01, initial_est = "saturated",
+                        iteration = 4, parameters = p, split = 0.5)
+  expect_identical(avar8, covar8)
+  avar9 <- gauge_avar(ref_dist = "normal", sign_level = 0.01,
+                      initial_est = "saturated", iteration = "convergence",
+                      parameters = p, split = 0.5)
+  covar9 <- gauge_covar(ref_dist = "normal", sign_level = 0.01,
+                        sign_level2 = 0.01, initial_est = "saturated",
+                        iteration = "convergence", parameters = p, split = 0.5)
+  expect_identical(avar9, covar9)
+  # following setting is not completely identical, differ in digit 15
+  avar10 <- gauge_avar(ref_dist = "normal", sign_level = 0.1,
+                       initial_est = "saturated", iteration = "convergence",
+                       parameters = p, split = 0.5)
+  covar10 <- gauge_covar(ref_dist = "normal", sign_level = 0.1,
+                         sign_level2 = 0.1, initial_est = "saturated",
+                         iteration = "convergence", parameters = p, split = 0.5)
+  expect_equal(avar10, covar10, tolerance = 0.000000000000001)
 
 })

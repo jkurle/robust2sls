@@ -507,8 +507,18 @@ generate_data <- function(parameters, n) {
 #' @param iterations An integer >= 0 that specifies how often the outlier
 #' detection algorithm is iterated and for which summary statistics will be
 #' calculated. The value \code{0} means that outlier classification based on the
-#' initial estimator is done.
-#' @param shuffle A logical value or \code{NULL}. Only used if
+#' initial estimator is done. Alternatively, the character \code{"convergence"}
+#' for iteration until convergence.
+#' @param convergence_criterion A numeric value that determines whether the
+#'   algorithm has converged as measured by the L2 norm of the difference in
+#'   coefficients between the current and the previous iteration. Only used when
+#'   argument \code{iterations} is set to \code{"convergence"}.
+#' @param max_iter A numeric value >= 1 or NULL. If
+#' \code{iterations = "convergence"} is chosen, then the algorithm is stopped
+#' after at most \code{max_iter} iterations. If also a
+#' \code{convergence_criterion} is chosen then the algorithm stops when either
+#' the criterion is fulfilled or the maximum number of iterations is reached.
+#' @param shuffle A logical value or \code{NULL}.
 #' \code{initial_est == "saturated"}. If \code{TRUE} then the sample is shuffled
 #' before creating the subsamples.
 #' @param shuffle_seed An integer value that will set the seed for shuffling the
@@ -552,7 +562,8 @@ generate_data <- function(parameters, n) {
 #' @export
 
 mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
-                    initial_est, iterations, shuffle = FALSE, shuffle_seed,
+                    initial_est, iterations, convergence_criterion = NULL,
+                    max_iter = NULL, shuffle = FALSE, shuffle_seed = 10,
                     split = 0.5, path = FALSE, verbose = FALSE) {
 
   gamma <- sign_level
@@ -585,109 +596,230 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
     cat("Monte Carlo experiment: ")
   }
 
-  for (i in 1:NROW(grid)) {
+  if (is.numeric(iterations)) {
 
-    if (verbose == TRUE) {
-      cat(i, " ")
-    }
+    for (i in 1:NROW(grid)) {
 
-    # which parameters in this run?
-    n <- grid$sample_size[[i]]
-    sign_level <- grid$sign_level[[i]]
-    initial_est <- grid$initial_est[[i]]
-    split <- grid$split[[i]]
-
-    avar <- gauge_avar(ref_dist = ref_dist, sign_level = sign_level,
-                       initial_est = initial_est, iteration = iterations,
-                       parameters = parameters, split = split)
-
-    # store results in a data frame
-    results <- foreach::foreach(m = (1:M), .combine = "rbind",
-                                .options.RNG = seed) %dorng% {
-
-      # draw random data of the 2SLS model, sample size n
-      d <- generate_data(parameters = parameters, n = n)
-
-      # run the model
-      model <- outlier_detection(data = d$data, formula = formula,
-                                 ref_dist = ref_dist, sign_level = sign_level,
-                                 initial_est = initial_est, user_model = NULL,
-                                 iterations = iterations,
-                                 convergence_criterion = NULL,
-                                 shuffle = shuffle, shuffle_seed = shuffle_seed,
-                                 split = split, verbose = FALSE)
-
-      # calculate metrics of interest
-      num.outliers <- sum((model$type[[(iterations + 1)]] == 0))
-      num.expected <- n * sign_level
-      num.nonmissing <- n - sum((model$type[[(iterations + 1)]] == -1))
-      gauge <- num.outliers / num.nonmissing
-      p_est <- estimate_param_null(model)
-      avar_est <- gauge_avar(ref_dist = ref_dist, sign_level = sign_level,
-                             initial_est = initial_est,
-                             iteration = iterations, parameters = p_est,
-                             split = split)
-      prop_t <- abs((gauge - sign_level) / sqrt((avar_est / n)))
-      prop_p <- 2 * stats::pnorm(prop_t, lower.tail = FALSE)
-      prop_reject_001 <- (prop_p < 0.01)
-      prop_reject_005 <- (prop_p < 0.05)
-      prop_reject_010 <- (prop_p < 0.1)
-      count_p <- stats::poisson.test(x = num.outliers, r = num.expected,
-                                     alternative = "two.sided")$p.value
-      count_reject_001 <- (count_p < 0.01)
-      count_reject_005 <- (count_p < 0.05)
-      count_reject_010 <- (count_p < 0.1)
-
-      data.frame(M, n, iterations, sign_level, num.outliers, num.expected,
-                 gauge, avar, avar_est, prop_t, prop_p, prop_reject_001,
-                 prop_reject_005, prop_reject_010, count_p, count_reject_001,
-                 count_reject_005, count_reject_010)
-
-    } # end foreach
-
-    if (!(path == FALSE)) {
-
-      # path should not end with a separator
-      # use base R function file.path() because uses path separator for platform
-      ending <- substr(x = path, start = nchar(path), stop = nchar(path))
-      if (ending %in% c("/", "\\")) {
-        stop("Argument 'path' should not end with a path separator.")
+      if (verbose == TRUE) {
+        cat(i, " ")
       }
 
-      filename <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,sep = "")
-      filename_csv <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,".csv",sep = "")
-      pathi <- file.path(path, filename)
-      pathi_csv <- file.path(path, filename_csv)
-      saveRDS(results, file = pathi)
-      utils::write.csv(results, file = pathi_csv)
+      # which parameters in this run?
+      n <- grid$sample_size[[i]]
+      sign_level <- grid$sign_level[[i]]
+      initial_est <- grid$initial_est[[i]]
+      split <- grid$split[[i]]
 
-    }
+      avar <- gauge_avar(ref_dist = ref_dist, sign_level = sign_level,
+                         initial_est = initial_est, iteration = iterations,
+                         parameters = parameters, split = split)
 
-    mean_gauge <- mean(results$gauge)
-    var_gauge <- stats::var(results$gauge)
-    var_ratio <- (var_gauge / (avar/n))
-    var_ratio2 <- var_gauge * n / avar
+      # store results in a data frame
+      results <- foreach::foreach(m = (1:M), .combine = "rbind",
+                                  .options.RNG = seed) %dorng% {
 
-    mean_avar_est <- mean(results$avar_est)
-    mean_prop_t <- mean(results$prop_t)
-    mean_prop_p <- mean(results$prop_p)
-    prop_size_001 <- mean(results$prop_reject_001)
-    prop_size_005 <- mean(results$prop_reject_005)
-    prop_size_010 <- mean(results$prop_reject_010)
-    mean_count_p <- mean(results$count_p)
-    count_size_001 <- mean(results$count_reject_001)
-    count_size_005 <- mean(results$count_reject_005)
-    count_size_010 <- mean(results$count_reject_010)
+        # draw random data of the 2SLS model, sample size n
+        d <- generate_data(parameters = parameters, n = n)
 
-    res <- data.frame(M, n, iterations, sign_level, initial_est, split,
-                      mean_gauge, avar, mean_avar_est, var_gauge, var_ratio, var_ratio2,
-                      mean_prop_t, mean_prop_p, prop_size_001, prop_size_005,
-                      prop_size_010, mean_count_p, count_size_001,
-                      count_size_005, count_size_010)
+        # run the model
+        model <- outlier_detection(data = d$data, formula = formula,
+                                   ref_dist = ref_dist, sign_level = sign_level,
+                                   initial_est = initial_est, user_model = NULL,
+                                   iterations = iterations,
+                                   convergence_criterion = NULL,
+                                   shuffle = shuffle, shuffle_seed = shuffle_seed,
+                                   split = split, verbose = FALSE)
 
-    results_all <- rbind(results_all, res)
+        # calculate metrics of interest
+        num.outliers <- sum((model$type[[(iterations + 1)]] == 0))
+        num.expected <- n * sign_level
+        num.nonmissing <- n - sum((model$type[[(iterations + 1)]] == -1))
+        gauge <- num.outliers / num.nonmissing
+        p_est <- estimate_param_null(model)
+        avar_est <- gauge_avar(ref_dist = ref_dist, sign_level = sign_level,
+                               initial_est = initial_est,
+                               iteration = iterations, parameters = p_est,
+                               split = split)
+        prop_t <- abs((gauge - sign_level) / sqrt((avar_est / n)))
+        prop_p <- 2 * stats::pnorm(prop_t, lower.tail = FALSE)
+        prop_reject_001 <- (prop_p < 0.01)
+        prop_reject_005 <- (prop_p < 0.05)
+        prop_reject_010 <- (prop_p < 0.1)
+        count_p <- stats::poisson.test(x = num.outliers, r = num.expected,
+                                       alternative = "two.sided")$p.value
+        count_reject_001 <- (count_p < 0.01)
+        count_reject_005 <- (count_p < 0.05)
+        count_reject_010 <- (count_p < 0.1)
 
-  } # end grid search
+        data.frame(M, n, iterations, sign_level, num.outliers, num.expected,
+                   gauge, avar, avar_est, prop_t, prop_p, prop_reject_001,
+                   prop_reject_005, prop_reject_010, count_p, count_reject_001,
+                   count_reject_005, count_reject_010)
+
+      } # end foreach
+
+      if (!(path == FALSE)) {
+
+        # path should not end with a separator
+        # use base R function file.path() because uses path separator for platform
+        ending <- substr(x = path, start = nchar(path), stop = nchar(path))
+        if (ending %in% c("/", "\\")) {
+          stop("Argument 'path' should not end with a path separator.")
+        }
+
+        filename <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,sep = "")
+        filename_csv <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,".csv",sep = "")
+        pathi <- file.path(path, filename)
+        pathi_csv <- file.path(path, filename_csv)
+        saveRDS(results, file = pathi)
+        utils::write.csv(results, file = pathi_csv)
+
+      }
+
+      mean_gauge <- mean(results$gauge)
+      var_gauge <- stats::var(results$gauge)
+      var_ratio <- (var_gauge / (avar/n))
+      var_ratio2 <- var_gauge * n / avar
+
+      mean_avar_est <- mean(results$avar_est)
+      mean_prop_t <- mean(results$prop_t)
+      mean_prop_p <- mean(results$prop_p)
+      prop_size_001 <- mean(results$prop_reject_001)
+      prop_size_005 <- mean(results$prop_reject_005)
+      prop_size_010 <- mean(results$prop_reject_010)
+      mean_count_p <- mean(results$count_p)
+      count_size_001 <- mean(results$count_reject_001)
+      count_size_005 <- mean(results$count_reject_005)
+      count_size_010 <- mean(results$count_reject_010)
+
+      res <- data.frame(M, n, iterations, sign_level, initial_est, split,
+                        mean_gauge, avar, mean_avar_est, var_gauge, var_ratio, var_ratio2,
+                        mean_prop_t, mean_prop_p, prop_size_001, prop_size_005,
+                        prop_size_010, mean_count_p, count_size_001,
+                        count_size_005, count_size_010)
+
+      results_all <- rbind(results_all, res)
+
+    } # end grid search
+  } else if (identical(iterations, "convergence")) { # end if iteration is numeric
+
+    for (i in 1:NROW(grid)) {
+
+      if (verbose == TRUE) {
+        cat(i, " ")
+      }
+
+      # which parameters in this run?
+      n <- grid$sample_size[[i]]
+      sign_level <- grid$sign_level[[i]]
+      initial_est <- grid$initial_est[[i]]
+      split <- grid$split[[i]]
+
+      avar <- gauge_avar(ref_dist = ref_dist, sign_level = sign_level,
+                         initial_est = initial_est, iteration = iterations,
+                         parameters = parameters, split = split)
+
+      # store results in a data frame
+      results <- foreach::foreach(m = (1:M), .combine = "rbind",
+                                  .options.RNG = seed) %dorng% {
+
+        # draw random data of the 2SLS model, sample size n
+        d <- generate_data(parameters = parameters, n = n)
+
+        # run the model
+        model <- outlier_detection(data = d$data, formula = formula,
+                                   ref_dist = ref_dist, sign_level = sign_level,
+                                   initial_est = initial_est, user_model = NULL,
+                                   iterations = iterations,
+                                   convergence_criterion = convergence_criterion,
+                                   max_iter = max_iter,
+                                   shuffle = shuffle, shuffle_seed = shuffle_seed,
+                                   split = split, verbose = FALSE)
+
+        last_it <- length(model$model)
+
+        # calculate metrics of interest
+        num.outliers <- sum((model$type[[last_it]] == 0))
+        num.expected <- n * sign_level
+        num.nonmissing <- n - sum((model$type[[(last_it)]] == -1))
+        gauge <- num.outliers / num.nonmissing
+        p_est <- estimate_param_null(model)
+        avar_est <- gauge_avar(ref_dist = ref_dist, sign_level = sign_level,
+                               initial_est = initial_est,
+                               iteration = iterations, parameters = p_est,
+                               split = split)
+        prop_t <- abs((gauge - sign_level) / sqrt((avar_est / n)))
+        prop_p <- 2 * stats::pnorm(prop_t, lower.tail = FALSE)
+        prop_reject_001 <- (prop_p < 0.01)
+        prop_reject_005 <- (prop_p < 0.05)
+        prop_reject_010 <- (prop_p < 0.1)
+        count_p <- stats::poisson.test(x = num.outliers, r = num.expected,
+                                       alternative = "two.sided")$p.value
+        count_reject_001 <- (count_p < 0.01)
+        count_reject_005 <- (count_p < 0.05)
+        count_reject_010 <- (count_p < 0.1)
+        conv <- last_it-1
+
+        data.frame(M, n, iterations, conv, sign_level, num.outliers,
+                   num.expected, gauge, avar, avar_est, prop_t, prop_p,
+                   prop_reject_001, prop_reject_005, prop_reject_010, count_p,
+                   count_reject_001, count_reject_005, count_reject_010)
+
+      } # end foreach
+
+      if (!(path == FALSE)) {
+
+        # path should not end with a separator
+        # use base R function file.path() because uses path separator for platform
+        ending <- substr(x = path, start = nchar(path), stop = nchar(path))
+        if (ending %in% c("/", "\\")) {
+          stop("Argument 'path' should not end with a path separator.")
+        }
+
+        filename <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,sep = "")
+        filename_csv <- paste("M",M,"n",n,"g",sign_level,"i",initial_est,"s",split,".csv",sep = "")
+        pathi <- file.path(path, filename)
+        pathi_csv <- file.path(path, filename_csv)
+        saveRDS(results, file = pathi)
+        utils::write.csv(results, file = pathi_csv)
+
+      }
+
+      mean_gauge <- mean(results$gauge)
+      var_gauge <- stats::var(results$gauge)
+      var_ratio <- (var_gauge / (avar/n))
+      var_ratio2 <- var_gauge * n / avar
+
+      mean_avar_est <- mean(results$avar_est)
+      mean_prop_t <- mean(results$prop_t)
+      mean_prop_p <- mean(results$prop_p)
+      prop_size_001 <- mean(results$prop_reject_001)
+      prop_size_005 <- mean(results$prop_reject_005)
+      prop_size_010 <- mean(results$prop_reject_010)
+      mean_count_p <- mean(results$count_p)
+      count_size_001 <- mean(results$count_reject_001)
+      count_size_005 <- mean(results$count_reject_005)
+      count_size_010 <- mean(results$count_reject_010)
+
+      conv_freq <- as.list(table(results$conv))
+
+      if (is.null(max_iter)) {max <- "NULL"} else {max <- max_iter}
+
+      res <- data.frame(M, n, iterations, max, sign_level, initial_est, split,
+                        mean_gauge, avar, mean_avar_est, var_gauge, var_ratio, var_ratio2,
+                        mean_prop_t, mean_prop_p, prop_size_001, prop_size_005,
+                        prop_size_010, mean_count_p, count_size_001,
+                        count_size_005, count_size_010, conv_freq = I(list(conv_freq)))
+
+      results_all <- rbind(results_all, res)
+
+    } # end grid search
+
+  } else { # not "convergence"
+
+    stop("Argument iterations not correctly specified.")
+
+  }
 
   # might want to make clear that robustified is independent of split
   # but then turns all of them to characters, so leave at 0.5 for now
@@ -702,7 +834,5 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
   return(results_all)
 
 }
-
-
 
 

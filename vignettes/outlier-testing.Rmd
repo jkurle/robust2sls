@@ -1,0 +1,250 @@
+---
+title: "Outlier Testing"
+output: rmarkdown::html_vignette
+author: "Jonas Kurle"
+date: "13 Februar 2022"
+vignette: >
+  %\VignetteIndexEntry{Outlier Testing}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+```{r, include = FALSE, echo = FALSE}
+Sys.setenv(LANGUAGE="en")
+```
+
+# Introduction
+
+This vignette introduces the testing suite implemented in version 0.2.0 that
+offers several ways of testing for presence of outliers in the data. We will use
+artificial data to illustrate the usage of the different functions and how they
+can be combined.
+
+See the vignette *Introduction to the robust2sls Package* for a general overview
+over the 2SLS setting and the package itself and the vignette *Monte Carlo
+Simulations* for more details about how to simulate data and register various
+back-ends for parallel or sequential execution.
+
+# Artificial Data
+
+First, we generate the parameters of the 2SLS model randomly and create 
+artificial data.
+
+```{r, data}
+library(robust2sls)
+# create parameters
+p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+# draw random sample of 1000 observations following the model
+d <- generate_data(parameters = p, n = 1000)$data
+```
+
+# Outlier Detection
+
+First, we use one of the algorithms to detect outliers in our sample. Suppose we
+use *Robustified 2SLS*, iterate the algorithm five times, and choose a
+significance level $\gamma_{c}$ of 0.05 (cut-off 1.96 under normality) to
+classify an observation as an outlier or not.
+
+Running the algorithm can be done as follows. The returned object is an object
+of class *robust2sls*. This is a list storing, inter alia, the model estimates
+and classifications as outliers for each iteration.
+
+```{r, single_alg}
+model <- outlier_detection(data = d, formula = p$setting$formula, ref_dist = "normal",
+                           sign_level = 0.05, initial_est = "robustified", iterations = 5)
+print(model)
+```
+
+For some of the tests, we might want to use the same algorithm but different
+cut-off values. Under the null hypothesis of no outliers, we expect a 
+proportional relationship between $\gamma_{c}$ and the share of detected 
+outliers. For example, for $\gamma_{c} = 0.01$, we expect to classify 1% of the
+observations as outliers; for $\gamma_{c} = 0.05$, we expect to classify 5% as
+outliers. The utility function `multi_cutoff()` allows the user to estimate
+several such models by giving the function a vector of multiple $\gamma$ values.
+
+The function can be executed in parallel by registering a parallel back-end. We
+choose to run the expression sequentially because it is already fast. The 
+function simply returns a list of *robust2sls* objects.
+
+```{r, multiple_alg}
+# choose which gamma values to use
+gammas <- seq(0.01, 0.05, 0.01)
+# register backend
+library(doFuture)
+registerDoFuture()
+plan(sequential)
+models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula, ref_dist = "normal",
+                       initial_est = "robustified", iterations = 5)
+length(models)
+```
+
+# Outlier Testing
+
+This section introduces four different tests:
+
+* proportion test
+* count test
+* scaling sum test
+* scaling supremum test
+
+Each subsection quickly explains the intuition, the formula for the test
+statistic, and provides a small example how to implement it.
+
+As usual, all tests require a significance level to decide whether to reject or
+not. Note that there are two significance levels at play: We use $\gamma_{c}$ to
+refer to the significance level that determines the cut-off value beyond which
+an error is classified as an outlier. It is a tuning parameter in the 
+`outlier_detection()` algorithm. In contrast, $\alpha$ refers to the 
+significance level of the tests, such that we reject the null hypothesis when
+the p-value is smaller than the significance level.
+
+## Proportion Test
+
+The idea of the proportion test is to check whether the detected share of
+outliers deviates significantly from the expected share of outliers under the
+null hypothesis of no outliers. The test statistic is a simple t-test based on
+the asymptotic distribution of the false outlier detection rate (FODR) and is
+hence given as
+$$t = \frac{\hat\gamma_{c} - \gamma_{c}}{se},$$
+where $se$ is the standard error.
+
+The function `proptest()` implements the test. It can either be given a 
+*robust2sls* object or a list thereof, as returned by `multi_cutoff()`. 
+
+```{r, proptest}
+# using a single robust2sls object
+proptest(model, alpha = 0.05, iteration = 5, one_sided = FALSE)
+
+# using a list of robust2sls objects
+proptest(models, alpha = 0.05, iteration = 5, one_sided = TRUE)
+```
+
+The function returns a data frame and each row corresponds to one setting of
+$\gamma_{c}$. Note that the value of the test statistic is the same for the
+first call of `proptest()` and the last row of the second call. They refer to
+the same model.
+
+The first column of the output stores the iteration that was tested and the
+second column refers to the actual iteration that was tested. This only differs
+when the user tests the convergenct distribution, which may differ across
+different settings of $\gamma_{c}$. The one-sided test only rejects for positive
+deviations from the expected value while the two-sided test rejects in both
+directions.
+
+When testing several settings of the algorithms, we have a multiple testing 
+issue. We can apply the 
+[Simes (1986)](https://academic.oup.com/biomet/article/73/3/751/250538) 
+procedure to fix the significance level for the global null hypothesis, which is
+rejected if any of the individual null hypotheses is rejected at the adjusted
+significance level.
+
+```{r, proptest simes}
+proptests <- proptest(models, alpha = 0.05, iteration = 5, one_sided = TRUE)
+a <- globaltest(tests = proptests, global_alpha = 0.05)
+
+# decision for global hypothesis test
+a$reject
+
+# details for the Simes procedure
+a$tests[, c("iter_test", "iter_act", "gamma", "t", "pval", "alpha_adj", "reject_adj")]
+
+```
+
+## Count Test
+
+The idea is similar to the proportion test. Instead of comparing the share of
+detected outliers to its expected value, we now compare the expected number of
+detected outliers to the expected number. The test statistic asymptotically
+follows a Poisson distribution.
+$$n \hat  \gamma_{c},$$
+where $n$ is the sample size.
+
+The function `counttest()` implements the test. As `porptest()`, it can either
+take a *robust2sls* object or a list thereof.
+
+```{r, counttest}
+# using a single robust2sls object
+counttest(model, alpha = 0.05, iteration = 5, one_sided = FALSE)
+
+# using a list of robust2sls objects
+counttest(models, alpha = 0.05, iteration = 5, one_sided = TRUE)
+```
+
+As before, we can use the 
+[Simes (1986)](https://academic.oup.com/biomet/article/73/3/751/250538) 
+procedure to account for multiple hypothesis testing.
+
+```{r, counttest simes}
+counttests <- counttest(models, alpha = 0.05, iteration = 5, one_sided = TRUE)
+b <- globaltest(tests = counttests, global_alpha = 0.05)
+
+# decision for global hypothesis test
+b$reject
+
+# details for the Simes procedure
+b$tests[, c("iter_test", "iter_act", "gamma", "num_act", "num_exp", "pval", "alpha_adj", "reject_adj")]
+```
+
+## Scaling Sum Test
+
+This test directly exploits the information we get from running several 
+configurations of the outlier detection algorithm with varying $\gamma_{c}$. We
+therefore need a list of *robust2sls* objects, as for example returned by
+`multi_cutoff()`.
+
+The test statistic is constructed by summing up the deviations across different
+cut-offs / values of $\gamma_{c}$:
+$$t = \sum_{k = 1}^{K} \sqrt n (\hat \gamma_{c_{k}} - \gamma_{c_{k}})/se,$$
+where $K$ is the number of different cut-off values that we have tried and $se$
+is the standard error of this sum.
+
+```{r, sumtest}
+c <- sumtest(models, alpha = 0.05, iteration = 1, one_sided = FALSE)
+
+attr(c, "gammas")
+```
+
+Note that we tested iteration 1 instead of iteration 5, which was the number of 
+iterations we applied the algorithm. In general, as long as all *robust2sls* 
+model objects contain that iteration, it can be tested - even if the model 
+objects themselves contain further iterations.
+
+The returned data frame has an attribute called `"gammas"`, which stores the
+$\gamma_{c}$ values that were used in constructing the test.
+
+## Scaling Supremum Test
+
+As in the previous test, we combine several deviations across different cut-offs
+/ values of $\gamma_{c}$. In this case, we take the supremum / maximum, since we
+have a finite number of $\gamma$ values:
+$$t = \sup_{k = 1,...,K} |\sqrt n (\hat \gamma_{c_{k}} - \gamma_{c_{k}})|$$
+We simulate the asymptotic distribution of this object to derive the critical
+values and the p-value.
+
+The function `suptest()` implements this test. The user can specify which 
+critical values should be returned. The default is to report the values 
+corresponding to the 90th, 95th, and 99th quantile.
+
+```{r, suptest}
+d <- suptest(models, alpha = 0.05, iteration = 5)
+
+attr(d, "gammas")
+attr(d, "critical")
+```
+
+As for `sumtest()`, the returned data frame has an attribute called `"gammas"`,
+which stores the $\gamma_{c}$ values that were used in constructing the test. In
+addition, there is an attribute `"critical"`, which stores the critical values
+of the simulated asymptotic distribution against which the test statistic was
+compared.

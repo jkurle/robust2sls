@@ -1,9 +1,9 @@
 Package: robust2sls
 Type: Package
 Title: Outlier Robust Two-Stage Least Squares Inference and Testing
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: person("Jonas", "Kurle", email = "mail@jonaskurle.com", 
-                  role = c("aut","cre"), comment = (ORCID = "0000-0003-2197-2012"))
+                  role = c("aut","cre"), comment = c(ORCID = "0000-0003-2197-2012"))
 Description: An implementation of easy tools for outlier robust inference in
     two-stage least squares (2SLS) models. The user specifies a reference 
     distribution against which observations are classified as outliers or not. 
@@ -25,7 +25,6 @@ Suggests:
     ggplot2,
     grDevices,
     knitr,
-    MASS,
     parallel,
     rmarkdown,
     testthat,
@@ -36,8 +35,11 @@ Imports:
     AER,
     doRNG,
     foreach,
+    MASS,
+    mathjaxr,
     pracma,
     stats
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
+RdMacros: mathjaxr

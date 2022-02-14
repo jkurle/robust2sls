@@ -97,15 +97,15 @@ validate_robust2sls <- function(x) {
     stop(strwrap("Component $cons$convergence must be a list", prefix = " ",
                  initial = ""))
   }
-  # test that subsublist $cons$convergence has length 3
-  if (!identical(length(x$cons$convergence), 4L)) {
-    stop(strwrap("Component $cons$convergence must be a list with 4 elements",
+  # test that subsublist $cons$convergence has length 5
+  if (!identical(length(x$cons$convergence), 5L)) {
+    stop(strwrap("Component $cons$convergence must be a list with 5 elements",
                  prefix = " ", initial = ""))
   }
   # test that subsublist $cons$convergence has the correct named components
-  cons_convergence_name <- c("criterion", "difference", "converged", "iter")
+  cons_convergence_name <- c("criterion", "difference", "converged", "iter", "max_iter")
   if (!identical(names(x$cons$convergence), cons_convergence_name)) {
-    stop(strwrap(paste(c("Component $cons$convergence must have 4 named
+    stop(strwrap(paste(c("Component $cons$convergence must have 5 named
                     components:", cons_convergence_name), collapse = " ")),
          prefix = " ", initial = "")
   }
@@ -398,6 +398,17 @@ validate_robust2sls <- function(x) {
                    been set", prefix = " ", initial = ""))
     }
   } # end numeric iterations set
+
+  # check $cons$convergence$max_iter correct class
+  if (!(is.null(x$cons$convergence$max_iter) | is.numeric(x$cons$convergence$max_iter))) {
+    stop(strwrap("x$cons$convergence$max_iter must either be NULL or numeric",
+                 prefix = " ", initial = ""))
+  }
+  if (is.numeric(x$cons$iterations$setting) &&
+      !is.null(x$cons$convergence$max_iter)) {
+    stop(strwrap("When iterations is numeric, then max_iter must be NULL",
+                 prefix = " ", initial = ""))
+  }
 
   # check the elements of $model, $res, $stdres, $sel, $type
   if (identical(x$cons$initial$estimator, "saturated") &
