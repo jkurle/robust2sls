@@ -399,6 +399,7 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #' @return A numeric vector of the centered FODR values.
 #'
 #' @keywords internal
+#' @import mathjaxr
 
 multi_cutoff_to_fodr_vec <- function(robust2sls_object, iteration) {
 
@@ -456,6 +457,7 @@ multi_cutoff_to_fodr_vec <- function(robust2sls_object, iteration) {
 #' gammas determining the different cut-offs were used in the scaling sum test.
 #'
 #' @export
+#' @import mathjaxr
 
 sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 
@@ -577,6 +579,7 @@ sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #' \code{p}.
 #'
 #' @export
+#' @import mathjaxr
 
 suptest <- function(robust2sls_object, alpha, iteration, p = c(0.9, 0.95, 0.99),
                     R = 50000) {
