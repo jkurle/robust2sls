@@ -836,5 +836,3 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
 }
 
 
-
-
