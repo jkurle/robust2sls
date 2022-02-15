@@ -18,6 +18,7 @@ BugReports: https://github.com/jkurle/robust2sls/issues
 License: GPL-3
 Encoding: UTF-8
 Suggests:
+    covr,
     datasets,
     doFuture,
     doParallel,
