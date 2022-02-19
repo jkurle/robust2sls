@@ -6,6 +6,8 @@
 <!-- badges: start -->
 
 ![R-CMD-check](https://github.com/jkurle/robust2sls/workflows/R-CMD-check/badge.svg?branch=master)
+[![Codecov test
+coverage](https://codecov.io/gh/jkurle/robust2sls/branch/master/graph/badge.svg)](https://codecov.io/gh/jkurle/robust2sls?branch=master)
 <!-- badges: end -->
 
 The goal of robust2sls is to provide easy-to-use tools for
@@ -14,7 +16,7 @@ outlier-robust inference and outlier testing in two-stage least squares
 
 ## Installation
 
-You can install the released version from 
+You can install the released version from
 [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
