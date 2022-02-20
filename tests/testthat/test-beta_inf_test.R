@@ -92,6 +92,26 @@ test_that("beta_inf_correction() produces the correct output", {
   attributes(value) <- NULL
   expect_equal(value, 1.54301, tolerance = 0.000001)
 
+
+  # synthetic data
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  # this one does not converge, so $convergence$converged and $iter are NULL
+  obj <- outlier_detection(data = d, formula = p$setting$formula, "normal",
+                           0.1, "robustified", iterations = "convergence",
+                           convergence_criterion = 0, max_iter = 20)
+  # has not converged, so in neither case should use fixed point
+  a <- beta_inf_correction(obj, iteration = 1, fp = FALSE)
+  b <- beta_inf_correction(obj, iteration = 1, fp = TRUE)
+  c <- beta_inf_correction(obj, iteration = 20, fp = FALSE)
+  d <- beta_inf_correction(obj, iteration = 20, fp = TRUE)
+  expect_equal(a, b)
+  expect_equal(c, d)
+  expect_equal(attr(a, "type of correction"), "iteration m = 1")
+  expect_equal(attr(b, "type of correction"), "iteration m = 1")
+  expect_equal(attr(c, "type of correction"), "iteration m = 20")
+  expect_equal(attr(d, "type of correction"), "iteration m = 20")
+
 })
 
 test_that("beta_inf() throws correct errors to invalid inputs", {
