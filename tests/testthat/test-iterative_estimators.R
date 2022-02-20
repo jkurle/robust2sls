@@ -330,7 +330,7 @@ test_that("outlier_detection() produces correct output", {
   expect_equal(t$cons$iterations$actual, 2)
   expect_equal(z$cons$iterations$actual, 1)
   expect_equal(t$cons$convergence$converged, TRUE)
-  expect_equal(z$cons$convergence$converged, NULL)
+  expect_equal(z$cons$convergence$converged, FALSE)
   expect_equal(t$cons$convergence$iter, 1) # is 1 because no change after m1
   expect_equal(z$cons$convergence$iter, NULL)
 

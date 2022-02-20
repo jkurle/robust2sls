@@ -246,10 +246,11 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
       # calculate difference
       difference <- conv_diff(current = out, counter = counter)
+      # always put difference even if not converged yet
+      out$cons$convergence$difference <- difference
 
       if (difference <= convergence_criterion) {
 
-        out$cons$convergence$difference <- difference
         out$cons$convergence$converged <- TRUE
 
         if (difference == 0) {
@@ -264,7 +265,13 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
           cat("\n Algorithm converged successfully. Exit iterations.")
         }
 
-      } # end if converged
+      } else { # end if converged; if not converged
+
+        if (!is.null(max_iter) && (counter == max_iter)) { # final iteration
+          out$cons$convergence$converged <- FALSE
+        }
+
+      }
 
       # update counter
       counter <- counter + 1
