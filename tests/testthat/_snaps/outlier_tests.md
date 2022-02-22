@@ -231,6 +231,11 @@
       iter_test iter_act gamma         t      type      pval alpha reject
     1         1        1  0.05 -1.552096 one-sided 0.9396804   0.1  FALSE
 
+---
+
+        iter_test iter_act gamma         t      type      pval alpha reject
+    1 convergence        4  0.01 -1.612366 two-sided 0.1068823   0.1  FALSE
+
 # counttest() works correctly
 
     $gamma0.01

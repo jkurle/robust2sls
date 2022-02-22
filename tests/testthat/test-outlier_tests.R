@@ -282,6 +282,21 @@ test_that("proptest() works correctly", {
   expect_identical(pval1side, b$pval)
   expect_identical(pval2side, a$pval)
 
+  # single model until convergence (codecov)
+  model <- outlier_detection(data = d, formula = p$setting$formula,
+                             initial_est = "robustified", ref_dist = "normal",
+                             sign_level = 0.01, iterations = "convergence", convergence_criterion = 0)
+  c <- proptest(model, alpha = 0.1, iteration = "convergence", one_sided = FALSE)
+  expect_equal(NROW(c), 1)
+  expect_equal(NCOL(c), 8)
+  expect_equal(c$iter_test, "convergence")
+  expect_equal(c$iter_act, 4)
+  expect_equal(c$gamma, 0.01)
+  expect_equal(c$type, "two-sided")
+  expect_equal(c$alpha, 0.1)
+  expect_equal(c$reject, FALSE)
+  expect_snapshot_output(c)
+
 })
 
 test_that("proptest() raises correct errors", {

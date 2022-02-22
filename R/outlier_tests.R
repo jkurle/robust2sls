@@ -264,9 +264,10 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
       type <- "two-sided"
       pval <- sapply(X = t, FUN = function(x) 2 * stats::pnorm(q = abs(x), mean = 0, sd = 1, lower.tail = FALSE))
     }
-  } else {
+  # below is never reached b/c of first input check
+  } else {  # nocov start
     stop("Argument 'robust2sls_object' invalid input type.")
-  }
+  } # nocov end
 
   out <- data.frame(iter_test = iteration, iter_act = iter_act, gamma = gamma, t = t, type = type,
                     pval = pval, alpha = alpha, reject = (pval <= alpha))
