@@ -8,6 +8,7 @@
 ![R-CMD-check](https://github.com/jkurle/robust2sls/workflows/R-CMD-check/badge.svg?branch=master)
 [![Codecov test
 coverage](https://codecov.io/gh/jkurle/robust2sls/branch/master/graph/badge.svg)](https://codecov.io/gh/jkurle/robust2sls?branch=master)
+[![](https://www.r-pkg.org/badges/version/robust2sls?color=blue)](https://cran.r-project.org/package=robust2sls)
 <!-- badges: end -->
 
 The goal of robust2sls is to provide easy-to-use tools for
