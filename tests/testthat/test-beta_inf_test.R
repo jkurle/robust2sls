@@ -595,6 +595,8 @@ test_that("beta_hausman() produces the correct output", {
   names(t$model$m1$coefficients) <- c("othername", "Education", "Infant.Mortality")
   expect_error(beta_hausman(z, iteration = 1, subset = c(1, 2)),
                "At least one of the coefficients is NA. Check elements.")
+  expect_error(beta_hausman(z, iteration = 1, subset = c("(Intercept)", "Education")),
+               "At least one of the coefficients is NA. Check elements.")
   expect_error(beta_hausman(t, iteration = 1, subset = c(1, 2)),
                "index selects different coefficients in the robust and full")
 
