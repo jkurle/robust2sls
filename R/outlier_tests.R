@@ -369,9 +369,10 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
   } else if (identical(class(robust2sls_object), "list")) {
     iter_max <- sapply(X = robust2sls_object, FUN = function(x) x$cons$convergence$max_iter)
     result <- do.call(rbind, lapply(X = robust2sls_object, FUN = counttest_fun, iter = iteration, type = one_sided))
-  } else {
+  # part below never reached because of first input check
+  } else { # nocov start
     stop("Argument 'robust2sls_object' invalid input type.")
-  }
+  } # nocov end
 
   colnames(result) <- c("iter_test", "iter_act", "gamma", "num_act", "num_exp",
                         "type", "pval")
