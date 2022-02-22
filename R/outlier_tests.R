@@ -525,17 +525,17 @@ sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
                                                             split = split,
                                                             sign_level1 = x))
 
-  # covariance matrix should be symmetric, so implement an internal check
+  # covariance matrix should be symmetric, so implement an internal check (fail-save)
   if (!isSymmetric.matrix(covar_part)) {
-    stop("Internal error. Covariance matrix of vector should be symmetric.")
+    stop("Internal error. Covariance matrix of vector should be symmetric.") # nocov
   }
 
   test_var1 <- sum(var_part) + 2 * sum(covar_part[upper.tri(covar_part,
                                                             diag = FALSE)])
   test_var2 <- sum(covar_part)
 
-  if (!isTRUE(all.equal(test_var1, test_var2))) {
-    stop("Internal error. Two ways of calculating avar should coincide.")
+  if (!isTRUE(all.equal(test_var1, test_var2))) { # (fail-save)
+    stop("Internal error. Two ways of calculating avar should coincide.") # nocov
   }
 
   # calculate test statistic and other outputs to be returned
