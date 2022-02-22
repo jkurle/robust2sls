@@ -95,9 +95,9 @@ test_that("beta_inf_correction() produces the correct output", {
 
   # synthetic data
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  dat <- generate_data(parameters = p, n = 1000)$data
   # this one does not converge, so $convergence$converged and $iter are NULL
-  obj <- outlier_detection(data = d, formula = p$setting$formula, "normal",
+  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
                            0.1, "robustified", iterations = "convergence",
                            convergence_criterion = 0, max_iter = 20)
   # has not converged, so in neither case should use fixed point
@@ -111,6 +111,14 @@ test_that("beta_inf_correction() produces the correct output", {
   expect_equal(attr(b, "type of correction"), "iteration m = 1")
   expect_equal(attr(c, "type of correction"), "iteration m = 20")
   expect_equal(attr(d, "type of correction"), "iteration m = 20")
+
+  # has not converged, so should not use fixed point
+  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
+                           0.1, "robustified", iterations = 1,
+                           convergence_criterion = 0)
+  a <- beta_inf_correction(obj, iteration = 1, fp = FALSE)
+  b <- beta_inf_correction(obj, iteration = 1, fp = TRUE)
+  expect_equal(a, b)
 
 })
 
@@ -288,6 +296,42 @@ test_that("beta_test_avar() produces the correct output", {
   expect_snapshot_output(avar5)
   expect_snapshot_output(avar6)
 
+
+  # synthetic data
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  dat <- generate_data(parameters = p, n = 1000)$data
+  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
+                           0.1, "robustified", iterations = "convergence",
+                           convergence_criterion = 0, max_iter = 20)
+  # has not converged, so in neither case should use fixed point
+  a <- beta_test_avar(obj, iteration = 1, fp = FALSE)
+  b <- beta_test_avar(obj, iteration = 1, fp = TRUE)
+  c <- beta_test_avar(obj, iteration = 20, fp = FALSE)
+  d <- beta_test_avar(obj, iteration = 20, fp = TRUE)
+  expect_equal(a, b)
+  expect_equal(c, d)
+  expect_equal(attr(a, "type of avar"), "iteration m = 1")
+  expect_equal(attr(b, "type of avar"), "iteration m = 1")
+  expect_equal(attr(c, "type of avar"), "iteration m = 20")
+  expect_equal(attr(d, "type of avar"), "iteration m = 20")
+
+  # has not converged, so should not use fixed point
+  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
+                           0.1, "robustified", iterations = 1,
+                           convergence_criterion = 0)
+  a <- beta_test_avar(obj, iteration = 1, fp = FALSE)
+  b <- beta_test_avar(obj, iteration = 1, fp = TRUE)
+  expect_equal(a, b)
+
+  # convergence
+  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
+                           0.01, "robustified", iterations = "convergence",
+                           convergence_criterion = 0)
+  a <- beta_test_avar(obj, iteration = 4, fp = FALSE)
+  b <- beta_test_avar(obj, iteration = 4, fp = TRUE)
+  expect_equal(attr(a, "type of avar"), "iteration m = 4")
+  expect_equal(attr(b, "type of avar"), "fixed point")
+
 })
 
 test_that("beta_t() throws the correct errors to invalid inputs", {
@@ -428,6 +472,8 @@ test_that("beta_t() produces the correct output", {
   z$model$m1$coefficients[[1]] <- NA # set intercept to NA
   names(t$model$m1$coefficients) <- c("othername", "Education", "Infant.Mortality")
   expect_error(beta_t(z, iteration = 1, element = 1),
+               "At least one of the coefficients is NA. Check elements.")
+  expect_error(beta_t(z, iteration = 1, element = "(Intercept)"),
                "At least one of the coefficients is NA. Check elements.")
   expect_error(beta_t(t, iteration = 1, element = 1),
                "index selects different coefficients in the robust and full")

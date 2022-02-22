@@ -95,7 +95,8 @@ beta_inf_correction <- function(robust2sls_object, iteration = 1,
   # which parameters to use: has algorithm converged at the given iteration?
   iter_converged <- robust2sls_object$cons$convergence$iter
   converged_yn <- robust2sls_object$cons$convergence$converged
-  if (is.null(converged_yn)) { converged_yn <- FALSE }
+  # should never be entered by how robust2sls object is currently created
+  if (is.null(converged_yn)) { converged_yn <- FALSE } # nocov
   # number doesn't matter bc then also converged_yn = FALSE
   if (is.null(iter_converged)) { iter_converged <- 1 }
   # check that converged and we are analysing an iteration after convergence
@@ -316,7 +317,8 @@ beta_test_avar <- function(robust2sls_object, iteration, fp = FALSE) {
   # which parameters to use: has algorithm converged at the given iteration?
   iter_converged <- robust2sls_object$cons$convergence$iter
   converged_yn <- robust2sls_object$cons$convergence$converged
-  if (is.null(converged_yn)) { converged_yn <- FALSE }
+  # next line should never be entered by the way the robust2sls object is created
+  if (is.null(converged_yn)) { converged_yn <- FALSE } # nocov
   # number doesn't matter bc then also converged_yn = FALSE
   if (is.null(iter_converged)) { iter_converged <- 1 }
   # check that converged and we are analysing an iteration after convergence
@@ -448,10 +450,11 @@ beta_t <- function(robust2sls_object, iteration, element, fp = FALSE) {
     beta_robust <- coef_robust[element]
     beta_full <- coef_full[element]
 
-    if (!identical(names(beta_robust), names(beta_full))) {
+    # fail-safe, should never be entered
+    if (!identical(names(beta_robust), names(beta_full))) { # nocov start
       stop(strwrap("The index selects different coefficients in the robust and full sample specification.",
                    prefix = " ", initial = ""))
-    }
+    } # nocov end
 
     if (any(is.na(beta_robust)) | any(is.na(beta_full))) {
       stop(strwrap("At least one of the coefficients is NA. Check elements.",
