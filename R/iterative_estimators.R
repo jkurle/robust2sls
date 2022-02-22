@@ -319,8 +319,8 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
       # despite choosing fixed number of iterations, can end early if converged
       # this is only done when a convergence_criterion is specified (not NULL)
       if (!is.null(convergence_criterion)) {
+        out$cons$convergence$difference <- difference
         if (difference <= convergence_criterion) {
-          out$cons$convergence$difference <- difference
           out$cons$convergence$converged <- TRUE
           if (difference == 0) {
             # if the difference is exactly 0 then actually already the previous
@@ -334,6 +334,8 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
             cat("\n Algorithm converged successfully. Exit iterations.")
           }
           break
+        } else {
+          out$cons$convergence$converged <- FALSE
         }
       } else { # end if break, convergence_criterion not specified
 
