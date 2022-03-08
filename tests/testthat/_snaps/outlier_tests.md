@@ -454,6 +454,21 @@
       iter_test iter_act gamma num_act num_exp      type      pval alpha reject
     1         1        1  0.05      38      50 one-sided 0.9660451   0.1  FALSE
 
+---
+
+      iter_test iter_act gamma num_act num_exp      type       pval alpha reject
+    1         1        1  0.05      38      50 two-sided 0.09474133   0.1   TRUE
+
+---
+
+      iter_test iter_act gamma num_act num_exp      type      pval alpha reject
+    1         1        1  0.05      38      50 two-sided 0.1030514   0.1  FALSE
+
+---
+
+      iter_test iter_act gamma num_act num_exp      type      pval alpha reject
+    1         1        1  0.05      38      50 two-sided 0.0897616   0.1   TRUE
+
 # multi_cutoff_to_fodr_vec() works correctly
 
     $gamma0.01

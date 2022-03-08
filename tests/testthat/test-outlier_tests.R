@@ -388,10 +388,22 @@ test_that("counttest() raises correct errors", {
   expect_error(counttest(models, alpha = 0.01, iteration = 1,
                         one_sided = c(TRUE, FALSE)),
                "'one_sided' must be a logical value of length one")
+  expect_error(counttest(models, alpha = 0.01, iteration = 1,
+                         one_sided = TRUE, tsmethod = 1),
+               "must be NULL or a character vector")
+  expect_error(counttest(models, alpha = 0.01, iteration = 1,
+                         one_sided = TRUE, tsmethod = c("a", "b")),
+               "must be of length 1")
+  expect_error(counttest(models, alpha = 0.01, iteration = 1,
+                         one_sided = TRUE, tsmethod = "blabla"),
+               "should be one of \"central\", \"minlike\", \"blaker\"")
 
 })
 
 test_that("counttest() works correctly", {
+
+  # note: since changed from poisson.test() to poisson.exact() need to specify
+  # tsmethod = "minlike" to reproduce tests as had done originally
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data
@@ -406,10 +418,10 @@ test_that("counttest() works correctly", {
 
   # for smaller gammas seems to converge (quicker) but for larger ones not
   # 0.07, 0.08, 0.1 it goes up to 200 iterations
-  a <- counttest(models, alpha = 0.05, iteration = 0, one_sided = FALSE)
-  b <- counttest(models, alpha = 0.05, iteration = 1, one_sided = FALSE)
+  a <- counttest(models, alpha = 0.05, iteration = 0, one_sided = FALSE, tsmethod = "minlike")
+  b <- counttest(models, alpha = 0.05, iteration = 1, one_sided = FALSE, tsmethod = "minlike")
   c <- counttest(models, alpha = 0.05, iteration = "convergence",
-                one_sided = FALSE)
+                one_sided = FALSE, tsmethod = "minlike")
 
   expect_equal(class(a), "data.frame")
   expect_equal(class(b), "data.frame")
@@ -446,6 +458,9 @@ test_that("counttest() works correctly", {
                            TRUE, FALSE, FALSE))
   expect_equal(c$reject, c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE,
                            FALSE, FALSE))
+  expect_equal(attr(a, "tsmethod"), "minlike")
+  expect_equal(attr(b, "tsmethod"), "minlike")
+  expect_equal(attr(c, "tsmethod"), "minlike")
   expect_snapshot_output(a)
   expect_snapshot_output(b)
   expect_snapshot_output(c)
@@ -454,8 +469,8 @@ test_that("counttest() works correctly", {
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 10)
-  a <- counttest(models, alpha = 0.05, iteration = 3, one_sided = TRUE)
-  b <- counttest(models, alpha = 0.01, iteration = 5, one_sided = FALSE)
+  a <- counttest(models, alpha = 0.05, iteration = 3, one_sided = TRUE, tsmethod = "minlike")
+  b <- counttest(models, alpha = 0.01, iteration = 5, one_sided = FALSE, tsmethod = "minlike")
   expect_equal(class(a), "data.frame")
   expect_equal(class(b), "data.frame")
   expect_equal(NROW(a), length(gammas))
@@ -474,6 +489,8 @@ test_that("counttest() works correctly", {
   expect_equal(b$iter_act, rep(5, 10))
   expect_equal(a$type, rep("one-sided", 10))
   expect_equal(b$type, rep("two-sided", 10))
+  expect_equal(attr(a, "tsmethod"), NULL) # no such attribute expected b/c one-sided
+  expect_equal(attr(b, "tsmethod"), "minlike")
 
   expect_snapshot_output(a)
   expect_snapshot_output(b)
@@ -482,8 +499,8 @@ test_that("counttest() works correctly", {
   model <- outlier_detection(data = d, formula = p$setting$formula,
                              initial_est = "saturated", ref_dist = "normal",
                              sign_level = 0.05, iterations = 3, split = 0.5)
-  a <- counttest(model, alpha = 0.1, iteration = 1, one_sided = FALSE)
-  b <- counttest(model, alpha = 0.1, iteration = 1, one_sided = TRUE)
+  a <- counttest(model, alpha = 0.1, iteration = 1, one_sided = FALSE, tsmethod = "minlike")
+  b <- counttest(model, alpha = 0.1, iteration = 1, one_sided = TRUE, tsmethod = "minlike")
   expect_equal(NROW(a), 1)
   expect_equal(NROW(b), 1)
   expect_equal(NCOL(a), 9)
@@ -506,6 +523,8 @@ test_that("counttest() works correctly", {
   expect_equal(b$alpha, 0.1)
   expect_equal(a$reject, FALSE)
   expect_equal(b$reject, FALSE)
+  expect_equal(attr(a, "tsmethod"), "minlike")
+  expect_equal(attr(b, "tsmethod"), NULL)
   expect_snapshot_output(a)
   expect_snapshot_output(b)
   # re-build p-values manually
@@ -517,6 +536,44 @@ test_that("counttest() works correctly", {
                                    alternative = "greater")$p.value
   expect_identical(a$pval, pval2side)
   expect_identical(b$pval, pval1side)
+
+  # try different tsmethods for two-sided
+  a <- counttest(model, alpha = 0.1, iteration = 1, one_sided = FALSE, tsmethod = "central")
+  b <- counttest(model, alpha = 0.1, iteration = 1, one_sided = FALSE, tsmethod = "minlike")
+  c <- counttest(model, alpha = 0.1, iteration = 1, one_sided = FALSE, tsmethod = "blaker")
+  expect_equal(attr(a, "tsmethod"), "central")
+  expect_equal(attr(b, "tsmethod"), "minlike")
+  expect_equal(attr(c, "tsmethod"), "blaker")
+  expect_snapshot_output(a)
+  expect_snapshot_output(b)
+  expect_snapshot_output(c)
+  # manual computation for the first two (third is hard to compute)
+  num.act <- outliers(model, iteration = 1)
+  num.exp <- model$cons$sign_level * NROW(d)
+  ## central
+  ### one-sided lower
+  less <- ppois(q = num.act, lambda = num.exp, lower.tail = TRUE)
+  ### one-sided greater
+  greater <- 1 - ppois(q = num.act-1, lambda = num.exp, lower.tail = TRUE)
+  ### pvalue
+  pcentral <- min(1, 2*min(less, greater))
+  expect_equal(a$pval, pcentral)
+  ## minlike
+  ### prob of getting what we got
+  prob <- dpois(x = num.act, lambda = num.exp) # 0.01341577
+  ### outcomes that are smaller AND less likely
+  probssmaller <- sapply(X = 0:(num.act-1), FUN = dpois, lambda = num.exp)
+  left <- sum(probssmaller[probssmaller <= prob])
+  ### outcomes that are larger AND less likely
+  #### know that Poisson distribution is unimodal -> check when get a prob to the right that is smaller
+  #### then sum all that are to the right & smaller than prob
+  i <- 1
+  while(dpois(x = num.act+i, lambda = num.exp) > prob) {
+    i <- i+1
+  }
+  probslarger <- 1 - ppois(q = num.act+i-1, lambda = num.exp, lower.tail = TRUE)
+  pminlike <- prob + sum(probssmaller) + probslarger
+  expect_equal(b$pval, pminlike)
 
 })
 
@@ -904,7 +961,7 @@ test_that("globaltest() works correctly", {
   expect_equal(a$global_alpha, 0.05)
 
   # count tests
-  tests <- counttest(models, alpha = 0.05, iteration = 0)
+  tests <- counttest(models, alpha = 0.05, iteration = 0, tsmethod = "minlike")
   a <- globaltest(tests = tests, global_alpha = 0.05)
   expect_snapshot_output(a)
   expect_equal(class(a), "list")
