@@ -285,10 +285,15 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #' @param one_sided A logical value whether a two-sided test (\code{FALSE})
 #'   should be conducted or a one-sided test (\code{TRUE}) that rejects only
 #'   when the number of detected outliers is above the expected number.
+#' @param tsmethod A character specifying the method for calculating two-sided
+#' p-values. Ignored for one-sided test.
 #'
 #' @details See \code{\link[=outlier_detection]{outlier_detection()}} and
 #' \code{\link[=multi_cutoff]{multi_cutoff()}} for creating an object of class
 #' \code{"robust2sls"} or a list thereof.
+#'
+#' See \code{\link[exactci:poisson.exact]{exactci::poisson.exact()}} for the
+#' different methods of calculating two-sided p-values.
 #'
 #' @return \code{proptest()} returns a data frame with the iteration (m) to be
 #' tested, the actual iteration that was tested (generally coincides with the
@@ -302,7 +307,10 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #'
 #' @export
 
-counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
+counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE,
+                      tsmethod = c("central", "minlike", "blaker")) {
+
+  tsmethod <- match.arg(tsmethod)
 
   # check input values
   if (!(identical(class(robust2sls_object), "robust2sls") | identical(class(robust2sls_object), "list"))) {
@@ -330,9 +338,16 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
   if (!is.logical(one_sided) | !identical(length(one_sided), 1L)) {
     stop("Argument 'one_sided' must be a logical value of length one.")
   }
+  # below not necessary, automatically tested via match.arg()
+  # if (!is.character(tsmethod) | !identical(length(tsmethod), 1L)) {
+  #   stop("Argument 'tsmethod' must be a character vector of length one.")
+  # }
+  # if (!(tsmethod %in% c("central", "minlike", "blaker"))) {
+  #   stop("Argument 'tsmethod' must be one of 'central', 'minlike', or 'blaker'.")
+  # }
 
   # define auxiliary function
-  counttest_fun <- function(r, iter, type) {
+  counttest_fun <- function(r, iter, type, tsmethod) {
     if (isTRUE(type)) {
       alt <- "greater"
     } else {
@@ -347,8 +362,9 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
     n <- sum(nonmissing(data = r$cons$data, formula = r$cons$formula))
     gamma <- r$cons$sign_level
     num_exp <- gamma * n
-    pvalue <- stats::poisson.test(x = num_act, r = num_exp,
-                                  alternative = alt)$p.value
+    pvalue <- exactci::poisson.exact(x = num_act, r = num_exp,
+                                     alternative = alt,
+                                     tsmethod = tsmethod)$p.value
 
     if (identical(alt, "greater")) {
       alt2 <- "one-sided"
@@ -365,10 +381,12 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
   }
 
   if (identical(class(robust2sls_object), "robust2sls")) {
-    result <- counttest_fun(r = robust2sls_object, iter = iteration, type = one_sided)
+    result <- counttest_fun(r = robust2sls_object, iter = iteration,
+                            type = one_sided, tsmethod = tsmethod)
   } else if (identical(class(robust2sls_object), "list")) {
     iter_max <- sapply(X = robust2sls_object, FUN = function(x) x$cons$convergence$max_iter)
-    result <- do.call(rbind, lapply(X = robust2sls_object, FUN = counttest_fun, iter = iteration, type = one_sided))
+    result <- do.call(rbind, lapply(X = robust2sls_object, FUN = counttest_fun, iter = iteration,
+                                    type = one_sided, tsmethod = tsmethod))
   # part below never reached because of first input check
   } else { # nocov start
     stop("Argument 'robust2sls_object' invalid input type.")
@@ -379,6 +397,12 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
   result <- as.data.frame(result)
   result <- cbind(result, data.frame(alpha = alpha))
   result <- cbind(result, reject = (result$pval <= result$alpha))
+
+  # add attribute that stores p-value method if two-sided
+  if (isFALSE(one_sided)) {
+    attr(result, which = "tsmethod") <- tsmethod
+  }
+
   return(result)
 
 }
