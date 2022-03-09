@@ -429,15 +429,18 @@ test_that("counttest() works correctly", {
   expect_equal(NROW(a), length(gammas))
   expect_equal(NROW(b), length(gammas))
   expect_equal(NROW(c), length(gammas))
-  expect_equal(NCOL(a), 9)
-  expect_equal(NCOL(b), 9)
-  expect_equal(NCOL(c), 9)
+  expect_equal(NCOL(a), 10)
+  expect_equal(NCOL(b), 10)
+  expect_equal(NCOL(c), 10)
   expect_equal(colnames(a), c("iter_test", "iter_act", "gamma", "num_act",
-                              "num_exp", "type", "pval", "alpha", "reject"))
+                              "num_exp", "type", "pval", "alpha", "reject",
+                              "tsmethod"))
   expect_equal(colnames(b), c("iter_test", "iter_act", "gamma", "num_act",
-                              "num_exp", "type", "pval", "alpha", "reject"))
+                              "num_exp", "type", "pval", "alpha", "reject",
+                              "tsmethod"))
   expect_equal(colnames(c), c("iter_test", "iter_act", "gamma", "num_act",
-                              "num_exp", "type", "pval", "alpha", "reject"))
+                              "num_exp", "type", "pval", "alpha", "reject",
+                              "tsmethod"))
   expect_equal(a$iter_test, rep(0, 10))
   expect_equal(b$iter_test, rep(1, 10))
   expect_equal(c$iter_test, rep("convergence", 10))
@@ -475,12 +478,14 @@ test_that("counttest() works correctly", {
   expect_equal(class(b), "data.frame")
   expect_equal(NROW(a), length(gammas))
   expect_equal(NROW(b), length(gammas))
-  expect_equal(NCOL(a), 9)
-  expect_equal(NCOL(b), 9)
+  expect_equal(NCOL(a), 10)
+  expect_equal(NCOL(b), 10)
   expect_equal(colnames(a), c("iter_test", "iter_act", "gamma", "num_act",
-                              "num_exp", "type", "pval", "alpha", "reject"))
+                              "num_exp", "type", "pval", "alpha", "reject",
+                              "tsmethod"))
   expect_equal(colnames(b), c("iter_test", "iter_act", "gamma", "num_act",
-                              "num_exp", "type", "pval", "alpha", "reject"))
+                              "num_exp", "type", "pval", "alpha", "reject",
+                              "tsmethod"))
   expect_equal(a$alpha, rep(0.05, 10))
   expect_equal(b$alpha, rep(0.01, 10))
   expect_equal(a$iter_test, rep(3, 10))
@@ -503,12 +508,14 @@ test_that("counttest() works correctly", {
   b <- counttest(model, alpha = 0.1, iteration = 1, one_sided = TRUE, tsmethod = "minlike")
   expect_equal(NROW(a), 1)
   expect_equal(NROW(b), 1)
-  expect_equal(NCOL(a), 9)
-  expect_equal(NCOL(b), 9)
+  expect_equal(NCOL(a), 10)
+  expect_equal(NCOL(b), 10)
   expect_equal(colnames(a), c("iter_test", "iter_act", "gamma", "num_act",
-                              "num_exp", "type", "pval", "alpha", "reject"))
+                              "num_exp", "type", "pval", "alpha", "reject",
+                              "tsmethod"))
   expect_equal(colnames(b), c("iter_test", "iter_act", "gamma", "num_act",
-                              "num_exp", "type", "pval", "alpha", "reject"))
+                              "num_exp", "type", "pval", "alpha", "reject",
+                              "tsmethod"))
   expect_equal(a$iter_test, 1)
   expect_equal(b$iter_test, 1)
   expect_equal(a$iter_act, 1)
@@ -544,6 +551,9 @@ test_that("counttest() works correctly", {
   expect_equal(attr(a, "tsmethod"), "central")
   expect_equal(attr(b, "tsmethod"), "minlike")
   expect_equal(attr(c, "tsmethod"), "blaker")
+  expect_equal(a$tsmethod, "central")
+  expect_equal(b$tsmethod, "minlike")
+  expect_equal(c$tsmethod, "blaker")
   expect_snapshot_output(a)
   expect_snapshot_output(b)
   expect_snapshot_output(c)

@@ -30,15 +30,16 @@ when the number of detected outliers is above the expected number.}
 p-values. Ignored for one-sided test.}
 }
 \value{
-\code{proptest()} returns a data frame with the iteration (m) to be
-tested, the actual iteration that was tested (generally coincides with the
-iteration that was specified to be tested but is the convergent iteration if
-the fixed point is tested), the setting of the probability of exceeding the
-cut-off (gamma), the number of detected outliers, the expected number of
-outliers under the null hypothesis that there are no outliers, the type of
-test (one- or two-sided), the p-value, the significance level \code{alpha},
-and the decision. The number of rows of the data frame corresponds to the
-length of the argument \code{robust2sls_object}.
+\code{counttest()} returns a data frame with the iteration (m) to be
+  tested, the actual iteration that was tested (generally coincides with the
+  iteration that was specified to be tested but is the convergent iteration
+  if the fixed point is tested), the setting of the probability of exceeding
+  the cut-off (gamma), the number of detected outliers, the expected number
+  of outliers under the null hypothesis that there are no outliers, the type
+  of test (one- or two-sided), the p-value, the significance level
+  \code{alpha}, the decision, and which method was used to calculate
+  (two-sided) p-values. The number of rows of the data frame corresponds to
+  the length of the argument \code{robust2sls_object}.
 }
 \description{
 \code{counttest()} conducts a test whether the number of detected outliers
