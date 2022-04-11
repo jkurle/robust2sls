@@ -16,11 +16,11 @@ test_that("extract_formula() works correctly", {
   expect_equal(v1$z2_var, c("z2", "z3"))
 
   expect_error(extract_formula(y ~ x1 + x2 + z2), "does not include both symbols `~` and `|`")
-  expect_error(extract_formula(y ~ z1 + z2), "does not include both symbols
-    `~` and `|`")
+  expect_error(extract_formula(y ~ z1 + z2), "does not include both symbols `~` and `|`")
   expect_error(extract_formula(~ x1 + x2 | x1 + z2), "any dependent variable")
   # expect_error(extract_formula(y ~ | z1 + z2)) # this is not possible anyways
   # expect_error(extract_formula(y ~ x1 + x2 |)) # this is not possible anyways
+  expect_error(extract_formula(y ~ x1 | z2 | z3), "does not consist of three parts")
 
   f2 <- mpg ~ cyl * disp | cyl + wt + gear
   v2 <- extract_formula(f2)
@@ -391,6 +391,22 @@ test_that("constants() works correctly", {
       estimator = "robustified", split = 0.5, shuffle = FALSE,
       shuffle_seed = 42, iter = 5, criterion = NULL))
   expect_error(constants(call = call1, formula = formula, data = data,
+      reference = "normal", sign_level = 1.1, estimator = "robustified",
+      split = 0.5, shuffle = FALSE, shuffle_seed = 42, iter = 5,
+      criterion = NULL))
+  expect_error(constants(call = call1, formula = formula, data = data,
+      reference = "normal", sign_level = -0.1, estimator = "robustified",
+      split = 0.5, shuffle = FALSE, shuffle_seed = 42, iter = 5,
+      criterion = NULL))
+  expect_error(constants(call = call1, formula = formula, data = data,
+      reference = "normal", sign_level = 1, estimator = "robustified",
+      split = 0.5, shuffle = FALSE, shuffle_seed = 42, iter = 5,
+      criterion = NULL))
+  expect_error(constants(call = call1, formula = formula, data = data,
+      reference = "normal", sign_level = 0, estimator = "robustified",
+      split = 0.5, shuffle = FALSE, shuffle_seed = 42, iter = 5,
+      criterion = NULL))
+  expect_error(constants(call = call1, formula = formula, data = data,
       reference = "normal", sign_level = 1.1,
       estimator = "robustified", split = 0.5, shuffle = FALSE,
       shuffle_seed = 42, iter = 5, criterion = NULL), "has to be > 0 and < 1")
@@ -518,6 +534,40 @@ test_that("conv_difference() works correctly", {
   expect_equal(conv_diff(current = test5, counter = 3), NULL)
   expect_equal(conv_diff(current = test6, counter = 1), NULL)
   expect_equal(conv_diff(current = test6, counter = 3), NULL)
+
+})
+
+test_that("conv_difference() throws correct errors", {
+
+  # working values
+  data <- datasets::mtcars
+  # since formula has an environment, whose memory address changes each time
+  # it is run, it differs by snapshot. So here remove environment.
+  formula <- mpg ~ cyl + disp | cyl + wt
+  attr(formula, which = ".Environment") <- NULL
+
+  # saturated, counter = 1
+  test1 <- outlier_detection(data = data, formula = formula,
+                             ref_dist = "normal", sign_level = 0.05, initial_est = "saturated",
+                             iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
+                             shuffle_seed = 42, split = 0.5)
+  test3 <- test2 <- test1
+  # manipulate to get NA values but not problematic (same order)
+  test1$model$m0$split1$coefficients[1] <- NA
+  test1$model$m0$split2$coefficients[1] <- NA
+  test1$model$m1$coefficients[1] <- NA
+  expect_silent(conv_diff(current = test1, counter = 1))
+  # manipulate to get NA values but different number of NAs
+  test2$model$m0$split1$coefficients[1] <- NA
+  test2$model$m0$split1$coefficients[2] <- NA
+  test2$model$m0$split2$coefficients[1] <- NA
+  test2$model$m1$coefficients[1] <- NA
+  expect_error(conv_diff(current = test2, counter = 1), "different number of coefficients")
+  # manipulate to get NA values but different ones
+  test3$model$m0$split1$coefficients[1] <- NA
+  test3$model$m0$split2$coefficients[2] <- NA
+  test3$model$m1$coefficients[1] <- NA
+  expect_error(conv_diff(current = test3, counter = 1), "different regressors or ordering")
 
 })
 

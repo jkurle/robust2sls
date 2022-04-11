@@ -214,10 +214,10 @@ nonmissing <- function(data, formula) {
   }
 
   # should never trigger but as a fail-safe
-  if (length(non_missing)!= NROW(data)) {
+  if (length(non_missing)!= NROW(data)) { # nocov start
     stop(strwrap("The returned vector does not have the same length as the
                  data set", prefix = " ", initial = ""))
-  }
+  } # nocov end
 
   return(non_missing)
 
