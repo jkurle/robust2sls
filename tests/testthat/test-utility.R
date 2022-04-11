@@ -15,8 +15,7 @@ test_that("extract_formula() works correctly", {
   expect_equal(v1$z1_var, "x1")
   expect_equal(v1$z2_var, c("z2", "z3"))
 
-  expect_error(extract_formula(y ~ x1 + x2 + z2), "does not include both symbols
-    `~` and `|`")
+  expect_error(extract_formula(y ~ x1 + x2 + z2), "does not include both symbols `~` and `|`")
   expect_error(extract_formula(y ~ z1 + z2), "does not include both symbols
     `~` and `|`")
   expect_error(extract_formula(~ x1 + x2 | x1 + z2), "any dependent variable")

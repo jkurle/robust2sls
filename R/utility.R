@@ -28,7 +28,7 @@ extract_formula <- function(formula) {
   fml <- Reduce(paste, deparse(formula))
 
   # check that formula contains both "~" and "|" symbols
-  if (!(grepl("~", fml) && grepl("|", fml))) {
+  if (!(grepl("~", fml) && grepl("\\|", fml))) {
     stop(strwrap("The `formula` is not of the required format since it does not
           include both symbols `~` and `|`", prefix = " ", initial = ""))
   }
