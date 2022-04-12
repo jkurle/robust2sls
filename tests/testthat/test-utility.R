@@ -569,6 +569,26 @@ test_that("conv_difference() throws correct errors", {
   test3$model$m1$coefficients[1] <- NA
   expect_error(conv_diff(current = test3, counter = 1), "different regressors or ordering")
 
+  # not saturated
+  test1 <- outlier_detection(data = data, formula = formula,
+                             ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
+                             iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
+                             shuffle_seed = 42, split = 0.5)
+  test3 <- test2 <- test1
+  # manipulate to get NA values but not problematic (same order)
+  test1$model$m4$coefficients[1] <- NA
+  test1$model$m5$coefficients[1] <- NA
+  expect_silent(conv_diff(current = test1, counter = 1))
+  # manipulate to get NA values but different number of NAs
+  test2$model$m4$coefficients[1] <- NA
+  test2$model$m4$coefficients[2] <- NA
+  test2$model$m5$coefficients[1] <- NA
+  expect_error(conv_diff(current = test2, counter = 1), "different number of coefficients")
+  # manipulate to get NA values but different ones
+  test3$model$m4$coefficients[2] <- NA
+  test3$model$m5$coefficients[1] <- NA
+  expect_error(conv_diff(current = test3, counter = 1), "different regressors or ordering")
+
 })
 
 
@@ -647,6 +667,7 @@ test_that("varrho() works correctly", {
                "'iteration' must be weakly larger than 1")
 
 })
+
 
 test_that("mvn_sup() works correctly", {
 

@@ -393,7 +393,7 @@ conv_diff <- function(current, counter) {
 
   } else { # can calculate
 
-    if (current$cons$initial$estimator == "saturated" & counter == 1) {
+    if (current$cons$initial$estimator == "saturated" && counter == 1) {
       # we now have two initial estimates, one for each split
 
       coef_current <- current$model[[2]]$coefficients
@@ -583,6 +583,9 @@ varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
 }
 
 #' Estimation of moments of the data
+#'
+#' NOTE (12 Apr 2022): probably superseded by estimate_param_null() function
+#' taken out of testing
 #'
 #' DO NOT USE YET!
 #' \code{estimate_param} can be used to estimate certain moments of the data
