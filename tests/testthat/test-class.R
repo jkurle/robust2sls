@@ -341,11 +341,10 @@ test_that("validate_robust2sls() works correctly", {
                "\\$cons\\$initial\\$shuffle_seed must be NULL")
 
   lmmodel <- lm(formula = mpg ~ cyl + disp, data = data)
-  expect_error(outlier_detection(data = data, formula = formula,
-       ref_dist = "normal", sign_level = 0.05, initial_est = "user",
-       user_model = lmmodel,
-       iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
-       shuffle_seed = 42, split = 0.5), "argument `user_model` is not of class `ivreg`")
+  t <- test1
+  t$cons$initial$estimator <- "user"
+  t$cons$initial$user <- lmmodel
+  expect_error(validate_robust2sls(t), "Component \\$cons\\$initial\\$user must be NULL or of class ivreg")
 
   t <- test1
   t$cons$convergence$criterion <- "abc"
