@@ -26,11 +26,16 @@ nonparametric <- function(indices, R, size = length(indices),
                           replacement = TRUE, seed = NULL) {
 
   if (!is.null(seed)) {
-    if (!(seed %% 1 == 0)) {
+    if (is.numeric(seed)){
+      if (!(seed %% 1 == 0)) {
+        stop(strwrap("Argument 'seed' must either be NULL or an integer",
+                     prefix = " ", initial = ""))
+      } else {
+        set.seed(seed = seed)
+      }
+    } else { # non-numeric
       stop(strwrap("Argument 'seed' must either be NULL or an integer",
                    prefix = " ", initial = ""))
-    } else {
-      set.seed(seed = seed)
     }
   }
 
@@ -47,9 +52,9 @@ nonparametric <- function(indices, R, size = length(indices),
 #' Counts the number of times each index was sampled
 #'
 #' \code{count_indices} takes a list of indices for resampling and counts how
-#' each index was sampled in each resample. The results is returned as a matrix
-#' where each row corresponds to a different resample and each column to one
-#' index.
+#' often each index was sampled in each resample. The result is returned in two
+#' versions of a matrix where each row corresponds to a different resample and
+#' each column to one index.
 #'
 #' @param resamples A list of resamples, as created by \link{nonparametric}.
 #' @param indices The vector of original indices from which the resamples were
