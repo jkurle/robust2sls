@@ -115,6 +115,11 @@ test_that("nonparametric_resampling() works correctly", {
 
 test_that("case_resampling() works correctly", {
 
+  library(future)
+  library(parallel)
+  library(doFuture)
+  library(foreach)
+
   # setup
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data
@@ -147,6 +152,7 @@ test_that("case_resampling() works correctly", {
   # only one coefficient by name
   cr41 <- case_resampling(robust2sls_object = r, R = 10, coef = "x2", m = 1,
                           parallel = TRUE)
+  future::plan(future::sequential)
 
   # first, ensure that same results whether parallel or not
   expect_identical(cr1, cr11)
@@ -213,5 +219,15 @@ test_that("case_resampling() works correctly", {
   expect_snapshot_output(cr2)
   expect_snapshot_output(cr3)
   expect_snapshot_output(cr4)
+
+  # need to check saturated and convergence (both parallel and not)
+  set.seed(10)
+  r <- outlier_detection(data = d, formula = p$setting$formula,
+                         ref_dist = "normal", sign_level = 0.05,
+                         initial_est = "saturated", iterations = "convergence",
+                         convergence_criterion = 0.5, split = 0.5)
+  cr5 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence")
+
+  expect_snapshot_output(cr5)
 
 })
