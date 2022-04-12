@@ -336,6 +336,78 @@ test_that("outlier_detection() produces correct output", {
 
 })
 
+test_that("outlier_detection() printing verbose works correctly", {
 
+  data <- datasets::mtcars
+  formula <- mpg ~ cyl + disp | cyl + wt
+  data[1, "mpg"] <- NA
+  data[2, "cyl"] <- NA
+  data[3, "disp"] <- NA
+  data[4, "wt"] <- NA
+  data[5, "gear"] <- NA
 
+  # check settings with robustified as initial estimator
+  expect_output(outlier_detection(data = data, formula = formula,
+                      ref_dist = "normal", sign_level = 0.05,
+                      initial_est = "robustified", iterations = 3,
+                      convergence_criterion = NULL, shuffle = FALSE,
+                      shuffle_seed = 42, split = 0.5, verbose = TRUE),
+                "Estimating iteration: 0, 1, 2, 3")
+  expect_output(outlier_detection(data = data, formula = formula,
+                                  ref_dist = "normal", sign_level = 0.05,
+                                  initial_est = "robustified", iterations = "convergence",
+                                  convergence_criterion = 0, shuffle = FALSE,
+                                  shuffle_seed = 42, split = 0.5, verbose = TRUE),
+                "Algorithm converged successfully. Exit iterations.")
+  expect_output(outlier_detection(data = data, formula = formula,
+                                  ref_dist = "normal", sign_level = 0.05,
+                                  initial_est = "robustified", iterations = 5,
+                                  convergence_criterion = 0, shuffle = FALSE,
+                                  shuffle_seed = 42, split = 0.5, verbose = TRUE),
+                "Algorithm converged successfully. Exit iterations.")
 
+})
+
+test_that("outlier_detection() works correctly when 'selection' variable exists", {
+
+  data <- datasets::mtcars
+  formula <- mpg ~ cyl + disp | cyl + wt
+  data[1, "mpg"] <- NA
+  data[2, "cyl"] <- NA
+  data[3, "disp"] <- NA
+  data[4, "wt"] <- NA
+  data[5, "gear"] <- NA
+
+  data2 <- data
+  data2$selection <- 8
+
+  # baseline
+  base <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                            sign_level = 0.05, initial_est = "robustified",
+                            iterations = 3)
+  # testing with selection variable present
+  test <- outlier_detection(data = data2, formula = formula, ref_dist = "normal",
+                            sign_level = 0.05, initial_est = "robustified",
+                            iterations = 3)
+
+  # should differ in a few instances, such as variable name in the model calls
+  expect_true(any(grepl(pattern = "selection", x = as.character(base$model$m1$call))))
+  expect_true(any(grepl(pattern = "selection", x = as.character(base$model$m2$call))))
+  expect_true(any(grepl(pattern = "selection", x = as.character(base$model$m3$call))))
+  expect_true(any(grepl(pattern = "selection_1", x = as.character(test$model$m1$call))))
+  expect_true(any(grepl(pattern = "selection_1", x = as.character(test$model$m2$call))))
+  expect_true(any(grepl(pattern = "selection_1", x = as.character(test$model$m3$call))))
+
+  # now make conform by changing / removing the expected differences
+  test$cons$data$selection <- NULL # remove selection variable
+  test$cons$call <- NULL
+  test$model$m1$call <- NULL
+  test$model$m2$call <- NULL
+  test$model$m3$call <- NULL
+  base$cons$call <- NULL
+  base$model$m1$call <- NULL
+  base$model$m2$call <- NULL
+  base$model$m3$call <- NULL
+  expect_identical(base, test)
+
+})
