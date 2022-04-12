@@ -332,7 +332,7 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
     # need to export the variables required for the parallel cores
     vars <- c("formula", "ref_dist", "sign_level", "user_model", "iterations",
               "convergence_criterion", "shuffle", "shuffle_seed", "split",
-              "verbose")
+              "verbose", "mg", "mb")
 
     # parallel loop
     output <- foreach::foreach(r = (1:R), .combine = "rbind",
