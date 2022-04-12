@@ -151,12 +151,14 @@ test_that("generate_param() works correctly", {
   # expect no error for: (calling no intercept)
   p <- generate_param(3, 2, 3, intercept = FALSE)
   expect_silent(generate_param(3, 2, 3, intercept = FALSE, beta = p$params$beta))
-  generate_param(3, 2, 3, intercept = FALSE, sigma = p$params$sigma)
-  generate_param(3, 2, 3, intercept = FALSE, mean_z = p$params$mean_z)
-  generate_param(3, 2, 3, intercept = FALSE, cov_z = p$params$cov_z)
-  generate_param(3, 2, 3, intercept = FALSE, Sigma2_half = p$params$Sigma2_half)
-  generate_param(3, 2, 3, intercept = FALSE, Omega2 = p$params$Omega2)
-  generate_param(3, 2, 3, intercept = FALSE, Pi = p$params$Pi)
+  expect_silent(generate_param(3, 2, 3, intercept = FALSE, sigma = p$params$sigma))
+  expect_silent(generate_param(3, 2, 3, intercept = FALSE, mean_z = p$params$mean_z))
+  expect_silent(generate_param(3, 2, 3, intercept = FALSE, cov_z = p$params$cov_z))
+  expect_silent(generate_param(3, 2, 3, intercept = FALSE, Sigma2_half = p$params$Sigma2_half))
+  expect_silent(generate_param(3, 2, 3, intercept = FALSE, Omega2 = p$params$Omega2))
+  expect_silent(generate_param(3, 2, 3, intercept = FALSE, Pi = p$params$Pi))
+  environment(p$setting$formula) <- NULL
+  expect_snapshot_output(p)
 
 })
 
@@ -206,6 +208,19 @@ test_that("generate_data() works correctly", {
 
 })
 
+test_that("mc_grid() throws correct error", {
+
+  skip_on_cran() # probably too long and might have problems with parallel
+  p <- generate_param(dx1 = 2, dx2 = 1, dz2 = 1, seed = 42)
+
+  # check error from invalid input "iterations"
+  expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
+                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       sign_level = 0.05, initial_est = "robustified",
+                       iterations = "nonexist", convergence_criterion = 0),
+               "Argument iterations not correctly specified.")
+
+})
 
 test_that("mc_grid() works correctly", {
 
@@ -278,5 +293,108 @@ test_that("mc_grid() works correctly with convergence setting", {
 
   expect_snapshot_output(out)
   expect_snapshot_output(out2)
+
+})
+
+test_that("mc_grid() prints correct output when verbose = TRUE", {
+
+  skip_on_cran() # probably too long and might have problems with parallel
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  doFuture::registerDoFuture()
+  future::plan(future::sequential)
+
+  # iterations fixed setting
+  expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
+                        formula = p$setting$formula, ref_dist = "normal",
+                        sign_level = c(0.01, 0.05),
+                        initial_est = "robustified",
+                        iterations = 0, shuffle = FALSE,
+                        shuffle_seed = NULL, split = 0.5, verbose = TRUE),
+                "Total number of Monte Carlo experiments:")
+  expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
+                        formula = p$setting$formula, ref_dist = "normal",
+                        sign_level = c(0.01, 0.05),
+                        initial_est = "robustified",
+                        iterations = 0, shuffle = FALSE,
+                        shuffle_seed = NULL, split = 0.5, verbose = TRUE),
+                "Monte Carlo experiment:")
+  expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
+                        formula = p$setting$formula, ref_dist = "normal",
+                        sign_level = c(0.01, 0.05),
+                        initial_est = "robustified",
+                        iterations = 0, shuffle = FALSE,
+                        shuffle_seed = NULL, split = 0.5, verbose = TRUE),
+                "user")
+
+  # convergence setting
+  expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+                        formula = p$setting$formula, ref_dist = "normal",
+                        sign_level = c(0.01),
+                        initial_est = "robustified",
+                        iterations = "convergence", convergence_criterion = 3,
+                        shuffle = FALSE,
+                        shuffle_seed = NULL, split = 0.5, verbose = TRUE),
+                "Total number of Monte Carlo experiments:")
+  expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+                        formula = p$setting$formula, ref_dist = "normal",
+                        sign_level = c(0.01),
+                        initial_est = "robustified",
+                        iterations = "convergence", convergence_criterion = 3,
+                        shuffle = FALSE,
+                        shuffle_seed = NULL, split = 0.5, verbose = TRUE),
+                "Monte Carlo experiment:")
+  expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+                        formula = p$setting$formula, ref_dist = "normal",
+                        sign_level = c(0.01),
+                        initial_est = "robustified",
+                        iterations = "convergence", convergence_criterion = 3,
+                        shuffle = FALSE,
+                        shuffle_seed = NULL, split = 0.5, verbose = TRUE),
+                "user")
+
+})
+
+test_that("mc_grid() saves intermediate results correctly", {
+
+  skip_on_cran() # probably too long and might have problems with parallel
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  doFuture::registerDoFuture()
+  future::plan(future::sequential)
+
+  pth <- NULL
+  save_file <- function(code) {
+    directory <- tempdir()
+    pth <<- directory
+    path <- paste(directory, "\\M10n1000g0.01irobustifieds0.5.csv", sep = "")
+    code
+    return(path)
+  }
+
+  expect_snapshot_file(path = save_file(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+                                                  formula = p$setting$formula, ref_dist = "normal",
+                                                  sign_level = c(0.01), path = pth,
+                                                  initial_est = "robustified",
+                                                  iterations = 0, shuffle = FALSE,
+                                                  shuffle_seed = NULL, split = 0.5)),
+                       name = "iter0.csv")
+
+  pth <- NULL
+  save_file <- function(code) {
+    directory <- tempdir()
+    pth <<- directory
+    path <- paste(directory, "\\M10n1000g0.01irobustifieds0.5.csv", sep = "")
+    code
+    return(path)
+  }
+
+  expect_snapshot_file(path = save_file(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+                                                formula = p$setting$formula, ref_dist = "normal",
+                                                sign_level = c(0.01), path = pth,
+                                                initial_est = "robustified",
+                                                iterations = "convergence", convergence_criterion = 3,
+                                                shuffle = FALSE, shuffle_seed = NULL, split = 0.5)),
+                       name = "iterconv.csv")
 
 })
