@@ -228,6 +228,9 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
 
   } else { # m is set to "convergence" -> need to determine m in each resample
 
+    mg <- NULL
+    mb <- NULL
+
   } # end determine iterations
 
   # extract the original sample results (call it r = 0)
@@ -330,9 +333,9 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
   } else {
 
     # need to export the variables required for the parallel cores
-    vars <- c("formula", "ref_dist", "sign_level", "user_model", "iterations",
-              "convergence_criterion", "shuffle", "shuffle_seed", "split",
-              "verbose", "mg", "mb")
+    vars <- c("formula", "ref_dist", "sign_level", "initial_est", "user_model",
+              "iterations", "convergence_criterion", "shuffle", "shuffle_seed",
+              "split", "verbose", "resamples", "orig_data", "mb", "mg", "m")
 
     # parallel loop
     output <- foreach::foreach(r = (1:R), .combine = "rbind",
@@ -340,7 +343,13 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
 
       resample <- nonparametric_resampling(df = orig_data,
                                            resample = resamples[[r]])
-      eval(expr)
+
+      new_model <- outlier_detection(data = resample, formula = formula,
+                                     ref_dist = ref_dist, sign_level = sign_level,
+                                     initial_est = initial_est, user_model = user_model,
+                                     iterations = iterations,
+                                     convergence_criterion = convergence_criterion, shuffle = shuffle,
+                                     shuffle_seed = shuffle_seed, split = split, verbose = verbose)
 
       if (identical(m, "convergence")) {
 
