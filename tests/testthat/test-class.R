@@ -597,7 +597,7 @@ test_that("plot.robust2sls() works correctly", {
             shuffle = TRUE, shuffle_seed = 42, split = 0.5)
 
   skip_on_cran()
-  # skip_on_ci() # for continuous integration
+  skip_on_ci() # for continuous integration, while successful for Windows not for others
   expect_snapshot_file(path = save_png(plot(test1)), name = "test1_default.png")
   expect_snapshot_file(path = save_png(plot(test1, iteration = 1)), name = "test1_m0.png")
   expect_snapshot_file(path = save_png(plot(test1, iteration = 4)), name = "test1_m4.png")
