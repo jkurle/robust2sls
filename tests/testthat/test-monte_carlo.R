@@ -220,6 +220,31 @@ test_that("mc_grid() throws correct error", {
                        iterations = "nonexist", convergence_criterion = 0),
                "Argument iterations not correctly specified.")
 
+  # error invalid path
+  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  doFuture::registerDoFuture()
+  future::plan(future::sequential)
+  expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
+                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       sign_level = 0.05, initial_est = "robustified",
+                       iterations = 3, convergence_criterion = 0, path = "test/"),
+               "Argument 'path' should not end with a path separator")
+  expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
+                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       sign_level = 0.05, initial_est = "robustified",
+                       iterations = 3, convergence_criterion = 0, path = "test\\"),
+               "Argument 'path' should not end with a path separator")
+  expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
+                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       sign_level = 0.05, initial_est = "robustified",
+                       iterations = "convergence", convergence_criterion = 0, path = "test/"),
+               "Argument 'path' should not end with a path separator")
+  expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
+                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       sign_level = 0.05, initial_est = "robustified",
+                       iterations = "convergence", convergence_criterion = 0, path = "test\\"),
+               "Argument 'path' should not end with a path separator")
+
 })
 
 test_that("mc_grid() works correctly", {
