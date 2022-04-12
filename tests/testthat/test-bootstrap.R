@@ -112,3 +112,106 @@ test_that("nonparametric_resampling() works correctly", {
   expect_true(!("Datsun 710" %in% rownames(df1)))
 
 })
+
+test_that("case_resampling() works correctly", {
+
+  # setup
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  r <- outlier_detection(data = d, formula = p$setting$formula,
+                         ref_dist = "normal", sign_level = 0.05,
+                         initial_est = "robustified", iterations = 3)
+
+  set.seed(10)
+  cr1 <- case_resampling(robust2sls_object = r, R = 10)
+  # only one iteration
+  cr2 <- case_resampling(robust2sls_object = r, R = 10, m = 1)
+  # only one coefficient by number
+  cr3 <- case_resampling(robust2sls_object = r, R = 10, coef = 1, m = 1)
+  # only one coefficient by name
+  cr4 <- case_resampling(robust2sls_object = r, R = 10, coef = "x2", m = 1)
+
+  # same ones but in parallel
+  set.seed(10)
+  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  doFuture::registerDoFuture()
+  cl <- parallel::makeCluster(ncores)
+  parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
+  future::plan(future::cluster, workers = cl)
+  cr11 <- case_resampling(robust2sls_object = r, R = 10, parallel = TRUE)
+  # only one iteration
+  cr21 <- case_resampling(robust2sls_object = r, R = 10, m = 1, parallel = TRUE)
+  # only one coefficient by number
+  cr31 <- case_resampling(robust2sls_object = r, R = 10, coef = 1, m = 1,
+                          parallel = TRUE)
+  # only one coefficient by name
+  cr41 <- case_resampling(robust2sls_object = r, R = 10, coef = "x2", m = 1,
+                          parallel = TRUE)
+
+  # first, ensure that same results whether parallel or not
+  expect_identical(cr1, cr11)
+  expect_identical(cr2, cr21)
+  expect_identical(cr3, cr31)
+  expect_identical(cr4, cr41)
+
+  # check output structure
+  expect_type(cr1, "list")
+  expect_type(cr2, "list")
+  expect_type(cr3, "list")
+  expect_type(cr4, "list")
+  expect_identical(class(cr1), "r2sls_boot")
+  expect_identical(class(cr2), "r2sls_boot")
+  expect_identical(class(cr3), "r2sls_boot")
+  expect_identical(class(cr4), "r2sls_boot")
+  expect_length(cr1, 3)
+  expect_length(cr2, 3)
+  expect_length(cr3, 3)
+  expect_length(cr4, 3)
+  expect_named(cr1, c("boot", "resamples", "original"))
+  expect_named(cr2, c("boot", "resamples", "original"))
+  expect_named(cr3, c("boot", "resamples", "original"))
+  expect_named(cr4, c("boot", "resamples", "original"))
+  expect_identical(class(cr1$boot), "data.frame")
+  expect_identical(class(cr2$boot), "data.frame")
+  expect_identical(class(cr3$boot), "data.frame")
+  expect_identical(class(cr4$boot), "data.frame")
+  expect_identical(NCOL(cr1$boot), 9L)
+  expect_identical(NCOL(cr2$boot), 9L)
+  expect_identical(NCOL(cr3$boot), 4L)
+  expect_identical(NCOL(cr4$boot), 4L)
+  expect_identical(NROW(cr1$boot), 44L)
+  expect_identical(NROW(cr2$boot), 11L)
+  expect_identical(NROW(cr3$boot), 11L)
+  expect_identical(NROW(cr4$boot), 11L)
+  expect_identical(colnames(cr1$boot), c("X.Intercept.", "x1", "x2", "x3", "x4", "x5", "m", "gauge", "r"))
+  expect_identical(colnames(cr2$boot), c("X.Intercept.", "x1", "x2", "x3", "x4", "x5", "m", "gauge", "r"))
+  expect_identical(colnames(cr3$boot), c("X.Intercept.", "m", "gauge", "r"))
+  expect_identical(colnames(cr4$boot), c("x2", "m", "gauge", "r"))
+  expect_type(cr1$resamples, "list")
+  expect_type(cr2$resamples, "list")
+  expect_type(cr3$resamples, "list")
+  expect_type(cr4$resamples, "list")
+  expect_identical(class(cr1$resamples), "list")
+  expect_identical(class(cr2$resamples), "list")
+  expect_identical(class(cr3$resamples), "list")
+  expect_identical(class(cr4$resamples), "list")
+  expect_length(cr1$resamples, 10L)
+  expect_length(cr2$resamples, 10L)
+  expect_length(cr3$resamples, 10L)
+  expect_length(cr4$resamples, 10L)
+  expect_identical(class(cr1$original), "robust2sls")
+  expect_identical(class(cr2$original), "robust2sls")
+  expect_identical(class(cr3$original), "robust2sls")
+  expect_identical(class(cr4$original), "robust2sls")
+  # $original saves original obj, so should be same across cr1, cr2, cr3, cr4
+  expect_identical(cr1$original, cr2$original)
+  expect_identical(cr1$original, cr3$original)
+  expect_identical(cr1$original, cr4$original)
+
+  # save as snapshot
+  expect_snapshot_output(cr1)
+  expect_snapshot_output(cr2)
+  expect_snapshot_output(cr3)
+  expect_snapshot_output(cr4)
+
+})
