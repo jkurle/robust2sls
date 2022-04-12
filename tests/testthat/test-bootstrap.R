@@ -92,3 +92,23 @@ test_that("count_indices() works as intended", {
   expect_snapshot_output(c3)
 
 })
+
+test_that("nonparametric_resampling() works correctly", {
+
+  data <- mtcars
+  resamples <- nonparametric(indices = 1:NROW(data), R = 5, replacement = TRUE,
+                             seed = 1)
+  # use these resamples of indices to actually get resample of mtcars
+  df1 <- nonparametric_resampling(df = data, resample = resamples[[1]])
+
+  expect_snapshot_output(df1)
+
+  # do manual check of two observations
+  # index 1 was drawn twice, this is Mazda RX4
+  expect_true("Mazda RX4" %in% rownames(df1))
+  expect_true("Mazda RX4.1" %in% rownames(df1))
+  expect_true(!("Mazda RX4.2" %in% rownames(df1)))
+  # index 3 was not drawn at all, this is Datsun 710
+  expect_true(!("Datsun 710" %in% rownames(df1)))
+
+})
