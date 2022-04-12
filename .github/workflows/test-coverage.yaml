@@ -26,5 +26,5 @@ jobs:
           extra-packages: covr
 
       - name: Test coverage
-        run: covr::codecov()
+        run: covr::codecov(function_exclusions = "estimate_param$")
         shell: Rscript {0}
