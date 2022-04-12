@@ -136,17 +136,27 @@ test_that("generate_param() works correctly", {
 
   # expect no error for:
   p <- generate_param(3, 2, 3)
-  generate_param(3, 2, 3, beta = p$params$beta)
-  generate_param(3, 2, 3, sigma = p$params$sigma)
-  generate_param(3, 2, 3, mean_z = p$params$mean_z)
-  generate_param(3, 2, 3, cov_z = p$params$cov_z)
-  generate_param(3, 2, 3, Sigma2_half = p$params$Sigma2_half)
-  generate_param(3, 2, 3, Omega2 = p$params$Omega2)
-  generate_param(3, 2, 3, Pi = p$params$Pi)
+  expect_silent(generate_param(3, 2, 3, beta = p$params$beta))
+  expect_silent(generate_param(3, 2, 3, sigma = p$params$sigma))
+  expect_silent(generate_param(3, 2, 3, mean_z = p$params$mean_z))
+  expect_silent(generate_param(3, 2, 3, cov_z = p$params$cov_z))
+  expect_silent(generate_param(3, 2, 3, Sigma2_half = p$params$Sigma2_half))
+  expect_silent(generate_param(3, 2, 3, Omega2 = p$params$Omega2))
+  expect_silent(generate_param(3, 2, 3, Pi = p$params$Pi))
 
   # output coincides with the original function param_gen_2SLS()
   environment(p$setting$formula) <- NULL
   expect_snapshot_output(p)
+
+  # expect no error for: (calling no intercept)
+  p <- generate_param(3, 2, 3, intercept = FALSE)
+  expect_silent(generate_param(3, 2, 3, intercept = FALSE, beta = p$params$beta))
+  generate_param(3, 2, 3, intercept = FALSE, sigma = p$params$sigma)
+  generate_param(3, 2, 3, intercept = FALSE, mean_z = p$params$mean_z)
+  generate_param(3, 2, 3, intercept = FALSE, cov_z = p$params$cov_z)
+  generate_param(3, 2, 3, intercept = FALSE, Sigma2_half = p$params$Sigma2_half)
+  generate_param(3, 2, 3, intercept = FALSE, Omega2 = p$params$Omega2)
+  generate_param(3, 2, 3, intercept = FALSE, Pi = p$params$Pi)
 
 })
 
