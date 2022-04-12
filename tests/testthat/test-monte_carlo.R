@@ -367,7 +367,7 @@ test_that("mc_grid() saves intermediate results correctly", {
   save_file <- function(code) {
     directory <- tempdir()
     pth <<- directory
-    path <- paste(directory, "\\M10n1000g0.01irobustifieds0.5.csv", sep = "")
+    path <- file.path(directory, "M10n1000g0.01irobustifieds0.5.csv")
     code
     return(path)
   }
@@ -384,7 +384,7 @@ test_that("mc_grid() saves intermediate results correctly", {
   save_file <- function(code) {
     directory <- tempdir()
     pth <<- directory
-    path <- paste(directory, "\\M10n1000g0.01irobustifieds0.5.csv", sep = "")
+    path <- file.path(directory, "M10n1000g0.01irobustifieds0.5.csv")
     code
     return(path)
   }
