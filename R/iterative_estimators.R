@@ -173,6 +173,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   }
 
   # initial estimation
+  initial_est <- match.arg(initial_est)
   if (initial_est == "robustified") {
     initial <- robustified_init(data = data, formula = formula,
                                 cutoff = out$cons$cutoff)
@@ -183,9 +184,10 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   } else if (initial_est == "user") {
     initial <- user_init(data = data, formula = formula,
                          cutoff = out$cons$cutoff, user_model = user_model)
-  } else {
+  # fail-safe, this should never be reached due to match.arg
+  } else { # nocov start
     stop(strwrap("Unknown `initial_est` argument", prefix = " ", initial = ""))
-  }
+  } # nocov end
 
   # add initial estimation results to out list
   iter_name <- "m0"
@@ -365,6 +367,10 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 #  out$cons$convergence$converged <- (out$cons$convergence$difference
 #                                <= convergence_criterion)
 #  }
+
+  if (verbose == TRUE) { # nicer layout
+    cat("\n")
+  }
 
   return(out)
 
