@@ -139,7 +139,7 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
                            split = 0.5) {
 
   if (!is.numeric(split)) {
-    stop(strwrap("The argument `split`has to be numeric", prefix = " ",
+    stop(strwrap("The argument `split` has to be numeric", prefix = " ",
                  initial = ""))
   }
 
