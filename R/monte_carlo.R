@@ -72,11 +72,11 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
 
   # check that the suggested packages required "pracma" package is installed
 
-  if (!requireNamespace("pracma", quietly = TRUE)) {
+  if (!requireNamespace("pracma", quietly = TRUE)) { # nocov start
     stop("Package 'pracma' needed for this function to work.
          Please install it.",
          call. = FALSE)
-  }
+  } # nocov end
 
   # check input values
   if (!is.numeric(dx1)) {
@@ -169,7 +169,7 @@ generate_param <- function(dx1, dx2, dz2, intercept = TRUE, beta = NULL,
                      initial = ""))
       }
     } else { # no intercept
-      if (!identical(dim(cov_z), as.integer(c(dx1 + dx2, dx1 + dz2)))) {
+      if (!identical(dim(cov_z), as.integer(c(dx1 + dz2, dx1 + dz2)))) {
         stop(strwrap("'cov_z' must be a square matrix with dimensions
                     (dx1 + dz2) when no intercept is included in the model",
                     prefix = " ", initial = ""))
