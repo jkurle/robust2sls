@@ -106,7 +106,33 @@ test_that("robustified_init() works correctly", {
 
 })
 
+test_that("user_init() works correctly", {
 
+  # test errors
+  data <- datasets::mtcars
+  data[1, "mpg"] <- NA # y missing
+  data[2, "cyl"] <- NA # x1 missing
+  data[3, "disp"] <- NA # x2 missing
+  data[4, "wt"] <- NA # z2 missing
+  data[5, "hp"] <- NA # not relevant for estimation missing
+  formula <- mpg ~ cyl + disp | cyl + wt
+  attr(formula, ".Environment") <- NULL
+  lmmodel <- lm(formula = mpg ~ cyl + disp, data = data)
+
+  expect_error(user_init(data = data, formula = formula, cutoff = 1.96, user_model = lmmodel),
+               "argument `user_model` is not of class `ivreg`")
+
+  # test success (do robustified manually, compare output)
+  ivmodel <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  expect_silent(ivtest <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                              sign_level = 0.05, initial_est = "user",
+                              user_model = ivmodel, iterations = 1))
+  robustifiedtest <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
+                                       sign_level = 0.05, initial_est = "robustified",
+                                       iterations = 1)
+  expect_equal(ivtest$model$m0, robustifiedtest$model$m0)
+
+})
 
 test_that("saturated_init() works correctly", {
 
@@ -243,5 +269,86 @@ test_that("saturated_init() works correctly", {
   expect_snapshot_output(cat(r1$stdres))
   expect_snapshot_output(cat(r1$sel))
   expect_snapshot_output(cat(r1$type))
+
+})
+
+test_that("saturated_init() throws correct errors", {
+
+  data <- datasets::mtcars
+  data[1, "mpg"] <- NA # y missing
+  data[2, "cyl"] <- NA # x1 missing
+  data[3, "disp"] <- NA # x2 missing
+  data[4, "wt"] <- NA # z2 missing
+  data[5, "hp"] <- NA # not relevant for estimation missing
+  formula <- mpg ~ cyl + disp | cyl + wt
+  c <- 1.96
+
+  expect_error(saturated_init(data = data, formula = formula, cutoff = c,
+                              shuffle = FALSE, shuffle_seed = 1, split = "0.5"),
+               "argument `split` has to be numeric")
+  expect_error(saturated_init(data = data, formula = formula, cutoff = c,
+                              shuffle = FALSE, shuffle_seed = 1, split = FALSE),
+               "argument `split` has to be numeric")
+  expect_error(saturated_init(data = data, formula = formula, cutoff = c,
+                              shuffle = FALSE, shuffle_seed = 1, split = 0),
+               "argument `split` has to lie strictly between 0 and 1")
+  expect_error(saturated_init(data = data, formula = formula, cutoff = c,
+                              shuffle = FALSE, shuffle_seed = 1, split = -0.5),
+               "argument `split` has to lie strictly between 0 and 1")
+  expect_error(saturated_init(data = data, formula = formula, cutoff = c,
+                              shuffle = FALSE, shuffle_seed = 1, split = 1),
+               "argument `split` has to lie strictly between 0 and 1")
+  expect_error(saturated_init(data = data, formula = formula, cutoff = c,
+                              shuffle = FALSE, shuffle_seed = 1, split = 1.3),
+               "argument `split` has to lie strictly between 0 and 1")
+  expect_warning(saturated_init(data = data, formula = formula, cutoff = c,
+                                shuffle = FALSE, shuffle_seed = 1, split = 0.2),
+                 "Very unequal `split`")
+  expect_warning(saturated_init(data = data, formula = formula, cutoff = c,
+                                shuffle = FALSE, shuffle_seed = 1, split = 0.9),
+                 "Very unequal `split`")
+  expect_error(saturated_init(data = data, formula = formula, cutoff = c,
+                              shuffle = 1, shuffle_seed = 1, split = 0.5),
+               "argument `shuffle` has to be TRUE or FALSE")
+  expect_error(saturated_init(data = data, formula = formula, cutoff = c,
+                              shuffle = "TRUE", shuffle_seed = 1, split = 0.5),
+               "argument `shuffle` has to be TRUE or FALSE")
+
+})
+
+test_that("saturated_init() works correctly when split variable exists", {
+
+  data <- datasets::mtcars
+  data[1, "mpg"] <- NA # y missing
+  data[2, "cyl"] <- NA # x1 missing
+  data[3, "disp"] <- NA # x2 missing
+  data[4, "wt"] <- NA # z2 missing
+  data[5, "hp"] <- NA # not relevant for estimation missing
+  formula <- mpg ~ cyl + disp | cyl + wt
+  c <- 1.96
+
+  # add variables called split1 and split2 such that function must change name
+  data2 <- data
+  data2$split1 <- 8
+  data2$split2 <- "c"
+
+  # baseline
+  base <- saturated_init(data = data, formula = formula, cutoff = c,
+                         shuffle = FALSE, shuffle_seed = 1, split = 0.5)
+  test <- saturated_init(data = data2, formula = formula, cutoff = c,
+                         shuffle = FALSE, shuffle_seed = 1, split = 0.5)
+  # should be the same except for call
+  # check and use fact that model2 is used for split 1 and vice versa
+  expect_true(any(grepl(pattern = "split2", x = as.character(base$model$split1$call))))
+  expect_true(any(grepl(pattern = "split1", x = as.character(base$model$split2$call))))
+  expect_true(any(grepl(pattern = "split2_1", x = as.character(test$model$split1$call))))
+  expect_true(any(grepl(pattern = "split1_1", x = as.character(test$model$split2$call))))
+
+  # set call to NULL, check whether then otherwise identical
+  base$model$split1$call <- NULL
+  base$model$split2$call <- NULL
+  test$model$split1$call <- NULL
+  test$model$split2$call <- NULL
+  expect_identical(base, test)
 
 })
