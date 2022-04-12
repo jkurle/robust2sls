@@ -228,6 +228,16 @@ test_that("validate_robust2sls() works correctly", {
                "Component \\$cons\\$call must be a valid function call")
 
   t <- test1
+  t$cons$verbose <- 1
+  expect_error(validate_robust2sls(t),
+               "Component \\$cons\\$verbose must be a logical value")
+
+  t <- test1
+  t$cons$verbose <- "TRUE"
+  expect_error(validate_robust2sls(t),
+               "Component \\$cons\\$verbose must be a logical value")
+
+  t <- test1
   t$cons$formula <- 1
   expect_error(validate_robust2sls(t),
                "Component \\$cons\\$formula must be a valid formula")
@@ -329,6 +339,13 @@ test_that("validate_robust2sls() works correctly", {
   t$cons$initial$shuffle_seed <- 42
   expect_error(validate_robust2sls(t),
                "\\$cons\\$initial\\$shuffle_seed must be NULL")
+
+  lmmodel <- lm(formula = mpg ~ cyl + disp, data = data)
+  expect_error(outlier_detection(data = data, formula = formula,
+       ref_dist = "normal", sign_level = 0.05, initial_est = "user",
+       user_model = lmmodel,
+       iterations = 5, convergence_criterion = NULL, shuffle = FALSE,
+       shuffle_seed = 42, split = 0.5), "argument `user_model` is not of class `ivreg`")
 
   t <- test1
   t$cons$convergence$criterion <- "abc"
@@ -511,6 +528,7 @@ test_that("print-robust2sls() works correctly", {
 
   data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
+  attr(formula, ".Environment") <- NULL
 
   test1 <- outlier_detection(data = data, formula = formula,
             ref_dist = "normal", sign_level = 0.05, initial_est = "robustified",
@@ -539,6 +557,12 @@ test_that("print-robust2sls() works correctly", {
   expect_snapshot_output(test3)
   expect_snapshot_output(test4)
   expect_snapshot_output(test5)
+  # print but as a list, i.e. detailed output
+  expect_snapshot_output(print(test1, verbose = TRUE))
+  expect_snapshot_output(print(test2, verbose = TRUE))
+  expect_snapshot_output(print(test3, verbose = TRUE))
+  expect_snapshot_output(print(test4, verbose = TRUE))
+  expect_snapshot_output(print(test5, verbose = TRUE))
 
 })
 
@@ -573,7 +597,7 @@ test_that("plot.robust2sls() works correctly", {
             shuffle = TRUE, shuffle_seed = 42, split = 0.5)
 
   skip_on_cran()
-  skip_on_ci() # for continuous integration
+  # skip_on_ci() # for continuous integration
   expect_snapshot_file(path = save_png(plot(test1)), name = "test1_default.png")
   expect_snapshot_file(path = save_png(plot(test1, iteration = 1)), name = "test1_m0.png")
   expect_snapshot_file(path = save_png(plot(test1, iteration = 4)), name = "test1_m4.png")
