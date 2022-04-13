@@ -228,9 +228,6 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
 
   } else { # m is set to "convergence" -> need to determine m in each resample
 
-    mg <- NULL
-    mb <- NULL
-
   } # end determine iterations
 
   # extract the original sample results (call it r = 0)
