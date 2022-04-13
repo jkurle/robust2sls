@@ -231,6 +231,11 @@
       iter_test iter_act gamma         t      type      pval alpha reject
     1         1        1  0.05 -1.552096 one-sided 0.9396804   0.1  FALSE
 
+---
+
+        iter_test iter_act gamma         t      type      pval alpha reject
+    1 convergence        4  0.01 -1.612366 two-sided 0.1068823   0.1  FALSE
+
 # counttest() works correctly
 
     $gamma0.01
@@ -327,17 +332,17 @@
     gamma0.08         0        0  0.08      72      80 two-sided 0.4016203  0.05
     gamma0.09         0        0  0.09      90      90 two-sided 1.0000000  0.05
     gamma0.1          0        0  0.10     101     100 two-sided 0.9202780  0.05
-              reject
-    gamma0.01  FALSE
-    gamma0.02  FALSE
-    gamma0.03  FALSE
-    gamma0.04  FALSE
-    gamma0.05  FALSE
-    gamma0.06  FALSE
-    gamma0.07  FALSE
-    gamma0.08  FALSE
-    gamma0.09  FALSE
-    gamma0.1   FALSE
+              reject tsmethod
+    gamma0.01  FALSE  minlike
+    gamma0.02  FALSE  minlike
+    gamma0.03  FALSE  minlike
+    gamma0.04  FALSE  minlike
+    gamma0.05  FALSE  minlike
+    gamma0.06  FALSE  minlike
+    gamma0.07  FALSE  minlike
+    gamma0.08  FALSE  minlike
+    gamma0.09  FALSE  minlike
+    gamma0.1   FALSE  minlike
 
 ---
 
@@ -352,17 +357,17 @@
     gamma0.08         1        1  0.08      60      80 two-sided 0.02509043  0.05
     gamma0.09         1        1  0.09      87      90 two-sided 0.79222703  0.05
     gamma0.1          1        1  0.10      98     100 two-sided 0.88081167  0.05
-              reject
-    gamma0.01  FALSE
-    gamma0.02  FALSE
-    gamma0.03  FALSE
-    gamma0.04   TRUE
-    gamma0.05  FALSE
-    gamma0.06  FALSE
-    gamma0.07  FALSE
-    gamma0.08   TRUE
-    gamma0.09  FALSE
-    gamma0.1   FALSE
+              reject tsmethod
+    gamma0.01  FALSE  minlike
+    gamma0.02  FALSE  minlike
+    gamma0.03  FALSE  minlike
+    gamma0.04   TRUE  minlike
+    gamma0.05  FALSE  minlike
+    gamma0.06  FALSE  minlike
+    gamma0.07  FALSE  minlike
+    gamma0.08   TRUE  minlike
+    gamma0.09  FALSE  minlike
+    gamma0.1   FALSE  minlike
 
 ---
 
@@ -377,17 +382,17 @@
     gamma0.08 convergence      200  0.08      53      80 two-sided 0.001708474
     gamma0.09 convergence        6  0.09      83      90 two-sided 0.493239774
     gamma0.1  convergence      200  0.10      93     100 two-sided 0.515706168
-              alpha reject
-    gamma0.01  0.05  FALSE
-    gamma0.02  0.05  FALSE
-    gamma0.03  0.05  FALSE
-    gamma0.04  0.05   TRUE
-    gamma0.05  0.05   TRUE
-    gamma0.06  0.05   TRUE
-    gamma0.07  0.05   TRUE
-    gamma0.08  0.05   TRUE
-    gamma0.09  0.05  FALSE
-    gamma0.1   0.05  FALSE
+              alpha reject tsmethod
+    gamma0.01  0.05  FALSE  minlike
+    gamma0.02  0.05  FALSE  minlike
+    gamma0.03  0.05  FALSE  minlike
+    gamma0.04  0.05   TRUE  minlike
+    gamma0.05  0.05   TRUE  minlike
+    gamma0.06  0.05   TRUE  minlike
+    gamma0.07  0.05   TRUE  minlike
+    gamma0.08  0.05   TRUE  minlike
+    gamma0.09  0.05  FALSE  minlike
+    gamma0.1   0.05  FALSE  minlike
 
 ---
 
@@ -402,17 +407,17 @@
     gamma0.08         3        3  0.08      56      80 one-sided 0.9980168  0.05
     gamma0.09         3        3  0.09      82      90 one-sided 0.8140138  0.05
     gamma0.1          3        3  0.10      84     100 one-sided 0.9536794  0.05
-              reject
-    gamma0.01  FALSE
-    gamma0.02  FALSE
-    gamma0.03  FALSE
-    gamma0.04  FALSE
-    gamma0.05  FALSE
-    gamma0.06  FALSE
-    gamma0.07  FALSE
-    gamma0.08  FALSE
-    gamma0.09  FALSE
-    gamma0.1   FALSE
+              reject tsmethod
+    gamma0.01  FALSE     <NA>
+    gamma0.02  FALSE     <NA>
+    gamma0.03  FALSE     <NA>
+    gamma0.04  FALSE     <NA>
+    gamma0.05  FALSE     <NA>
+    gamma0.06  FALSE     <NA>
+    gamma0.07  FALSE     <NA>
+    gamma0.08  FALSE     <NA>
+    gamma0.09  FALSE     <NA>
+    gamma0.1   FALSE     <NA>
 
 ---
 
@@ -427,27 +432,52 @@
     gamma0.08         5        5  0.08      54      80 two-sided 0.0025073073  0.01
     gamma0.09         5        5  0.09      83      90 two-sided 0.4932397737  0.01
     gamma0.1          5        5  0.10      90     100 two-sided 0.3419450172  0.01
-              reject
-    gamma0.01  FALSE
-    gamma0.02  FALSE
-    gamma0.03  FALSE
-    gamma0.04  FALSE
-    gamma0.05   TRUE
-    gamma0.06   TRUE
-    gamma0.07   TRUE
-    gamma0.08   TRUE
-    gamma0.09  FALSE
-    gamma0.1   FALSE
+              reject tsmethod
+    gamma0.01  FALSE  minlike
+    gamma0.02  FALSE  minlike
+    gamma0.03  FALSE  minlike
+    gamma0.04  FALSE  minlike
+    gamma0.05   TRUE  minlike
+    gamma0.06   TRUE  minlike
+    gamma0.07   TRUE  minlike
+    gamma0.08   TRUE  minlike
+    gamma0.09  FALSE  minlike
+    gamma0.1   FALSE  minlike
 
 ---
 
       iter_test iter_act gamma num_act num_exp      type      pval alpha reject
     1         1        1  0.05      38      50 two-sided 0.1030514   0.1  FALSE
+      tsmethod
+    1  minlike
 
 ---
 
       iter_test iter_act gamma num_act num_exp      type      pval alpha reject
     1         1        1  0.05      38      50 one-sided 0.9660451   0.1  FALSE
+      tsmethod
+    1     <NA>
+
+---
+
+      iter_test iter_act gamma num_act num_exp      type       pval alpha reject
+    1         1        1  0.05      38      50 two-sided 0.09474133   0.1   TRUE
+      tsmethod
+    1  central
+
+---
+
+      iter_test iter_act gamma num_act num_exp      type      pval alpha reject
+    1         1        1  0.05      38      50 two-sided 0.1030514   0.1  FALSE
+      tsmethod
+    1  minlike
+
+---
+
+      iter_test iter_act gamma num_act num_exp      type      pval alpha reject
+    1         1        1  0.05      38      50 two-sided 0.0897616   0.1   TRUE
+      tsmethod
+    1   blaker
 
 # multi_cutoff_to_fodr_vec() works correctly
 
@@ -791,12 +821,12 @@
     gamma0.03         0        0  0.03      24      30 two-sided 0.3146255  0.05
     gamma0.04         0        0  0.04      31      40 two-sided 0.1779894  0.05
     gamma0.05         0        0  0.05      43      50 two-sided 0.3576795  0.05
-              reject alpha_adj reject_adj
-    gamma0.01  FALSE      0.03      FALSE
-    gamma0.02  FALSE      0.02      FALSE
-    gamma0.03  FALSE      0.04      FALSE
-    gamma0.04  FALSE      0.01      FALSE
-    gamma0.05  FALSE      0.05      FALSE
+              reject tsmethod alpha_adj reject_adj
+    gamma0.01  FALSE  minlike      0.03      FALSE
+    gamma0.02  FALSE  minlike      0.02      FALSE
+    gamma0.03  FALSE  minlike      0.04      FALSE
+    gamma0.04  FALSE  minlike      0.01      FALSE
+    gamma0.05  FALSE  minlike      0.05      FALSE
     
 
 ---

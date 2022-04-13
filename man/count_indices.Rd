@@ -24,7 +24,7 @@ resampling. If the given indices do not skip any numbers, the two coincide.
 }
 \description{
 \code{count_indices} takes a list of indices for resampling and counts how
-each index was sampled in each resample. The results is returned as a matrix
-where each row corresponds to a different resample and each column to one
-index.
+often each index was sampled in each resample. The result is returned in two
+versions of a matrix where each row corresponds to a different resample and
+each column to one index.
 }

@@ -264,9 +264,10 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
       type <- "two-sided"
       pval <- sapply(X = t, FUN = function(x) 2 * stats::pnorm(q = abs(x), mean = 0, sd = 1, lower.tail = FALSE))
     }
-  } else {
+  # below is never reached b/c of first input check
+  } else {  # nocov start
     stop("Argument 'robust2sls_object' invalid input type.")
-  }
+  } # nocov end
 
   out <- data.frame(iter_test = iteration, iter_act = iter_act, gamma = gamma, t = t, type = type,
                     pval = pval, alpha = alpha, reject = (pval <= alpha))
@@ -284,24 +285,33 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #' @param one_sided A logical value whether a two-sided test (\code{FALSE})
 #'   should be conducted or a one-sided test (\code{TRUE}) that rejects only
 #'   when the number of detected outliers is above the expected number.
+#' @param tsmethod A character specifying the method for calculating two-sided
+#' p-values. Ignored for one-sided test.
 #'
 #' @details See \code{\link[=outlier_detection]{outlier_detection()}} and
 #' \code{\link[=multi_cutoff]{multi_cutoff()}} for creating an object of class
 #' \code{"robust2sls"} or a list thereof.
 #'
-#' @return \code{proptest()} returns a data frame with the iteration (m) to be
-#' tested, the actual iteration that was tested (generally coincides with the
-#' iteration that was specified to be tested but is the convergent iteration if
-#' the fixed point is tested), the setting of the probability of exceeding the
-#' cut-off (gamma), the number of detected outliers, the expected number of
-#' outliers under the null hypothesis that there are no outliers, the type of
-#' test (one- or two-sided), the p-value, the significance level \code{alpha},
-#' and the decision. The number of rows of the data frame corresponds to the
-#' length of the argument \code{robust2sls_object}.
+#' See \code{\link[exactci:poisson.exact]{exactci::poisson.exact()}} for the
+#' different methods of calculating two-sided p-values.
+#'
+#' @return \code{counttest()} returns a data frame with the iteration (m) to be
+#'   tested, the actual iteration that was tested (generally coincides with the
+#'   iteration that was specified to be tested but is the convergent iteration
+#'   if the fixed point is tested), the setting of the probability of exceeding
+#'   the cut-off (gamma), the number of detected outliers, the expected number
+#'   of outliers under the null hypothesis that there are no outliers, the type
+#'   of test (one- or two-sided), the p-value, the significance level
+#'   \code{alpha}, the decision, and which method was used to calculate
+#'   (two-sided) p-values. The number of rows of the data frame corresponds to
+#'   the length of the argument \code{robust2sls_object}.
 #'
 #' @export
 
-counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
+counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE,
+                      tsmethod = c("central", "minlike", "blaker")) {
+
+  tsmethod <- match.arg(tsmethod)
 
   # check input values
   if (!(identical(class(robust2sls_object), "robust2sls") | identical(class(robust2sls_object), "list"))) {
@@ -329,9 +339,16 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
   if (!is.logical(one_sided) | !identical(length(one_sided), 1L)) {
     stop("Argument 'one_sided' must be a logical value of length one.")
   }
+  # below not necessary, automatically tested via match.arg()
+  # if (!is.character(tsmethod) | !identical(length(tsmethod), 1L)) {
+  #   stop("Argument 'tsmethod' must be a character vector of length one.")
+  # }
+  # if (!(tsmethod %in% c("central", "minlike", "blaker"))) {
+  #   stop("Argument 'tsmethod' must be one of 'central', 'minlike', or 'blaker'.")
+  # }
 
   # define auxiliary function
-  counttest_fun <- function(r, iter, type) {
+  counttest_fun <- function(r, iter, type, tsmethod) {
     if (isTRUE(type)) {
       alt <- "greater"
     } else {
@@ -346,8 +363,9 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
     n <- sum(nonmissing(data = r$cons$data, formula = r$cons$formula))
     gamma <- r$cons$sign_level
     num_exp <- gamma * n
-    pvalue <- stats::poisson.test(x = num_act, r = num_exp,
-                                  alternative = alt)$p.value
+    pvalue <- exactci::poisson.exact(x = num_act, r = num_exp,
+                                     alternative = alt,
+                                     tsmethod = tsmethod)$p.value
 
     if (identical(alt, "greater")) {
       alt2 <- "one-sided"
@@ -364,19 +382,30 @@ counttest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
   }
 
   if (identical(class(robust2sls_object), "robust2sls")) {
-    result <- counttest_fun(r = robust2sls_object, iter = iteration, type = one_sided)
+    result <- counttest_fun(r = robust2sls_object, iter = iteration,
+                            type = one_sided, tsmethod = tsmethod)
   } else if (identical(class(robust2sls_object), "list")) {
     iter_max <- sapply(X = robust2sls_object, FUN = function(x) x$cons$convergence$max_iter)
-    result <- do.call(rbind, lapply(X = robust2sls_object, FUN = counttest_fun, iter = iteration, type = one_sided))
-  } else {
+    result <- do.call(rbind, lapply(X = robust2sls_object, FUN = counttest_fun, iter = iteration,
+                                    type = one_sided, tsmethod = tsmethod))
+  # part below never reached because of first input check
+  } else { # nocov start
     stop("Argument 'robust2sls_object' invalid input type.")
-  }
+  } # nocov end
 
   colnames(result) <- c("iter_test", "iter_act", "gamma", "num_act", "num_exp",
                         "type", "pval")
   result <- as.data.frame(result)
   result <- cbind(result, data.frame(alpha = alpha))
   result <- cbind(result, reject = (result$pval <= result$alpha))
+  # add tsmethod as column of output (value NA if one-sided)
+  result <- cbind(result, tsmethod = if (isFALSE(one_sided)) {tsmethod} else {NA_character_})
+
+  # add attribute that stores p-value method if two-sided
+  if (isFALSE(one_sided)) {
+    attr(result, which = "tsmethod") <- tsmethod
+  }
+
   return(result)
 
 }
@@ -523,17 +552,17 @@ sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
                                                             split = split,
                                                             sign_level1 = x))
 
-  # covariance matrix should be symmetric, so implement an internal check
+  # covariance matrix should be symmetric, so implement an internal check (fail-save)
   if (!isSymmetric.matrix(covar_part)) {
-    stop("Internal error. Covariance matrix of vector should be symmetric.")
+    stop("Internal error. Covariance matrix of vector should be symmetric.") # nocov
   }
 
   test_var1 <- sum(var_part) + 2 * sum(covar_part[upper.tri(covar_part,
                                                             diag = FALSE)])
   test_var2 <- sum(covar_part)
 
-  if (!isTRUE(all.equal(test_var1, test_var2))) {
-    stop("Internal error. Two ways of calculating avar should coincide.")
+  if (!isTRUE(all.equal(test_var1, test_var2))) { # (fail-save)
+    stop("Internal error. Two ways of calculating avar should coincide.") # nocov
   }
 
   # calculate test statistic and other outputs to be returned

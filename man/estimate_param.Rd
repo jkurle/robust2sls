@@ -23,6 +23,10 @@ resulting list can be given to the function \link{gauge_avar} as argument
 gauge.
 }
 \description{
+NOTE (12 Apr 2022): probably superseded by estimate_param_null() function
+taken out of testing
+}
+\details{
 DO NOT USE YET!
 \code{estimate_param} can be used to estimate certain moments of the data
 that are required for calculating the asymptotic variance of the gauge. Such

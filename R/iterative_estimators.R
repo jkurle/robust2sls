@@ -173,6 +173,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   }
 
   # initial estimation
+  initial_est <- match.arg(initial_est)
   if (initial_est == "robustified") {
     initial <- robustified_init(data = data, formula = formula,
                                 cutoff = out$cons$cutoff)
@@ -183,9 +184,10 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   } else if (initial_est == "user") {
     initial <- user_init(data = data, formula = formula,
                          cutoff = out$cons$cutoff, user_model = user_model)
-  } else {
+  # fail-safe, this should never be reached due to match.arg
+  } else { # nocov start
     stop(strwrap("Unknown `initial_est` argument", prefix = " ", initial = ""))
-  }
+  } # nocov end
 
   # add initial estimation results to out list
   iter_name <- "m0"
@@ -246,10 +248,11 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
       # calculate difference
       difference <- conv_diff(current = out, counter = counter)
+      # always put difference even if not converged yet
+      out$cons$convergence$difference <- difference
 
       if (difference <= convergence_criterion) {
 
-        out$cons$convergence$difference <- difference
         out$cons$convergence$converged <- TRUE
 
         if (difference == 0) {
@@ -264,7 +267,13 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
           cat("\n Algorithm converged successfully. Exit iterations.")
         }
 
-      } # end if converged
+      } else { # end if converged; if not converged
+
+        if (!is.null(max_iter) && (counter == max_iter)) { # final iteration
+          out$cons$convergence$converged <- FALSE
+        }
+
+      }
 
       # update counter
       counter <- counter + 1
@@ -312,8 +321,8 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
       # despite choosing fixed number of iterations, can end early if converged
       # this is only done when a convergence_criterion is specified (not NULL)
       if (!is.null(convergence_criterion)) {
+        out$cons$convergence$difference <- difference
         if (difference <= convergence_criterion) {
-          out$cons$convergence$difference <- difference
           out$cons$convergence$converged <- TRUE
           if (difference == 0) {
             # if the difference is exactly 0 then actually already the previous
@@ -327,6 +336,8 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
             cat("\n Algorithm converged successfully. Exit iterations.")
           }
           break
+        } else {
+          out$cons$convergence$converged <- FALSE
         }
       } else { # end if break, convergence_criterion not specified
 
@@ -356,6 +367,10 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 #  out$cons$convergence$converged <- (out$cons$convergence$difference
 #                                <= convergence_criterion)
 #  }
+
+  if (verbose == TRUE) { # nicer layout
+    cat("\n")
+  }
 
   return(out)
 

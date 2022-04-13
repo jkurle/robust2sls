@@ -4,7 +4,13 @@
 \alias{counttest}
 \title{Count test}
 \usage{
-counttest(robust2sls_object, alpha, iteration, one_sided = FALSE)
+counttest(
+  robust2sls_object,
+  alpha,
+  iteration,
+  one_sided = FALSE,
+  tsmethod = c("central", "minlike", "blaker")
+)
 }
 \arguments{
 \item{robust2sls_object}{An object of class \code{"robust2sls"} or a
@@ -19,17 +25,21 @@ determines which iteration is used for the test.}
 \item{one_sided}{A logical value whether a two-sided test (\code{FALSE})
 should be conducted or a one-sided test (\code{TRUE}) that rejects only
 when the number of detected outliers is above the expected number.}
+
+\item{tsmethod}{A character specifying the method for calculating two-sided
+p-values. Ignored for one-sided test.}
 }
 \value{
-\code{proptest()} returns a data frame with the iteration (m) to be
-tested, the actual iteration that was tested (generally coincides with the
-iteration that was specified to be tested but is the convergent iteration if
-the fixed point is tested), the setting of the probability of exceeding the
-cut-off (gamma), the number of detected outliers, the expected number of
-outliers under the null hypothesis that there are no outliers, the type of
-test (one- or two-sided), the p-value, the significance level \code{alpha},
-and the decision. The number of rows of the data frame corresponds to the
-length of the argument \code{robust2sls_object}.
+\code{counttest()} returns a data frame with the iteration (m) to be
+  tested, the actual iteration that was tested (generally coincides with the
+  iteration that was specified to be tested but is the convergent iteration
+  if the fixed point is tested), the setting of the probability of exceeding
+  the cut-off (gamma), the number of detected outliers, the expected number
+  of outliers under the null hypothesis that there are no outliers, the type
+  of test (one- or two-sided), the p-value, the significance level
+  \code{alpha}, the decision, and which method was used to calculate
+  (two-sided) p-values. The number of rows of the data frame corresponds to
+  the length of the argument \code{robust2sls_object}.
 }
 \description{
 \code{counttest()} conducts a test whether the number of detected outliers
@@ -40,4 +50,7 @@ hypothesis that there are no outliers in the sample.
 See \code{\link[=outlier_detection]{outlier_detection()}} and
 \code{\link[=multi_cutoff]{multi_cutoff()}} for creating an object of class
 \code{"robust2sls"} or a list thereof.
+
+See \code{\link[exactci:poisson.exact]{exactci::poisson.exact()}} for the
+different methods of calculating two-sided p-values.
 }

@@ -28,7 +28,7 @@ extract_formula <- function(formula) {
   fml <- Reduce(paste, deparse(formula))
 
   # check that formula contains both "~" and "|" symbols
-  if (!(grepl("~", fml) && grepl("|", fml))) {
+  if (!(grepl("~", fml) && grepl("\\|", fml))) {
     stop(strwrap("The `formula` is not of the required format since it does not
           include both symbols `~` and `|`", prefix = " ", initial = ""))
   }
@@ -214,10 +214,10 @@ nonmissing <- function(data, formula) {
   }
 
   # should never trigger but as a fail-safe
-  if (length(non_missing)!= NROW(data)) {
+  if (length(non_missing)!= NROW(data)) { # nocov start
     stop(strwrap("The returned vector does not have the same length as the
                  data set", prefix = " ", initial = ""))
-  }
+  } # nocov end
 
   return(non_missing)
 
@@ -393,7 +393,7 @@ conv_diff <- function(current, counter) {
 
   } else { # can calculate
 
-    if (current$cons$initial$estimator == "saturated" & counter == 1) {
+    if (current$cons$initial$estimator == "saturated" && counter == 1) {
       # we now have two initial estimates, one for each split
 
       coef_current <- current$model[[2]]$coefficients
@@ -583,6 +583,9 @@ varrho <- function(sign_level, ref_dist = c("normal"), iteration) {
 }
 
 #' Estimation of moments of the data
+#'
+#' NOTE (12 Apr 2022): probably superseded by estimate_param_null() function
+#' taken out of testing
 #'
 #' DO NOT USE YET!
 #' \code{estimate_param} can be used to estimate certain moments of the data

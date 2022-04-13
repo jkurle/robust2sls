@@ -30,11 +30,12 @@ Suggests:
     rmarkdown,
     testthat,
     utils
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Config/testthat/edition: 3
 Imports: 
     AER,
     doRNG,
+    exactci,
     foreach,
     MASS,
     mathjaxr,

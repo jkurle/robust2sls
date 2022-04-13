@@ -381,10 +381,11 @@ validate_robust2sls <- function(x) {
                  >= 0", prefix = " ", initial = ""))
   }
   if (is.numeric(x$cons$iterations$setting)) {
-    if (!(x$cons$iterations$setting >= 0)) {
+    # fail-safe, already caught in previous error
+    if (!(x$cons$iterations$setting >= 0)) { # nocov start
       stop(strwrap("Component x$cons$iterations$setting must be >= 0",
                    prefix = " ", initial = ""))
-    }
+    } # nocov end
     if (x$cons$iterations$actual > x$cons$iterations$setting) {
       stop(strwrap("Cannot have more actual iterations than was set (cannot have
                    x$cons$iterations$actual > x$cons$iterations$setting",
