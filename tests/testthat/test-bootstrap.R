@@ -152,6 +152,7 @@ test_that("case_resampling() works correctly", {
   # only one coefficient by name
   cr41 <- case_resampling(robust2sls_object = r, R = 10, coef = "x2", m = 1,
                           parallel = TRUE)
+  stopCluster(cl)
   future::plan(future::sequential)
 
   # first, ensure that same results whether parallel or not
@@ -227,7 +228,16 @@ test_that("case_resampling() works correctly", {
                          initial_est = "saturated", iterations = "convergence",
                          convergence_criterion = 0.5, split = 0.5)
   cr5 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence")
+  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  doFuture::registerDoFuture()
+  future::plan(future::cluster, workers = ncores)
+  set.seed(10)
+  cr6 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence",
+                         parallel = TRUE)
+  future::plan(future::sequential)
 
   expect_snapshot_output(cr5)
+  expect_snapshot_output(cr6)
+  expect_identical(cr5, cr6)
 
 })
