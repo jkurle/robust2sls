@@ -228,6 +228,9 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
 
   } else { # m is set to "convergence" -> need to determine m in each resample
 
+    mg <- NULL
+    mb <- NULL
+
   } # end determine iterations
 
   # extract the original sample results (call it r = 0)
@@ -280,7 +283,12 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
 
       resample <- nonparametric_resampling(df = orig_data,
                                            resample = resamples[[r]])
-      eval(expr)
+      new_model <- outlier_detection(data = resample, formula = formula,
+                                     ref_dist = ref_dist, sign_level = sign_level,
+                                     initial_est = initial_est, user_model = user_model,
+                                     iterations = iterations,
+                                     convergence_criterion = convergence_criterion, shuffle = shuffle,
+                                     shuffle_seed = shuffle_seed, split = split, verbose = verbose)
 
       if (identical(m, "convergence")) {
 
@@ -329,14 +337,8 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
 
   } else {
 
-    # need to export the variables required for the parallel cores
-    vars <- c("formula", "ref_dist", "sign_level", "initial_est", "user_model",
-              "iterations", "convergence_criterion", "shuffle", "shuffle_seed",
-              "split", "verbose", "resamples", "orig_data", "mb", "mg", "m")
-
     # parallel loop
-    output <- foreach::foreach(r = (1:R), .combine = "rbind",
-                               .export = vars) %dopar% {
+    output <- foreach::foreach(r = 1:R, .combine = "rbind") %dopar% {
 
       resample <- nonparametric_resampling(df = orig_data,
                                            resample = resamples[[r]])
@@ -348,13 +350,14 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
                                      convergence_criterion = convergence_criterion, shuffle = shuffle,
                                      shuffle_seed = shuffle_seed, split = split, verbose = verbose)
 
-      if (identical(m, "convergence")) {
+      mb2 <- mb
+      mg2 <- mg
 
+      if (identical(m, "convergence")) {
         # converged at which iteration?
         iter_conv <- new_model$cons$convergence$iter
-        mb <- iter_conv + 1
-        mg <- iter_conv
-
+        mb2 <- iter_conv + 1
+        mg2 <- iter_conv
       }
       if (identical(initial_est, "saturated")) {
         NA_coef <- new_model$model$m0$split1$coefficients
@@ -366,11 +369,11 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
         new_model$model$m0$coefficients <- NA_coef
       }
       if (is.null(coef)) { # extract all
-        betas <- sapply(X = mb, FUN = function(robust2sls_object, iteration)
+        betas <- sapply(X = mb2, FUN = function(robust2sls_object, iteration)
           robust2sls_object$model[[iteration]][["coefficients"]],
           robust2sls_object = new_model)
       } else { # same code works for indices and names
-        betas <- sapply(X = mb, FUN = function(robust2sls_object, iteration, c)
+        betas <- sapply(X = mb2, FUN = function(robust2sls_object, iteration, c)
           robust2sls_object$model[[iteration]][["coefficients"]][c],
           robust2sls_object = new_model, c = coef)
       }
@@ -383,9 +386,9 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
       } else {
         intermediate <- data.frame(t(betas))
       }
-      record_iter <- paste("m", mg, sep = "")
+      record_iter <- paste("m", mg2, sep = "")
       intermediate$m <- record_iter
-      gauges <- sapply(X = mg, FUN = outliers_prop,
+      gauges <- sapply(X = mg2, FUN = outliers_prop,
                        robust2sls_object = new_model)
       intermediate$gauge <- gauges
       intermediate$r <- r
