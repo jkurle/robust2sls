@@ -341,4 +341,19 @@ test_that("evaluate_boot() works correctly", {
   expect_snapshot_output(ev3)
   expect_snapshot_output(ev4)
 
+  # try saturated
+  r2 <- outlier_detection(data = d, formula = p$setting$formula,
+                          ref_dist = "normal", sign_level = 0.05,
+                          initial_est = "saturated", iterations = 1)
+  set.seed(10)
+  cr2 <- case_resampling(robust2sls_object = r2, R = R)
+  ev5 <- evaluate_boot(r2sls_boot = cr2, iterations = 1)
+
+  expect_identical(class(ev5), "data.frame")
+  expect_identical(NROW(ev5), 1L)
+  expect_identical(NCOL(ev5), 9L)
+  expect_identical(ev5$m, 1)
+  expect_snapshot_output(ev5)
+
+
 })
