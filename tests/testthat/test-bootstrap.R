@@ -241,3 +241,104 @@ test_that("case_resampling() works correctly", {
   expect_identical(cr5, cr6)
 
 })
+
+test_that("extract_boot() works correctly", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  r1 <- outlier_detection(data = d, formula = p$setting$formula,
+                         ref_dist = "normal", sign_level = 0.05,
+                         initial_est = "robustified", iterations = 3)
+  r2 <- outlier_detection(data = d, formula = p$setting$formula,
+                          ref_dist = "normal", sign_level = 0.05,
+                          initial_est = "robustified",
+                          iterations = "convergence", convergence_criterion = 1)
+
+  R <- 10
+  set.seed(10)
+  cr1 <- case_resampling(robust2sls_object = r1, R = R)
+  set.seed(10)
+  cr2 <- case_resampling(robust2sls_object = r2, R = R, m = "convergence")
+
+  ex1 <- extract_boot(r2sls_boot = cr1, iteration = 0)
+  ex2 <- extract_boot(r2sls_boot = cr1, iteration = 1)
+  ex3 <- extract_boot(r2sls_boot = cr2, iteration = "convergence")
+
+  expect_identical(class(ex1), "data.frame")
+  expect_identical(class(ex2), "data.frame")
+  expect_identical(class(ex3), "data.frame")
+  expect_type(ex1, "list")
+  expect_type(ex2, "list")
+  expect_type(ex3, "list")
+  expect_identical(NROW(ex1), as.integer(R+1))
+  expect_identical(NROW(ex2), as.integer(R+1))
+  expect_identical(NROW(ex3), as.integer(R+1))
+  expect_identical(NCOL(ex1), 9L)
+  expect_identical(NCOL(ex2), 9L)
+  expect_identical(NCOL(ex3), 9L)
+  expect_identical(ex1$m, rep("m0", times = (R+1)))
+  expect_identical(ex2$m, rep("m1", times = (R+1)))
+  # for convergence, the recorded iteration m can vary across resamples
+  expect_identical(ex1$r, as.double(0:R))
+  expect_identical(ex2$r, as.double(0:R))
+  expect_identical(ex3$r, as.double(0:R))
+
+  expect_snapshot_output(ex1)
+  expect_snapshot_output(ex2)
+  expect_snapshot_output(ex3)
+
+})
+
+test_that("evaluate_boot() works correctly", {
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  d <- generate_data(parameters = p, n = 1000)$data
+  r1 <- outlier_detection(data = d, formula = p$setting$formula,
+                          ref_dist = "normal", sign_level = 0.05,
+                          initial_est = "robustified", iterations = 3)
+  r2 <- outlier_detection(data = d, formula = p$setting$formula,
+                          ref_dist = "normal", sign_level = 0.05,
+                          initial_est = "robustified",
+                          iterations = "convergence", convergence_criterion = 1)
+
+  R <- 10
+  set.seed(10)
+  cr1 <- case_resampling(robust2sls_object = r1, R = R)
+
+  ev0 <- evaluate_boot(r2sls_boot = cr1, iterations = 0)
+  ev1 <- evaluate_boot(r2sls_boot = cr1, iterations = 1)
+  ev2 <- evaluate_boot(r2sls_boot = cr1, iterations = 2)
+  ev3 <- evaluate_boot(r2sls_boot = cr1, iterations = 3)
+  ev4 <- evaluate_boot(r2sls_boot = cr1, iterations = 0:3)
+
+  expect_identical(class(ev0), "data.frame")
+  expect_identical(class(ev1), "data.frame")
+  expect_identical(class(ev2), "data.frame")
+  expect_identical(class(ev3), "data.frame")
+  expect_identical(class(ev4), "data.frame")
+  expect_identical(NROW(ev0), 1L)
+  expect_identical(NROW(ev1), 1L)
+  expect_identical(NROW(ev2), 1L)
+  expect_identical(NROW(ev3), 1L)
+  expect_identical(NROW(ev4), 4L)
+  expect_identical(NCOL(ev0), 9L)
+  expect_identical(NCOL(ev1), 9L)
+  expect_identical(NCOL(ev2), 9L)
+  expect_identical(NCOL(ev3), 9L)
+  expect_identical(NCOL(ev4), 9L)
+  expect_identical(ev0$m, 0)
+  expect_identical(ev1$m, 1)
+  expect_identical(ev2$m, 2)
+  expect_identical(ev3$m, 3)
+  expect_identical(ev4$m, c(0L, 1L, 2L, 3L))
+  binding <- rbind(ev0, ev1, ev2, ev3)
+  binding$m <- as.integer(binding$m)
+  expect_identical(ev4, binding)
+
+  expect_snapshot_output(ev0)
+  expect_snapshot_output(ev1)
+  expect_snapshot_output(ev2)
+  expect_snapshot_output(ev3)
+  expect_snapshot_output(ev4)
+
+})
