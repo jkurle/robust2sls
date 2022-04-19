@@ -234,6 +234,9 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
   if (initial_est == "robustified" | sat_split_half) {
     if (ref_dist == "normal") {
 
+      # NOTE: under normality, general formula simplifies a lot
+      # comment out the obsolete parts but keep code for other distributions in future
+
       # create parameters needed for calculating asymptotic variance
       gamma <- sign_level
       c <- stats::qnorm(gamma/2, mean=0, sd=1, lower.tail = FALSE)
@@ -244,12 +247,12 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
       tau_2 <- 1
       tau_4 <- 3
       varsigma_c_2 <- tau_c_2 / phi
-      sigma <- parameters$params$sigma
-      Omega <- parameters$params$Omega
-      w <- Omega * tau_c_2
-      zeta_c_minus <- 2 * Omega * c
-      Sigma_half <- parameters$params$Sigma_half
-      Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
+      # sigma <- parameters$params$sigma
+      # Omega <- parameters$params$Omega
+      # w <- Omega * tau_c_2
+      # zeta_c_minus <- 2 * Omega * c
+      # Sigma_half <- parameters$params$Sigma_half
+      # Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
 
       if (iteration == 0) {
 
@@ -257,9 +260,9 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
         term1 <- gamma * (1 - gamma)
         term2 <- (c * f)^2 * (tau_4 - 1)
         term3 <- -2 * c * f * (1 - gamma - tau_c_2)
-        term4 <- f^2 * t((2*c*Omega - zeta_c_minus)) %*% Sigma_half %*%
-          Mxx_tilde_inv %*% Sigma_half %*% (2*c*Omega - zeta_c_minus)
-        avar <- term1 + term2 + term3 + term4
+        # term4 <- f^2 * t((2*c*Omega - zeta_c_minus)) %*% Sigma_half %*%
+        #   Mxx_tilde_inv %*% Sigma_half %*% (2*c*Omega - zeta_c_minus)
+        avar <- term1 + term2 + term3 #+ term4
 
       } else if (is.numeric(iteration)) { # m >= 1
 
@@ -281,19 +284,19 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
         # vector with scalars
         v1 <- rbind(1, -c*f*vss, -c*f*vsuu)
         # vector with vectors
-        v21 <- t(vbb*zeta_c_minus + 2*c*f/tau_c_2*vsb*((c^2-varsigma_c_2)/2*zeta_c_minus - 2*c/phi*w) - 2*c*vss*Omega) %*% Sigma_half %*% Mxx_tilde_inv
-        v22 <- t(vbxu*zeta_c_minus + 2*c*(vsxu*((c^2-varsigma_c_2)/2*zeta_c_minus - 2*c/phi*w) - vsuu/phi*w)) %*% Sigma_half %*% Mxx_tilde_inv
-        v2 <- -f/sigma * t(cbind(v21, v22))
+        # v21 <- t(vbb*zeta_c_minus + 2*c*f/tau_c_2*vsb*((c^2-varsigma_c_2)/2*zeta_c_minus - 2*c/phi*w) - 2*c*vss*Omega) %*% Sigma_half %*% Mxx_tilde_inv
+        # v22 <- t(vbxu*zeta_c_minus + 2*c*(vsxu*((c^2-varsigma_c_2)/2*zeta_c_minus - 2*c/phi*w) - vsuu/phi*w)) %*% Sigma_half %*% Mxx_tilde_inv
+        # v2 <- -f/sigma * t(cbind(v21, v22))
 
         # var-cov matrices
         var1 <- cbind(gamma*phi, phi-tau_c_2, 0)
         var1 <- rbind(var1, cbind(phi-tau_c_2, tau_4-1, tau_c_4-tau_c_2*varsigma_c_2))
         var1 <- rbind(var1, cbind(0, tau_c_4-tau_c_2*varsigma_c_2, tau_c_4-tau_c_2*varsigma_c_2))
-        var2 <- cbind(Mxx_tilde_inv*sigma^2, Mxx_tilde_inv*sigma^2*tau_c_2)
-        var2 <- rbind(var2, cbind(Mxx_tilde_inv*sigma^2*tau_c_2, Mxx_tilde_inv*sigma^2*tau_c_2))
+        # var2 <- cbind(Mxx_tilde_inv*sigma^2, Mxx_tilde_inv*sigma^2*tau_c_2)
+        # var2 <- rbind(var2, cbind(Mxx_tilde_inv*sigma^2*tau_c_2, Mxx_tilde_inv*sigma^2*tau_c_2))
 
         # calculate avar
-        avar <- t(v1) %*% var1 %*% v1 + t(v2) %*% var2 %*% v2
+        avar <- t(v1) %*% var1 %*% v1 #+ t(v2) %*% var2 %*% v2
 
       } else { # "convergence"
 
@@ -311,10 +314,10 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
 
         # here use explicit formula because is not too complicated (varrho then not even needed)
         term1 <- gamma*(1-gamma) + (c*f/(tau_c_2 - c*(c^2-varsigma_c_2)*f))^2 * (tau_c_4 - tau_c_2 * varsigma_c_2)
-        term2 <- tau_c_2 * (f / ((phi - 2*c*f) * (tau_c_2 - c*(c^2-varsigma_c_2)*f)))^2 * t(2*c*w - tau_c_2*zeta_c_minus) %*%
-          Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*% (2*c*w - tau_c_2*zeta_c_minus)
+        # term2 <- tau_c_2 * (f / ((phi - 2*c*f) * (tau_c_2 - c*(c^2-varsigma_c_2)*f)))^2 * t(2*c*w - tau_c_2*zeta_c_minus) %*%
+        #   Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*% (2*c*w - tau_c_2*zeta_c_minus)
 
-        avar <- term1 + term2
+        avar <- term1 #+ term2
 
       }
     } # end normal
@@ -332,21 +335,21 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
         tau_2 <- 1
         tau_4 <- 3
         varsigma_c_2 <- tau_c_2 / phi
-        Omega <- parameters$params$Omega
-        w <- Omega * tau_c_2
-        zeta_c_minus <- 2 * Omega * c
-        Sigma_half <- parameters$params$Sigma_half
-        Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
+        # Omega <- parameters$params$Omega
+        # w <- Omega * tau_c_2
+        # zeta_c_minus <- 2 * Omega * c
+        # Sigma_half <- parameters$params$Sigma_half
+        # Mxx_tilde_inv <- parameters$params$Mxx_tilde_inv
 
         # calculate asymptotic variance
         term1 <- gamma * (1 - gamma)
         term2 <- (c * f)^2 * (tau_4 - 1) *
           ((split^2 / (1-split)) + ((1-split)^2 / split))
         term3 <- -2 * c * f * (1 - gamma - tau_c_2)
-        term4 <- f^2 * t((2*c*Omega - zeta_c_minus)) %*% Sigma_half %*%
-          Mxx_tilde_inv %*% Sigma_half %*% (2*c*Omega - zeta_c_minus) *
-          ((split^2 / (1-split)) + ((1-split)^2 / split))
-        avar <- term1 + term2 + term3 + term4
+        # term4 <- f^2 * t((2*c*Omega - zeta_c_minus)) %*% Sigma_half %*%
+        #   Mxx_tilde_inv %*% Sigma_half %*% (2*c*Omega - zeta_c_minus) *
+        #   ((split^2 / (1-split)) + ((1-split)^2 / split))
+        avar <- term1 + term2 + term3 #+ term4
 
       } else { # m >= 1
 
