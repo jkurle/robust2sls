@@ -645,8 +645,8 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
 
         # calculate asymptotic variance
         term1 <- gamma_t * (1 - gamma_s)
-        term2 <- -s*f_s*(phi_t - tau_t_2) - t*f_t*(phi_s - tau_s_2)
-        # term3 <- f_s*f_t*(s*t*(tau_4-1) + t(zeta_s_minus-2*s*Omega) %*% Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*% (zeta_t_minus-2*t*Omega)) * (split^3 + (1-split)^3) / (split*(1-split))
+        term2 <- -s*f_s*(phi_t - tau_t_2) - t*f_t*(phi_s - tau_s_2) + f_s*f_t*s*t*(tau_4-1) * (split^3 + (1-split)^3) / (split*(1-split))
+        # term3 <- f_s*f_t*(t(zeta_s_minus-2*s*Omega) %*% Sigma_half %*% Mxx_tilde_inv %*% Sigma_half %*% (zeta_t_minus-2*t*Omega)) * (split^3 + (1-split)^3) / (split*(1-split))
         covar <- term1 + term2 #+ term3
 
       } else { # m >= 1
