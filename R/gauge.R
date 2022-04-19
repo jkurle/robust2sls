@@ -203,6 +203,9 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
                    prefix = " ", initial = ""))
     }
   }
+  if (is.null(parameters) && !identical(ref_dist, "normal")){
+    stop("Argument 'parameters' can only be NULL if ref_dist == 'normal'")
+  }
   if (is.null(split) & !identical(initial_est, "robustified")) {
     stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified'")
   }
@@ -451,6 +454,9 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
       stop(strwrap("Argument 'iteration' must be weakly larger than 0",
                    prefix = " ", initial = ""))
     }
+  }
+  if (is.null(parameters) && !identical(ref_dist, "normal")){
+    stop("Argument 'parameters' can only be NULL if ref_dist == 'normal'")
   }
   if (is.null(split) & !identical(initial_est, "robustified")) {
     stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified'")
