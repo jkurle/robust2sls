@@ -291,10 +291,10 @@ test_that("gauge_avar() gives correct errors", {
 
   # expect error if specify saturated, split != 0.5, m >= 1
   expect_error(gauge_avar("normal", 0.01, "saturated", iteration = 1,
-                          split = 0.3),
+                          split = 0.3, parameters = p),
                "No theory for m >= 1 if saturated initial estimator is not split in half")
   expect_error(gauge_avar("normal", 0.05, "saturated", iteration = 10,
-                          split = 0.3),
+                          split = 0.3, parameters = p),
                "No theory for m >= 1 if saturated initial estimator is not split in half")
 
 })
@@ -354,10 +354,10 @@ test_that("gauge_covar() gives correct errors", {
 
   # expect error if specify saturated, split != 0.5, m >= 1
   expect_error(gauge_covar("normal", 0.01, 0.05, "saturated", iteration = 1,
-                           split = 0.3),
+                           split = 0.3, parameters = p),
                            "No theory for m >= 1 if saturated initial estimator is not split in half")
   expect_error(gauge_covar("normal", 0.01, 0.05, "saturated", iteration = 10,
-                           split = 0.3),
+                           split = 0.3, parameters = p),
                "No theory for m >= 1 if saturated initial estimator is not split in half")
 
 
