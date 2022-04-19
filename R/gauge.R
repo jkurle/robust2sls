@@ -152,7 +152,8 @@ outlier <- function(robust2sls_object, obs) {
 #' representing the iteration for which the outliers are calculated. Uses the
 #' fixed point value if set to \code{"convergence"}.
 #' @param parameters A list created by \link{generate_param} or
-#' \link{estimate_param_null} that stores the parameters (true or estimated).
+#'   \link{estimate_param_null} that stores the parameters (true or estimated).
+#'   \code{NULL} permitted if \code{ref_dist == "normal"}.
 #' @param split A numeric value strictly between 0 and 1 that determines
 #' in which proportions the sample will be split. Can be \code{NULL} if
 #' \code{initial_est == "robustified"}.
@@ -392,7 +393,8 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
 #' representing the iteration for which the outliers are calculated. Uses the
 #' fixed point value if set to \code{"convergence"}.
 #' @param parameters A list created by \link{generate_param} or
-#' \link{estimate_param_null} that stores the parameters (true or estimated).
+#'   \link{estimate_param_null} that stores the parameters (true or estimated).
+#'   \code{NULL} permitted if \code{ref_dist == "normal"}.
 #' @param split A numeric value strictly between 0 and 1 that determines
 #' in which proportions the sample will be split. Can be \code{NULL} if
 #' \code{initial_est == "robustified"}.
