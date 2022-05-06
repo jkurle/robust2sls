@@ -216,7 +216,7 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
     }
     expected_prop <- r$cons$sign_level
     n <- sum(nonmissing(data = r$cons$data, formula = r$cons$formula))
-    if (robust2sls_object$cons$reference == "normal") { # then no need to estimate parameters
+    if (r$cons$reference == "normal") { # then no need to estimate parameters
       est_param <- NULL
     } else {
       est_param <- estimate_param_null(robust2SLS_object = r)
