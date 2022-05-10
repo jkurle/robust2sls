@@ -65,6 +65,7 @@ test_cpv <- function(dist, teststat, p) {
 #' \href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
 #'
 #' @keywords internal
+#' @export
 
 simes <- function(pvals, alpha) {
 
