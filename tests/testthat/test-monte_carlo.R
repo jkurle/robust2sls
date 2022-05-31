@@ -382,6 +382,7 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
 
 test_that("mc_grid() saves intermediate results correctly", {
 
+  skip_on_ci() # runs locally, sometimes causes problems on GitHub Actions
   skip_on_cran() # probably too long and might have problems with parallel
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
