@@ -424,3 +424,30 @@ test_that("mc_grid() saves intermediate results correctly", {
                        name = "iterconv.csv")
 
 })
+
+test_that("CI::mc_grid() saves intermediate results correctly", {
+
+  # this is to have coverage of the test on CI
+  # but this is really tested locally
+  # expect_silent to check no error or warnings raised
+  skip_on_cran() # probably too long and might have problems with parallel
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  doFuture::registerDoFuture()
+  future::plan(future::sequential)
+
+  expect_silent(a <- mc_grid(10, n = c(1000), seed = 42, parameters = p,
+                formula = p$setting$formula, ref_dist = "normal",
+                sign_level = c(0.01), path = tempdir(),
+                initial_est = "robustified",
+                iterations = 0, shuffle = FALSE,
+                shuffle_seed = NULL, split = 0.5))
+
+  expect_silent(a <- mc_grid(10, n = c(1000), seed = 42, parameters = p,
+                formula = p$setting$formula, ref_dist = "normal",
+                sign_level = c(0.01), path = tempdir(),
+                initial_est = "robustified",
+                iterations = "convergence", convergence_criterion = 3,
+                shuffle = FALSE, shuffle_seed = NULL, split = 0.5))
+
+})
