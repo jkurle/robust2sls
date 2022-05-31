@@ -203,9 +203,10 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
                    prefix = " ", initial = ""))
     }
   }
-  if (is.null(parameters) && !identical(ref_dist, "normal")){
+  # currently never reached because ref_dist only allows "normal"
+  if (is.null(parameters) && !identical(ref_dist, "normal")){ # nocov start
     stop("Argument 'parameters' can only be NULL if ref_dist == 'normal'")
-  }
+  } # nocov end
   if (is.null(split) & !identical(initial_est, "robustified")) {
     stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified'")
   }
@@ -455,9 +456,10 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
                    prefix = " ", initial = ""))
     }
   }
-  if (is.null(parameters) && !identical(ref_dist, "normal")){
+  # currently never reached because ref_dist only allows "normal"
+  if (is.null(parameters) && !identical(ref_dist, "normal")){ # nocov start
     stop("Argument 'parameters' can only be NULL if ref_dist == 'normal'")
-  }
+  } # nocov end
   if (is.null(split) & !identical(initial_est, "robustified")) {
     stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified'")
   }
