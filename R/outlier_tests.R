@@ -65,6 +65,7 @@ test_cpv <- function(dist, teststat, p) {
 #' \href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
 #'
 #' @keywords internal
+#' @export
 
 simes <- function(pvals, alpha) {
 
@@ -216,7 +217,11 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
     }
     expected_prop <- r$cons$sign_level
     n <- sum(nonmissing(data = r$cons$data, formula = r$cons$formula))
-    est_param <- estimate_param_null(robust2SLS_object = r)
+    if (r$cons$reference == "normal") { # then no need to estimate parameters
+      est_param <- NULL
+    } else { # nocov start
+      est_param <- estimate_param_null(robust2SLS_object = r)
+    } # nocov end
     est_avar <- gauge_avar(ref_dist = r$cons$reference,
                            sign_level = expected_prop,
                            initial_est = r$cons$initial$estimator,
@@ -524,7 +529,11 @@ sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
   ref <- robust2sls_object[[1]]$cons$reference
   init <- robust2sls_object[[1]]$cons$initial$estimator
   split <- robust2sls_object[[1]]$cons$initial$split # could be NULL
-  param_est <- estimate_param_null(robust2SLS_object = robust2sls_object[[1]])
+  if (robust2sls_object[[1]]$cons$reference == "normal") {
+    param_est <- NULL
+  } else { # nocov start
+    param_est <- estimate_param_null(robust2SLS_object = robust2sls_object[[1]])
+  } # nocov end
 
   # extract which gammas are in the models
   gammas <- sapply(X = robust2sls_object, FUN = function(x) x$cons$sign_level)
@@ -650,7 +659,11 @@ suptest <- function(robust2sls_object, alpha, iteration, p = c(0.9, 0.95, 0.99),
   ref <- robust2sls_object[[1]]$cons$reference
   init <- robust2sls_object[[1]]$cons$initial$estimator
   split <- robust2sls_object[[1]]$cons$initial$split # could be NULL
-  param_est <- estimate_param_null(robust2SLS_object = robust2sls_object[[1]])
+  if (robust2sls_object[[1]]$cons$reference == "normal") {
+    param_est <- NULL
+  } else { # nocov start
+    param_est <- estimate_param_null(robust2SLS_object = robust2sls_object[[1]])
+  } # nocov end
 
   # extract which gammas are in the models
   gammas <- sapply(X = robust2sls_object, FUN = function(x) x$cons$sign_level)

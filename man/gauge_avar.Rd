@@ -34,7 +34,8 @@ representing the iteration for which the outliers are calculated. Uses the
 fixed point value if set to \code{"convergence"}.}
 
 \item{parameters}{A list created by \link{generate_param} or
-\link{estimate_param_null} that stores the parameters (true or estimated).}
+\link{estimate_param_null} that stores the parameters (true or estimated).
+\code{NULL} permitted if \code{ref_dist == "normal"}.}
 
 \item{split}{A numeric value strictly between 0 and 1 that determines
 in which proportions the sample will be split. Can be \code{NULL} if

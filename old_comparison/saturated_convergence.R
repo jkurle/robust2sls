@@ -11,3 +11,14 @@ model <- outlier_detection(data = d, formula = p$setting$formula,
                            max_iter = 50, shuffle = FALSE, shuffle_seed = NULL,
                            split = 0.5, convergence_criterion = 0)
 # should work now
+model2 <- outlier_detection(data = d, formula = p$setting$formula,
+                           ref_dist = "normal", sign_level = 0.05,
+                           initial_est = "saturated", iterations = "convergence",
+                           max_iter = 50, shuffle = FALSE, shuffle_seed = NULL,
+                           split = 0.5, convergence_criterion = 0)
+
+model3 <- outlier_detection(data = d, formula = p$setting$formula,
+                            ref_dist = "normal", sign_level = 0.1,
+                            initial_est = "saturated", iterations = "convergence",
+                            max_iter = 50, shuffle = FALSE, shuffle_seed = NULL,
+                            split = 0.5, convergence_criterion = 0)
