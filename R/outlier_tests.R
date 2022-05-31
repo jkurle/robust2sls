@@ -219,9 +219,9 @@ proptest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
     n <- sum(nonmissing(data = r$cons$data, formula = r$cons$formula))
     if (r$cons$reference == "normal") { # then no need to estimate parameters
       est_param <- NULL
-    } else {
+    } else { # nocov start
       est_param <- estimate_param_null(robust2SLS_object = r)
-    }
+    } # nocov end
     est_avar <- gauge_avar(ref_dist = r$cons$reference,
                            sign_level = expected_prop,
                            initial_est = r$cons$initial$estimator,
@@ -531,9 +531,9 @@ sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
   split <- robust2sls_object[[1]]$cons$initial$split # could be NULL
   if (robust2sls_object[[1]]$cons$reference == "normal") {
     param_est <- NULL
-  } else {
+  } else { # nocov start
     param_est <- estimate_param_null(robust2SLS_object = robust2sls_object[[1]])
-  }
+  } # nocov end
 
   # extract which gammas are in the models
   gammas <- sapply(X = robust2sls_object, FUN = function(x) x$cons$sign_level)
@@ -661,9 +661,9 @@ suptest <- function(robust2sls_object, alpha, iteration, p = c(0.9, 0.95, 0.99),
   split <- robust2sls_object[[1]]$cons$initial$split # could be NULL
   if (robust2sls_object[[1]]$cons$reference == "normal") {
     param_est <- NULL
-  } else {
+  } else { # nocov start
     param_est <- estimate_param_null(robust2SLS_object = robust2sls_object[[1]])
-  }
+  } # nocov end
 
   # extract which gammas are in the models
   gammas <- sapply(X = robust2sls_object, FUN = function(x) x$cons$sign_level)
