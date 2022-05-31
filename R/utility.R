@@ -777,6 +777,7 @@ mvn_sup <- function(n, mu, Sigma, seed = NULL) {
 
   sup <- apply(X = abs(sim), MARGIN = 1, FUN = max)
 
+
   return(sup)
 
 }
