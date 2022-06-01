@@ -25,6 +25,7 @@ Suggests:
     future,
     ggplot2,
     grDevices,
+    ivgets,
     knitr,
     parallel,
     rmarkdown,
