@@ -285,4 +285,71 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
 
 }
 
+#' Impulse Indicator Saturation (IIS initial estimator)
+#'
+#' @inheritParams robustified_init
+#' @inheritParams ivgets::ivisat
+#' @param gamma A numeric value between 0 and 1 representing the significance level used for two-sided significance t-test on the impulse indicators. Corresponds to the probability of falsely classifying an observation as an outlier.
+#'
+#'
+#'
+#' @export
 
+iis_init <- function(data, formula, gamma, t.pval, do.pet = FALSE,
+                     normality.JarqueB = NULL, turbo = FALSE, overid = NULL,
+                     weak = NULL) {
+
+  # can only use this function when "ivgets" is installed
+  if (!requireNamespace("ivgets", quietly = TRUE)) {
+    stop("Package 'ivgets' must be installed to use this function.", .call = FALSE)
+  }
+
+  iismodel <- ivgets::ivisat(formula = formula, data = data, iis = TRUE,
+                             sis = FALSE, tis = FALSE, uis = FALSE,
+                             blocks = NULL, ratio.threshold = 0.8,
+                             max.block.size = 30, t.pval = gamma,
+                             wald.pval = t.pval, do.pet = do.pet,
+                             # don't need these two tests b/c iid model
+                             ar.LjungB = NULL, arch.LjungB = NULL,
+                             normality.JarqueB = normality.JarqueB,
+                             info.method = "sc", include.1cut = FALSE,
+                             include.empty = FALSE, max.paths = NULL,
+                             parallel.options = NULL, turbo = turbo,
+                             tol = 1e-07, max.regs = NULL,
+                             print.searchinfo = FALSE, plot = NULL,
+                             alarm = FALSE, overid = overid, weak = weak)
+
+  # check how many indicators were retained, is NULL if none were retained
+  indnames <- iismodel$selection$ISnames
+  indnum <- length(indnames)
+
+  if (identical(indnum, 0L)) {
+    # selection vector will only be determined by missing, otherwise all 0
+
+    # extract all variables appearing in the regression formula
+    vars <- extract_formula(formula)
+    y_var <- vars$y_var
+
+    # most beautiful solution would be to update selection() as well and allow for ivisat object
+    # and then use that to return the vectors
+
+
+
+
+  } else {
+
+    # check which observations (relates to those used in estimation, in case have missings)
+    obs <- sub(pattern = "iis", replacement = "", x = indnames)
+
+    res <- iismodel$final$residuals
+
+
+  }
+
+
+
+  return(iismodel)
+
+
+
+}
