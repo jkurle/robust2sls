@@ -193,6 +193,7 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
 #' means at least one of these variables necessary for estimation is missing.
 #'
 #' @keywords internal
+#' @export
 
 nonmissing <- function(data, formula) {
 
@@ -204,6 +205,9 @@ nonmissing <- function(data, formula) {
   vars <- extract_formula(formula = formula)
   all_vars <- union(union(union(union(vars$y_var, vars$x1_var), vars$x2_var),
                           vars$z1_var), vars$z2_var)
+
+  # if formula contains "0", "-1", or "1", don't need to check
+  all_vars <- setdiff(all_vars, c("0", "-1", "1"))
 
   # initialise logical vector with all TRUE
   non_missing <- !logical(length = NROW(data))
