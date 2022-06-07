@@ -174,6 +174,79 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
 
 }
 
+#' Create selection (non-outlying) vector from IIS model
+#'
+#' \code{selection_iis} uses the data and isat model object to create a list
+#' with five elements that are used to determine whether the observations are
+#' judged as outliers or not.
+#'
+#' @param x An object of class \code{\link[ivgets:ivisat]{ivisat}}.
+#' @inheritParams selection
+#' @param complete A logical vector with the same length as the number of
+#'   observations in the data set that specifies whether an observation has any
+#'   missing values in any of y, x, or z variables.
+#' @param rownames_orig A character vector storing the original rownames of the
+#'   dataframe.
+#'
+#' @inheritSection selection Warning
+#' @inherit selection return
+#'
+#' @export
+
+selection_iis <- function(x, data, yvar, complete, rownames_orig) {
+
+  # initialise vector outputs
+  res <- rep(NA, times = NROW(data))
+  stdres <- rep(NA, times = NROW(data))
+  sel <- rep(NA, times = NROW(data))
+  type <- rep(-1, times = NROW(data))
+
+  # use residuals from IIS model (even though these are not truly the residuals)
+  # residuals are not unique in this set-up because each obs has several models
+  # NOTE: residual will be zero for obs with a corresponding indicator
+  res[complete] <- x$final$residuals
+  # undo df correction because our theory did not use it (asymp. equivalent and here irrelevant for selection)
+  stdres[complete] <- x$final$residuals / (x$final$sigma * sqrt(x$final$df.residual / x$final$nobs))
+
+  # check how many indicators were retained, is NULL if none were retained
+  indnames <- x$selection$ISnames
+  indnum <- length(indnames)
+
+  # fill in sel and type with correct values
+  if (identical(indnum, 0L)) { # no indicator retained
+
+    # update values
+    # all observations TRUE (except for incomplete observations)
+    sel[complete] <- TRUE
+    # all observations 1 (except for incomplete observations)
+    type[complete] <- 1
+
+  } else { # at least one indicator retained
+
+    # check which observations (relates to those used in estimation, in case have missings)
+    obs <- sub(pattern = "iis", replacement = "", x = indnames)
+    obs.numeric <- as.numeric(obs)
+    # corresponding observations in original data frame
+    complete_data <- data[complete, ]
+    obs.original <- as.numeric(rownames(complete_data)[obs.numeric])
+
+    # update values
+    sel[complete] <- TRUE
+    sel[obs.original] <- FALSE
+    type[complete] <- 1
+    type[obs.original] <- 0
+
+  } # end creation of 4 vectors
+
+  # give names if previously named
+  names(res) <- names(stdres) <- names(sel) <- names(type) <- rownames_orig
+
+  # output
+  return(list(res = res, stdres = stdres, sel = sel, type = type,
+              model = x$final))
+
+}
+
 #' Determine which observations can be used for estimation
 #'
 #' \code{nonmissing} takes a dataframe and a formula and determines which
