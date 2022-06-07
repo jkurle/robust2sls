@@ -304,7 +304,21 @@ iis_init <- function(data, formula, gamma, t.pval, do.pet = FALSE,
     stop("Package 'ivgets' must be installed to use this function.", .call = FALSE)
   }
 
-  iismodel <- ivgets::ivisat(formula = formula, data = data, iis = TRUE,
+  # problems with ivregFun in combination with getsFun when have missings
+  # reason: getsFun deletes trailing and leading NAs in x or y but not z (b/c treated separately)
+  # causes error in ivregFun when binding y, x, and z because different length
+  # need to ensure that run ivisat only on the subset of nonmissing observations
+  # still keep track of all to get complete classification vector in the end
+
+  # need to match indicators found in complete subset later to original obs
+  rownames.orig <- rownames(data)
+  rownames(data) <- as.character(1:NROW(data))
+
+  # check which observations are complete
+  complete <- nonmissing(data = data, formula = formula)
+  complete_data <- data[complete, ]
+
+  iismodel <- ivgets::ivisat(formula = formula, data = complete_data, iis = TRUE,
                              sis = FALSE, tis = FALSE, uis = FALSE,
                              blocks = NULL, ratio.threshold = 0.8,
                              max.block.size = 30, t.pval = gamma,
@@ -319,37 +333,10 @@ iis_init <- function(data, formula, gamma, t.pval, do.pet = FALSE,
                              print.searchinfo = FALSE, plot = NULL,
                              alarm = FALSE, overid = overid, weak = weak)
 
-  # check how many indicators were retained, is NULL if none were retained
-  indnames <- iismodel$selection$ISnames
-  indnum <- length(indnames)
+  vars <- extract_formula(formula)
+  y_var <- vars$y_var
 
-  if (identical(indnum, 0L)) {
-    # selection vector will only be determined by missing, otherwise all 0
-
-    # extract all variables appearing in the regression formula
-    vars <- extract_formula(formula)
-    y_var <- vars$y_var
-
-    # most beautiful solution would be to update selection() as well and allow for ivisat object
-    # and then use that to return the vectors
-
-
-
-
-  } else {
-
-    # check which observations (relates to those used in estimation, in case have missings)
-    obs <- sub(pattern = "iis", replacement = "", x = indnames)
-
-    res <- iismodel$final$residuals
-
-
-  }
-
-
-
-  return(iismodel)
-
-
+  update_info <- selection_iis(x = iismodel, data = data, yvar = y_var,
+                               complete = complete, rownamed_id = rownames.orig)
 
 }
