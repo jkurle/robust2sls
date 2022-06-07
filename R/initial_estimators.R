@@ -337,6 +337,6 @@ iis_init <- function(data, formula, gamma, t.pval, do.pet = FALSE,
   y_var <- vars$y_var
 
   update_info <- selection_iis(x = iismodel, data = data, yvar = y_var,
-                               complete = complete, rownamed_id = rownames.orig)
+                               complete = complete, rownames_orig = rownames.orig)
 
 }
