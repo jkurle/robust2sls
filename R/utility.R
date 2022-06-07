@@ -20,6 +20,7 @@
 #' and \code{$z2_var} refers to the outside instruments.
 #'
 #' @keywords internal
+#' @export
 
 extract_formula <- function(formula) {
 
