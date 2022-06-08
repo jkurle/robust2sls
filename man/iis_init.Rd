@@ -8,7 +8,7 @@ iis_init(
   data,
   formula,
   gamma,
-  t.pval,
+  t.pval = gamma,
   do.pet = FALSE,
   normality.JarqueB = NULL,
   turbo = FALSE,
@@ -23,9 +23,13 @@ iis_init(
 \code{y} is the dependent variable, \code{x1} are the exogenous regressors,
 \code{x2} the endogenous regressors, and \code{z2} the outside instruments.}
 
-\item{gamma}{A numeric value between 0 and 1 representing the significance level used for two-sided significance t-test on the impulse indicators. Corresponds to the probability of falsely classifying an observation as an outlier.}
+\item{gamma}{A numeric value between 0 and 1 representing the significance
+level used for two-sided significance t-test on the impulse indicators.
+Corresponds to the probability of falsely classifying an observation as an
+outlier.}
 
-\item{t.pval}{numeric value between 0 and 1. The significance level used for the two-sided regressor significance t-tests}
+\item{t.pval}{A numeric value between 0 and 1 representing the significance
+level for the Parsimonious Encompassing Test (PET).}
 
 \item{do.pet}{logical. If \code{TRUE}, then a Parsimonious Encompassing Test (PET) against the GUM is undertaken at each regressor removal for the joint significance of all the deleted regressors along the current path. If FALSE (default), then a PET is not undertaken at each regressor removal. By default, the numeric value is the same as that of \code{t.pval}}
 

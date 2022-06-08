@@ -289,13 +289,16 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
 #'
 #' @inheritParams robustified_init
 #' @inheritParams ivgets::ivisat
-#' @param gamma A numeric value between 0 and 1 representing the significance level used for two-sided significance t-test on the impulse indicators. Corresponds to the probability of falsely classifying an observation as an outlier.
-#'
-#'
+#' @param gamma A numeric value between 0 and 1 representing the significance
+#'   level used for two-sided significance t-test on the impulse indicators.
+#'   Corresponds to the probability of falsely classifying an observation as an
+#'   outlier.
+#' @param t.pval A numeric value between 0 and 1 representing the significance
+#'   level for the Parsimonious Encompassing Test (PET).
 #'
 #' @export
 
-iis_init <- function(data, formula, gamma, t.pval, do.pet = FALSE,
+iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
                      normality.JarqueB = NULL, turbo = FALSE, overid = NULL,
                      weak = NULL) {
 
