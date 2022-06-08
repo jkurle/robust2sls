@@ -329,6 +329,9 @@ iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
     stop("Package 'ivgets' must be installed to use this function.", .call = FALSE)
   }
 
+  # run full model as reference
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+
   # problems with ivregFun in combination with getsFun when have missings
   # reason: getsFun deletes trailing and leading NAs in x or y but not z (b/c treated separately)
   # causes error in ivregFun when binding y, x, and z because different length
@@ -360,8 +363,6 @@ iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
 
   vars <- extract_formula(formula)
   y_var <- vars$y_var
-
-  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
 
   update_info <- selection_iis(x = iismodel, data = data, yvar = y_var,
                                complete = complete, rownames_orig = rownames.orig,

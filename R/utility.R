@@ -217,6 +217,9 @@ selection_iis <- function(x, data, yvar, complete, rownames_orig, refmodel) {
   if (!identical(typeof(rownames_orig), "character") | !identical(length(rownames_orig), NROW(data))) {
     stop("Argument 'rownames_orig' must be a character vector with length equal to number of rows in 'data'.")
   }
+  if (!identical(class(refmodel), "ivreg")) {
+    stop("Argument 'refmodel' must be of class 'ivreg'.")
+  }
 
   # initialise vector outputs
   res <- rep(NA, times = NROW(data))
