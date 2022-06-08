@@ -14,7 +14,7 @@ outlier(robust2sls_object, obs)
 \value{
 \code{outlier} returns a vector that contains the 'type' value for
 the given observations across the different iterations. There are three
-possible values: 1 if the observations is judged to be an outlier, 0 if not,
+possible values: 0 if the observations is judged to be an outlier, 1 if not,
 and -1 if any of its x, y, or z values required for estimation is missing.
 }
 \description{
