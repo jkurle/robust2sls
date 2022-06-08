@@ -352,3 +352,145 @@ test_that("saturated_init() works correctly when split variable exists", {
   expect_identical(base, test)
 
 })
+
+test_that("iis_init() works corectly", {
+
+  set.seed(10)
+  p <- generate_param(1, 1, 1, beta = c(2, 4), sigma = 1,
+                      mean_z = 0, cov_z = matrix(1),
+                      Sigma2_half = matrix(1), Omega2 = matrix(3/4),
+                      Pi = t(matrix(c(1, 0, 0, 1), nrow = 2)))
+  d <- generate_data(parameters = p, n = 50)$data
+  formula <- y ~ -1+x1+x2 | -1+x1+z2
+  gamma <- 0.05
+
+  ### full data, baseline
+  iis1 <- iis_init(data = d, formula = formula, gamma = gamma)
+  expect_type(iis1, "list")
+  expect_identical(class(iis1), "list")
+  expect_length(iis1, 5)
+  expect_named(iis1, c("res", "stdres", "sel", "type", "model"))
+  expect_type(iis1$res, "double")
+  expect_type(iis1$stdres, "double")
+  expect_type(iis1$sel, "logical")
+  expect_type(iis1$type, "integer")
+  # should have retained iis19
+  sel <- rep(TRUE, times = 50)
+  sel[19] <- FALSE
+  type <- rep(1L, times = 50)
+  type[19] <- 0L
+  names(sel) <- names(type) <- as.character(1:50)
+  expect_identical(iis1$sel, sel)
+  expect_identical(iis1$type, type)
+
+  ### full data with names, none to be retained
+  rownames(d) <- paste0("o", 1:50)
+  gamma <- 0.001
+  iis2 <- iis_init(data = d, formula = formula, gamma = gamma)
+  expect_type(iis2, "list")
+  expect_identical(class(iis2), "list")
+  expect_length(iis2, 5)
+  expect_named(iis2, c("res", "stdres", "sel", "type", "model"))
+  expect_type(iis2$res, "double")
+  expect_type(iis2$stdres, "double")
+  expect_type(iis2$sel, "logical")
+  expect_type(iis2$type, "integer")
+  # should not retain any indicator
+  sel <- rep(TRUE, times = 50)
+  type <- rep(1L, times = 50)
+  names(sel) <- names(type) <- paste0("o", 1:50)
+  expect_identical(iis2$sel, sel)
+  expect_identical(iis2$type, type)
+
+  ### missing y
+  d3 <- d
+  d3[1, "y"] <- NA
+  gamma <- 0.05
+  iis3 <- iis_init(data = d3, formula = formula, gamma = gamma)
+  expect_type(iis3, "list")
+  expect_identical(class(iis3), "list")
+  expect_length(iis3, 5)
+  expect_named(iis3, c("res", "stdres", "sel", "type", "model"))
+  expect_type(iis3$res, "double")
+  expect_type(iis3$stdres, "double")
+  expect_type(iis3$sel, "logical")
+  expect_type(iis3$type, "integer")
+  # retain indicators 11 and 18, which corresponds to obs 12 and 19 in original data
+  sel <- rep(TRUE, times = 50)
+  sel[1] <- NA
+  sel[12] <- FALSE
+  sel[19] <- FALSE
+  type <- rep(1L, times = 50)
+  type[1] <- -1L
+  type[12] <- 0L
+  type[19] <- 0L
+  names(sel) <- names(type) <- paste0("o", 1:50)
+  expect_identical(iis3$sel, sel)
+  expect_identical(iis3$type, type)
+
+  ### missing x1
+  d4 <- d
+  d4[2, "x1"] <- NA
+  iis4 <- iis_init(data = d4, formula = formula, gamma = gamma)
+  expect_type(iis4, "list")
+  expect_identical(class(iis4), "list")
+  expect_length(iis4, 5)
+  expect_named(iis4, c("res", "stdres", "sel", "type", "model"))
+  expect_type(iis4$res, "double")
+  expect_type(iis4$stdres, "double")
+  expect_type(iis4$sel, "logical")
+  expect_type(iis4$type, "integer")
+  # retain indicator 18, which corresponds to obs 19 in original data
+  sel <- rep(TRUE, times = 50)
+  sel[2] <- NA
+  sel[19] <- FALSE
+  type <- rep(1L, times = 50)
+  type[2] <- -1L
+  type[19] <- 0L
+  names(sel) <- names(type) <- paste0("o", 1:50)
+  expect_identical(iis4$sel, sel)
+  expect_identical(iis4$type, type)
+
+  ### missing z2
+  d5 <- d
+  d5[2, "z2"] <- NA
+  iis5 <- iis_init(data = d5, formula = formula, gamma = gamma)
+  expect_type(iis5, "list")
+  expect_identical(class(iis5), "list")
+  expect_length(iis5, 5)
+  expect_named(iis5, c("res", "stdres", "sel", "type", "model"))
+  expect_type(iis5$res, "double")
+  expect_type(iis5$stdres, "double")
+  expect_type(iis5$sel, "logical")
+  expect_type(iis5$type, "integer")
+  # retain indicator 18, which corresponds to obs 19 in original data
+  sel <- rep(TRUE, times = 50)
+  sel[2] <- NA
+  sel[19] <- FALSE
+  type <- rep(1L, times = 50)
+  type[2] <- -1L
+  type[19] <- 0L
+  names(sel) <- names(type) <- paste0("o", 1:50)
+  expect_identical(iis5$sel, sel)
+  expect_identical(iis5$type, type)
+
+  ### full data with names, add tests
+  expect_silent(iis6 <- iis_init(data = d, formula = formula, gamma = gamma, weak = 0.01))
+  expect_silent(iis7 <- iis_init(data = d, formula = formula, gamma = gamma, turbo = TRUE))
+  expect_warning(iis8 <- iis_init(data = d, formula = formula, gamma = gamma, overid = 0.01)) # not overid
+
+  # snapshot outputs
+  expect_snapshot_output(iis1)
+  expect_snapshot_output(iis2)
+  expect_snapshot_output(iis3)
+  expect_snapshot_output(iis4)
+  expect_snapshot_output(iis5)
+  expect_snapshot_output(iis6)
+  expect_snapshot_output(iis7)
+  expect_snapshot_output(iis8)
+
+})
+
+
+
+
