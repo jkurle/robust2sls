@@ -724,9 +724,11 @@ test_that("selection_iis() works correctly", {
                               tol = 1e-07, max.regs = NULL,
                               print.searchinfo = FALSE, plot = NULL,
                               alarm = FALSE, overid = NULL, weak = NULL)
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
   # retains indicator "iis19", i.e. observation 19 in the original data
   selection1 <- selection_iis(x = iismodel1, data = d, yvar = y_var,
-                              complete = complete, rownames_orig = rownames_orig)
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
   # expect the following:
   res <- iismodel1$final$residuals
   stdres <- res / (iismodel1$final$sigma * sqrt(iismodel1$final$df.residual / iismodel1$final$nobs))
@@ -786,9 +788,11 @@ test_that("selection_iis() works correctly", {
                               tol = 1e-07, max.regs = NULL,
                               print.searchinfo = FALSE, plot = NULL,
                               alarm = FALSE, overid = NULL, weak = NULL)
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
   # retains indicators 11 and 18, but these correspond to observations 12 and 19
   selection2 <- selection_iis(x = iismodel2, data = d2, yvar = y_var,
-                              complete = complete, rownames_orig = rownames_orig)
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
   # expect the following:
   res <- c(NA, iismodel2$final$residuals)
   stdres <- res / (iismodel2$final$sigma * sqrt(iismodel2$final$df.residual / iismodel2$final$nobs))
@@ -854,9 +858,11 @@ test_that("selection_iis() works correctly", {
                               tol = 1e-07, max.regs = NULL,
                               print.searchinfo = FALSE, plot = NULL,
                               alarm = FALSE, overid = NULL, weak = NULL)
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
   # retains indicator 18, so corresponds to original observation 19
   selection3 <- selection_iis(x = iismodel3, data = d3, yvar = y_var,
-                              complete = complete, rownames_orig = rownames_orig)
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
   # expect the following:
   res <- c(iismodel3$final$residuals[1], NA, iismodel3$final$residuals[-1])
   stdres <- res / (iismodel3$final$sigma * sqrt(iismodel3$final$df.residual / iismodel3$final$nobs))
@@ -921,9 +927,11 @@ test_that("selection_iis() works correctly", {
                               tol = 1e-07, max.regs = NULL,
                               print.searchinfo = FALSE, plot = NULL,
                               alarm = FALSE, overid = NULL, weak = NULL)
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
   # retains indicator 18, so corresponds to original observation 19
   selection4 <- selection_iis(x = iismodel4, data = d4, yvar = y_var,
-                              complete = complete, rownames_orig = rownames_orig)
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
   # expect same res, stdres, sel, type as for selection3
   # check that correct iismodel
   expect_identical(iismodel4$selection$ISnames, c("iis18"))
@@ -973,9 +981,11 @@ test_that("selection_iis() works correctly", {
                               tol = 1e-07, max.regs = NULL,
                               print.searchinfo = FALSE, plot = NULL,
                               alarm = FALSE, overid = NULL, weak = NULL)
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
   # retains no indicator
   selection5 <- selection_iis(x = iismodel5, data = data, yvar = y_var,
-                              complete = complete, rownames_orig = rownames_orig)
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
   # expect the following:
   res <- iismodel5$final$residuals
   stdres <- res / (iismodel5$final$sigma * sqrt(iismodel5$final$df.residual / iismodel5$final$nobs))
@@ -1044,31 +1054,42 @@ test_that("selection_iis() returns correct input errors", {
                               tol = 1e-07, max.regs = NULL,
                               print.searchinfo = FALSE, plot = NULL,
                               alarm = FALSE, overid = NULL, weak = NULL)
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
 
   expect_error(selection_iis(x = iismodel$final, data = d, yvar = y_var,
-                             complete = complete, rownames_orig = rownames_orig),
+                             complete = complete, rownames_orig = rownames_orig,
+                             refmodel = full),
                "Argument 'x' must be of class 'ivisat'")
   expect_error(selection_iis(x = iismodel, data = d, yvar = 1,
-                             complete = complete, rownames_orig = rownames_orig),
+                             complete = complete, rownames_orig = rownames_orig,
+                             refmodel = full),
                "Argument 'yvar' must be a character of length 1")
   expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
                              complete = as.numeric(complete),
-                             rownames_orig = rownames_orig),
+                             rownames_orig = rownames_orig, refmodel = full),
                "Argument 'complete' must be a logical vector")
   expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
                              complete = complete[-1],
-                             rownames_orig = rownames_orig),
+                             rownames_orig = rownames_orig, refmodel = full),
                "Argument 'complete' must be a logical vector with length equal to number of rows")
   expect_error(selection_iis(x = iismodel, data = d, yvar = "yy",
-                             complete = complete, rownames_orig = rownames_orig),
+                             complete = complete, rownames_orig = rownames_orig,
+                             refmodel = full),
                "Variable 'yvar' cannot be found in 'data'")
   expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
                              complete = complete,
-                             rownames_orig = as.numeric(rownames_orig)),
+                             rownames_orig = as.numeric(rownames_orig),
+                             refmodel = full),
                "Argument 'rownames_orig' must be a character vector")
   expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
                              complete = complete,
-                             rownames_orig = rownames_orig[-5]),
+                             rownames_orig = rownames_orig[-5],
+                             refmodel = full),
                "Argument 'rownames_orig' must be a character vector with length equal to number of rows")
+  f <- unclass(full)
+  expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
+                             complete = complete, rownames_orig = rownames_orig,
+                             refmodel = f),
+               "Argument 'refmodel' must be of class 'ivreg'")
 
 })
