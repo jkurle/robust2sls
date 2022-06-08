@@ -187,13 +187,20 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
 #'   missing values in any of y, x, or z variables.
 #' @param rownames_orig A character vector storing the original rownames of the
 #'   dataframe.
+#' @param refmodel A model object that will be stored in \code{$model}.
 #'
 #' @inheritSection selection Warning
 #' @inherit selection return
 #'
+#' @section Note:
+#' IIS runs multiple models, similar to \code{\link{saturated_init}} but with
+#' multiple block search. These intermediate models are not recorded. For
+#' simplicity, the element \code{$model} of the returned list stores the full
+#' sample model result, identical to \code{\link{robustified_init}}.
+#'
 #' @export
 
-selection_iis <- function(x, data, yvar, complete, rownames_orig) {
+selection_iis <- function(x, data, yvar, complete, rownames_orig, refmodel) {
 
   if (!identical(class(x), "ivisat")) {
     stop("Argument 'x' must be of class 'ivisat'.")
@@ -260,9 +267,12 @@ selection_iis <- function(x, data, yvar, complete, rownames_orig) {
   # give names if previously named
   names(res) <- names(stdres) <- names(sel) <- names(type) <- rownames_orig
 
+  # use full model as reference
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+
   # output
   return(list(res = res, stdres = stdres, sel = sel, type = type,
-              model = x$final))
+              model = refmodel))
 
 }
 

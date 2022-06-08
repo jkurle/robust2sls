@@ -23,8 +23,8 @@
 #' standardised residuals, the third one a logical vector with \code{TRUE} if
 #' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
-#' list is an integer vector with three values: 1 if the observations is judged
-#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
+#' list is an integer vector with three values: 0 if the observations is judged
+#' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
 #' stores the \code{\link[AER]{ivreg}} model object based on which the four
 #' vectors were calculated.
 #'
@@ -69,8 +69,8 @@ robustified_init <- function(data, formula, cutoff) {
 #' standardised residuals, the third one a logical vector with \code{TRUE} if
 #' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
-#' list is an integer vector with three values: 1 if the observations is judged
-#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
+#' list is an integer vector with three values: 0 if the observations is judged
+#' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
 #' stores the \code{\link[AER]{ivreg}} user-specified model object based on
 #' which the four vectors were calculated.
 #'
@@ -128,8 +128,8 @@ user_init <- function(data, formula, cutoff, user_model) {
 #' standardised residuals, the third one a logical vector with \code{TRUE} if
 #' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
-#' list is an integer vector with three values: 1 if the observations is judged
-#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
+#' list is an integer vector with three values: 0 if the observations is judged
+#' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
 #' is a list with the two initial \code{\link[AER]{ivreg}} model objects based
 #' on the two different sub-samples.
 #'
@@ -296,6 +296,28 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
 #' @param t.pval A numeric value between 0 and 1 representing the significance
 #'   level for the Parsimonious Encompassing Test (PET).
 #'
+#' @return \code{iis_init} returns a list with five elements. The first
+#' four are vectors whose length equals the number of observations in the data
+#' set. Unlike the residuals stored in a model object (usually accessible via
+#' \code{model$residuals}), it does not ignore observations where any of y, x
+#' or z are missing. It instead sets their values to \code{NA}.
+#'
+#' The first element is a double vector containing the residuals for each
+#' observation based on the model estimates. The second element contains the
+#' standardised residuals, the third one a logical vector with \code{TRUE} if
+#' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
+#' and \code{NA} if any of y, x, or z are missing. The fourth element of the
+#' list is an integer vector with three values: 0 if the observations is judged
+#' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
+#' stores the \code{\link[AER]{ivreg}} model object based on which the four
+#' vectors were calculated.
+#'
+#' @section Note:
+#' IIS runs multiple models, similar to \code{\link{saturated_init}} but with
+#' multiple block search. These intermediate models are not recorded. For
+#' simplicity, the element \code{$model} of the returned list stores the full
+#' sample model result, identical to \code{\link{robustified_init}}.
+#'
 #' @export
 
 iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
@@ -339,7 +361,10 @@ iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
   vars <- extract_formula(formula)
   y_var <- vars$y_var
 
+  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+
   update_info <- selection_iis(x = iismodel, data = data, yvar = y_var,
-                               complete = complete, rownames_orig = rownames.orig)
+                               complete = complete, rownames_orig = rownames.orig,
+                               refmodel = full)
 
 }

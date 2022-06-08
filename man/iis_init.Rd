@@ -47,6 +47,31 @@ should be used as a diagnostic check for model selection or a numeric value
 between 0 and 1. In the latter case, the test is conducted using this value
 as the significance level.}
 }
+\value{
+\code{iis_init} returns a list with five elements. The first
+four are vectors whose length equals the number of observations in the data
+set. Unlike the residuals stored in a model object (usually accessible via
+\code{model$residuals}), it does not ignore observations where any of y, x
+or z are missing. It instead sets their values to \code{NA}.
+
+The first element is a double vector containing the residuals for each
+observation based on the model estimates. The second element contains the
+standardised residuals, the third one a logical vector with \code{TRUE} if
+the observation is judged as not outlying, \code{FALSE} if it is an outlier,
+and \code{NA} if any of y, x, or z are missing. The fourth element of the
+list is an integer vector with three values: 0 if the observations is judged
+to be an outlier, 1 if not, and -1 if missing. The fifth and last element
+stores the \code{\link[AER]{ivreg}} model object based on which the four
+vectors were calculated.
+}
 \description{
 Impulse Indicator Saturation (IIS initial estimator)
 }
+\section{Note}{
+
+IIS runs multiple models, similar to \code{\link{saturated_init}} but with
+multiple block search. These intermediate models are not recorded. For
+simplicity, the element \code{$model} of the returned list stores the full
+sample model result, identical to \code{\link{robustified_init}}.
+}
+

@@ -4,7 +4,7 @@
 \alias{selection_iis}
 \title{Create selection (non-outlying) vector from IIS model}
 \usage{
-selection_iis(x, data, yvar, complete, rownames_orig)
+selection_iis(x, data, yvar, complete, rownames_orig, refmodel)
 }
 \arguments{
 \item{x}{An object of class \code{\link[ivgets:ivisat]{ivisat}}.}
@@ -20,6 +20,8 @@ missing values in any of y, x, or z variables.}
 
 \item{rownames_orig}{A character vector storing the original rownames of the
 dataframe.}
+
+\item{refmodel}{A model object that will be stored in \code{$model}.}
 }
 \value{
 A list with five elements. The first four are vectors whose length
@@ -43,6 +45,14 @@ vectors were calculated.
 with five elements that are used to determine whether the observations are
 judged as outliers or not.
 }
+\section{Note}{
+
+IIS runs multiple models, similar to \code{\link{saturated_init}} but with
+multiple block search. These intermediate models are not recorded. For
+simplicity, the element \code{$model} of the returned list stores the full
+sample model result, identical to \code{\link{robustified_init}}.
+}
+
 \section{Warning}{
 
 Unlike the residuals stored in a model object (usually accessible via
