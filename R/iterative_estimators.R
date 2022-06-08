@@ -64,6 +64,10 @@
 #' in which proportions the sample will be split.
 #' @param verbose A logical value whether progress during estimation should be
 #' reported.
+#' @param iis_args A list with named entries corresponding to the arguments for
+#'   \code{\link{iis_init}} (\code{gamma} (required), \code{t.pval},
+#'   \code{do.pet}, \code{normality.JarqueB}, \code{turbo}, \code{overid},
+#'   \code{weak}). Can be \code{NULL} if \code{initial_est != "iis"}.
 #'
 #' @return \code{outlier_detection} returns an object of class
 #' \code{"robust2sls"}, which is a list with the following components:
@@ -137,7 +141,8 @@
 outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   initial_est = c("robustified", "saturated", "user", "iis"), user_model = NULL,
   iterations = 1, convergence_criterion = NULL, max_iter = NULL,
-  shuffle = FALSE, shuffle_seed = NULL, split = 0.5, verbose = FALSE) {
+  shuffle = FALSE, shuffle_seed = NULL, split = 0.5, verbose = FALSE,
+  iis_args = NULL) {
 
   # capture the original function call
   cll <- sys.call()
@@ -188,6 +193,12 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   } else if (initial_est == "user") {
     initial <- user_init(data = data, formula = formula,
                          cutoff = out$cons$cutoff, user_model = user_model)
+  } else if (initial_est == "iis") {
+    initial <- iis_init(data = data, formula = formula, gamma = iis_args$gamma,
+                        t.pval = iis_args$t.pval, do.pet = iis_args$do.pet,
+                        normality.JarqueB = iis_args$normality.JarqueB,
+                        turbo = iis_args$turbo, overid = iis_args$overid,
+                        weak = iis_args$weak)
   # fail-safe, this should never be reached due to match.arg
   } else { # nocov start
     stop(strwrap("Unknown `initial_est` argument", prefix = " ", initial = ""))
