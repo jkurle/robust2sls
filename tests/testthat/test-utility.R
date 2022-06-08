@@ -724,7 +724,7 @@ test_that("selection_iis() works correctly", {
                               tol = 1e-07, max.regs = NULL,
                               print.searchinfo = FALSE, plot = NULL,
                               alarm = FALSE, overid = NULL, weak = NULL)
-  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  full <- AER::ivreg(formula = formula, data = d, model = TRUE, y = TRUE)
   # retains indicator "iis19", i.e. observation 19 in the original data
   selection1 <- selection_iis(x = iismodel1, data = d, yvar = y_var,
                               complete = complete, rownames_orig = rownames_orig,
@@ -1054,7 +1054,7 @@ test_that("selection_iis() returns correct input errors", {
                               tol = 1e-07, max.regs = NULL,
                               print.searchinfo = FALSE, plot = NULL,
                               alarm = FALSE, overid = NULL, weak = NULL)
-  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  full <- AER::ivreg(formula = formula, data = d, model = TRUE, y = TRUE)
 
   expect_error(selection_iis(x = iismodel$final, data = d, yvar = y_var,
                              complete = complete, rownames_orig = rownames_orig,

@@ -95,11 +95,11 @@
     $model
     
     Call:
-    ivreg::ivreg(formula = as.formula(fml_sel), data = d)
+    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
-        x1   iis19      x2  
-     2.011  -3.044   3.695  
+       x1     x2  
+    1.960  3.613  
     
     
 
@@ -166,7 +166,7 @@
     $model
     
     Call:
-    ivreg::ivreg(formula = as.formula(fml_sel), data = d)
+    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
        x1     x2  
@@ -241,11 +241,11 @@
     $model
     
     Call:
-    ivreg::ivreg(formula = as.formula(fml_sel), data = d)
+    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
-        x1   iis11   iis18      x2  
-     1.908   3.027  -2.964   3.669  
+       x1     x2  
+    1.917  3.596  
     
     
 
@@ -316,11 +316,11 @@
     $model
     
     Call:
-    ivreg::ivreg(formula = as.formula(fml_sel), data = d)
+    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
-        x1   iis18      x2  
-     2.029  -3.080   3.675  
+       x1     x2  
+    1.979  3.589  
     
     
 
@@ -391,11 +391,11 @@
     $model
     
     Call:
-    ivreg::ivreg(formula = as.formula(fml_sel), data = d)
+    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
-        x1   iis18      x2  
-     2.029  -3.080   3.675  
+       x1     x2  
+    1.979  3.589  
     
     
 
@@ -466,11 +466,11 @@
     $model
     
     Call:
-    ivreg::ivreg(formula = as.formula(fml_sel), data = d)
+    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
-        x1   iis19      x2  
-     2.011  -3.044   3.695  
+       x1     x2  
+    1.960  3.613  
     
     
 
@@ -541,11 +541,11 @@
     $model
     
     Call:
-    ivreg::ivreg(formula = as.formula(fml_sel), data = d)
+    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
-        x1   iis19      x2  
-     2.011  -3.044   3.695  
+       x1     x2  
+    1.960  3.613  
     
     
 
@@ -616,11 +616,11 @@
     $model
     
     Call:
-    ivreg::ivreg(formula = as.formula(fml_sel), data = d)
+    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
-        x1   iis19      x2  
-     2.011  -3.044   3.695  
+       x1     x2  
+    1.960  3.613  
     
     
 
