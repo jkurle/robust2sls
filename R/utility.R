@@ -238,6 +238,9 @@ selection_iis <- function(x, data, yvar, complete, rownames_orig) {
 
   } # end creation of 4 vectors
 
+  # ensure type is integer
+  type <- as.integer(type)
+
   # give names if previously named
   names(res) <- names(stdres) <- names(sel) <- names(type) <- rownames_orig
 
