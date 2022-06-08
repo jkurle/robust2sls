@@ -195,6 +195,22 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
 
 selection_iis <- function(x, data, yvar, complete, rownames_orig) {
 
+  if (!identical(class(x), "ivisat")) {
+    stop("Argument 'x' must be of class 'ivisat'.")
+  }
+  if (!identical(typeof(yvar), "character") | !identical(length(yvar), 1L)) {
+    stop("Argument 'yvar' must be a character of length 1.")
+  }
+  if (!identical(typeof(complete), "logical") | !identical(length(complete), NROW(data))) {
+    stop("Argument 'complete' must be a logical vector with length equal to number of rows in 'data'.")
+  }
+  if (!(yvar %in% colnames(data))) {
+    stop("Variable 'yvar' cannot be found in 'data'.")
+  }
+  if (!identical(typeof(rownames_orig), "character") | !identical(length(rownames_orig), NROW(data))) {
+    stop("Argument 'rownames_orig' must be a character vector with length equal to number of rows in 'data'.")
+  }
+
   # initialise vector outputs
   res <- rep(NA, times = NROW(data))
   stdres <- rep(NA, times = NROW(data))
