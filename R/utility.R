@@ -270,9 +270,6 @@ selection_iis <- function(x, data, yvar, complete, rownames_orig, refmodel) {
   # give names if previously named
   names(res) <- names(stdres) <- names(sel) <- names(type) <- rownames_orig
 
-  # use full model as reference
-  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
-
   # output
   return(list(res = res, stdres = stdres, sel = sel, type = type,
               model = refmodel))
