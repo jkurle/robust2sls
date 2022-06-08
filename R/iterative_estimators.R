@@ -24,13 +24,15 @@
 #' in the reference distribution against which observations are judged as
 #' outliers or not.
 #' @param initial_est A character vector that specifies the initial estimator
-#' for the outlier detection algorithm. \code{"robustified"} means that the full
-#' sample 2SLS is used as initial estimator. \code{"saturated"} splits the
-#' sample into two parts and estimates a 2SLS on each subsample. The
-#' coefficients of one subsample are used to calculate residuals and determine
-#' outliers in the other subsample. \code{"user"} allows the user to specify a
-#' model based on which observations are classified as outliers. See section
-#' "Warning" for more information and conditions.
+#'   for the outlier detection algorithm. \code{"robustified"} means that the
+#'   full sample 2SLS is used as initial estimator. \code{"saturated"} splits
+#'   the sample into two parts and estimates a 2SLS on each subsample. The
+#'   coefficients of one subsample are used to calculate residuals and determine
+#'   outliers in the other subsample. \code{"user"} allows the user to specify a
+#'   model based on which observations are classified as outliers. \code{"iis"}
+#'   applies impulse indicator saturation (IIS) as implemented in
+#'   \code{\link[ivgets]{ivisat}}. See section "Warning" for more information
+#'   and conditions.
 #' @param user_model A model object of \link{class} \link[AER]{ivreg}. Only
 #' required if argument \code{initial_est} is set to \code{"user"}, otherwise
 #' \code{NULL}.
@@ -125,13 +127,15 @@
 #' @section Warning:
 #' Check \href{https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view}{Jiao (2019)}
 #' (as well as forthcoming working paper in the future) about conditions on the
-#' initial estimator that should be satisfied for the initial estimator (e.g.
-#' they have to be Op(1)).
+#' initial estimator that should be satisfied for the initial estimator when
+#' using \code{initial_est == "user"} (e.g. they have to be Op(1)).
+#' IIS is a generalisation of \code{\link[=saturated_init]{Saturated 2SLS}} with
+#' multiple block search but no asymptotic theory exists for IIS.
 #'
 #' @export
 
 outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
-  initial_est = c("robustified", "saturated", "user"), user_model = NULL,
+  initial_est = c("robustified", "saturated", "user", "iis"), user_model = NULL,
   iterations = 1, convergence_criterion = NULL, max_iter = NULL,
   shuffle = FALSE, shuffle_seed = NULL, split = 0.5, verbose = FALSE) {
 
