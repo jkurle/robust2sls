@@ -37,5 +37,5 @@ different quantiles in the limiting distribution that were specified in
 the supremum/maximum of the deviations between sample and population FODR
 differs significantly from its expected value.
 \loadmathjax
-\mjdeqn{ \sup_{c} |\sqrt{n}(\widehat{\gamma}_{c} - \gamma_{c})| }{}
+\mjdeqn{ \sup_{c} |\sqrt{n}(\widehat{\gamma}_{c} - \gamma_{c})| }{sup_c |sqrt(n)(gammahat_c - gamma_c)|}
 }
