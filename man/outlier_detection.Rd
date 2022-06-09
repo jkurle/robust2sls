@@ -88,9 +88,9 @@ in which proportions the sample will be split.}
 reported.}
 
 \item{iis_args}{A list with named entries corresponding to the arguments for
-\code{\link{iis_init}} (\code{gamma} (required), \code{t.pval},
-\code{do.pet}, \code{normality.JarqueB}, \code{turbo}, \code{overid},
-\code{weak}). Can be \code{NULL} if \code{initial_est != "iis"}.}
+\code{\link{iis_init}} (\code{t.pval}, \code{do.pet},
+\code{normality.JarqueB}, \code{turbo}, \code{overid}, \code{weak}). Can be
+\code{NULL} if \code{initial_est != "iis"}.}
 }
 \value{
 \code{outlier_detection} returns an object of class

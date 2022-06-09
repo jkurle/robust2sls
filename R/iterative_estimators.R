@@ -65,9 +65,9 @@
 #' @param verbose A logical value whether progress during estimation should be
 #' reported.
 #' @param iis_args A list with named entries corresponding to the arguments for
-#'   \code{\link{iis_init}} (\code{gamma} (required), \code{t.pval},
-#'   \code{do.pet}, \code{normality.JarqueB}, \code{turbo}, \code{overid},
-#'   \code{weak}). Can be \code{NULL} if \code{initial_est != "iis"}.
+#'   \code{\link{iis_init}} (\code{t.pval}, \code{do.pet},
+#'   \code{normality.JarqueB}, \code{turbo}, \code{overid}, \code{weak}). Can be
+#'   \code{NULL} if \code{initial_est != "iis"}.
 #'
 #' @return \code{outlier_detection} returns an object of class
 #' \code{"robust2sls"}, which is a list with the following components:
@@ -194,7 +194,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
     initial <- user_init(data = data, formula = formula,
                          cutoff = out$cons$cutoff, user_model = user_model)
   } else if (initial_est == "iis") {
-    initial <- iis_init(data = data, formula = formula, gamma = iis_args$gamma,
+    initial <- iis_init(data = data, formula = formula, gamma = sign_level,
                         t.pval = iis_args$t.pval, do.pet = iis_args$do.pet,
                         normality.JarqueB = iis_args$normality.JarqueB,
                         turbo = iis_args$turbo, overid = iis_args$overid,
