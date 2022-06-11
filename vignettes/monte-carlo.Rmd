@@ -2,7 +2,7 @@
 title: "Monte Carlo Simulations"
 output: rmarkdown::html_vignette
 author: "Jonas Kurle"
-date: "12 November 2021"
+date: "11 June 2022"
 vignette: >
   %\VignetteIndexEntry{Monte Carlo Simulations}
   %\VignetteEngine{knitr::rmarkdown}

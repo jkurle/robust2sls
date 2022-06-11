@@ -1,7 +1,7 @@
 ---
 title: "Introduction to the robust2sls Package"
 author: "Jonas Kurle"
-date: "12 November 2021"
+date: "11 June 2022"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to the robust2sls Package}
@@ -170,7 +170,7 @@ packages.
 
 ```{r, echo = FALSE}
 library(robust2sls)
-library(AER) # for 2sls regression
+library(ivreg) # for 2sls regression
 ```
 
 ## Data generating process (DGP)
