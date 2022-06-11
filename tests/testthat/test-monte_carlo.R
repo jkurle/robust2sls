@@ -200,7 +200,7 @@ test_that("generate_data() works correctly", {
   expect_equal(mean(d1$data[, "z6"]), p1$structural$mean[[8]], tolerance = 0.01)
 
   # check that ivreg() recovers beta approximately
-  model <- AER::ivreg(y ~ -1 + x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6, data = d1$data)
+  model <- ivreg::ivreg(y ~ -1 + x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6, data = d1$data)
   coef <- model$coefficients
   names(coef) <- NULL
   coef <- matrix(coef, 5, 1)
