@@ -361,6 +361,10 @@ iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
                              print.searchinfo = FALSE, plot = NULL,
                              alarm = FALSE, overid = overid, weak = weak)
 
+  if (is.null(iismodel$final)) {
+    stop("IIS final model is NULL. See warning.")
+  }
+
   vars <- extract_formula(formula)
   y_var <- vars$y_var
 
