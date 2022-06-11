@@ -176,70 +176,98 @@ test_that("outlier_detection() with iis_init() works, convergence", {
 test_that("outlier_detection() works with iis_init(), tests turned on", {
 
   # base setup
-  # set.seed(50)
-  # p <- generate_param(dx1 = 1, dx2 = 1, dz2 = 2, intercept = TRUE,
-  #                     beta = c(2, 4), sigma = 1, mean_z = matrix(c(0,0), 2, 1),
-  #                     cov_z = matrix(c(1,0,0,1), 2, 2),
-  #                     Sigma2_half = matrix(1), Omega2 = matrix(3/4),
-  #                     Pi = t(matrix(c(1, 0, 0, 1, 0, 1), nrow = 2)))
-  # d <- generate_data(parameters = p, n = 50)$data
-  # formula <- y ~ -1+x1+x2 | -1+x1+z2+z3
-  # gamma <- 0.05
-  #
-  # # checked by stepping through function call that weak instrument test is actually applied
-  #
-  # # iis arguments, no testing
-  # arglist1 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
-  #                  turbo = FALSE, overid = NULL, weak = NULL)
-  # model1 <- outlier_detection(data = d, formula = formula, ref_dist = "normal",
-  #                             sign_level = gamma, initial_est = "iis",
-  #                             user_model = NULL, iterations = 5,
-  #                             convergence_criterion = NULL, max_iter = NULL,
-  #                             shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
-  #                             verbose = FALSE, iis_args = arglist1)
-  # # outliers: m0 = 5, m1 = 4, m2 = 2, m3 = 2, m4 = 2, m5 = 2
-  # # add weak instrument test
-  # arglist2 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
-  #                  turbo = FALSE, overid = 0.95, weak = 0.00000000000000000000001)
-  # model2 <- outlier_detection(data = d, formula = formula, ref_dist = "normal",
-  #                             sign_level = gamma, initial_est = "iis",
-  #                             user_model = NULL, iterations = 5,
-  #                             convergence_criterion = NULL, max_iter = NULL,
-  #                             shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
-  #                             verbose = FALSE, iis_args = arglist2)
-  #
-  #
-  # # set up a 2SLS structure (broadly)
-  # set.seed(123)
-  # df <- data.frame(u = stats::rnorm(50))
-  # df$z2 <- stats::rnorm(50) # excluded instrument
-  # df$z3 <- stats::rnorm(50) # excluded instrument
-  # df$r <- 0.5 * df$u + stats::rnorm(50) # so r and u are correlated
-  # df$x2 <- df$z2 - 0.5*df$z3 + df$r # endogenous regressor, relevant
-  # df$cons <- 1 # intercept, relevant
-  # df$x1 <- stats::rnorm(50) # exogenous regressor, relevant
-  # df$y <- df$cons + 2*df$x1 - df$x2 + df$u # coefficients c(1,2,-1)
-  # # delete unobserved errors
-  # df$u <- NULL
-  # df$r <- NULL
-  # # GUM
-  # fml <- y ~ -1+cons+x1+x2 | -1+cons+x1+z2+z3
-  # model <- ivreg::ivreg(formula = fml, data = df) # model seems consistent
-  # gamma <- 1/50
+  set.seed(50)
+  p <- generate_param(dx1 = 1, dx2 = 1, dz2 = 2, intercept = TRUE,
+                      beta = c(2, 4), sigma = 1, mean_z = matrix(c(0,0), 2, 1),
+                      cov_z = matrix(c(1,0,0,1), 2, 2),
+                      Sigma2_half = matrix(1), Omega2 = matrix(3/4),
+                      Pi = t(matrix(c(1, 0, 0, 1, 0, 1), nrow = 2)))
+  d <- generate_data(parameters = p, n = 50)$data
+  formula <- y ~ -1+x1+x2 | -1+x1+z2+z3
+  gamma <- 0.05
 
-  # arglist2 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
-  #                  turbo = FALSE, overid = 0.95, weak = 0.05)
-  # model2 <- outlier_detection(data = df, formula = fml, ref_dist = "normal",
-  #                             sign_level = gamma, initial_est = "iis",
-  #                             user_model = NULL, iterations = 5,
-  #                             convergence_criterion = NULL, max_iter = NULL,
-  #                             shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
-  #                             verbose = FALSE, iis_args = arglist2)
-  #
-  # x <- ivisat(formula = fml, data = df, iis = TRUE,
-  #        print.searchinfo = TRUE,
-  #        overid = 0.95, weak = 0.05)
+  # checked by stepping through function call that weak instrument test is actually applied
 
+  # iis arguments, no testing
+  arglist1 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
+                   turbo = FALSE, overid = NULL, weak = NULL)
+  model1 <- outlier_detection(data = d, formula = formula, ref_dist = "normal",
+                              sign_level = gamma, initial_est = "iis",
+                              user_model = NULL, iterations = 5,
+                              convergence_criterion = NULL, max_iter = NULL,
+                              shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
+                              verbose = FALSE, iis_args = arglist1)
+  # outliers: m0 = 5, m1 = 4, m2 = 2, m3 = 2, m4 = 2, m5 = 2
+  # add weak instrument test, should not pass
+  arglist2 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
+                   turbo = FALSE, overid = NULL, weak = 0.00000000001)
+  expect_warning(expect_error(outlier_detection(data = d, formula = formula, ref_dist = "normal",
+                                 sign_level = gamma, initial_est = "iis",
+                                 user_model = NULL, iterations = 5,
+                                 convergence_criterion = NULL, max_iter = NULL,
+                                 shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
+                                 verbose = FALSE, iis_args = arglist2),
+               "IIS final model is NULL. See warning."))
+  # add overid test, should not pass
+  arglist3 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
+                   turbo = FALSE, overid = 0.99, weak = NULL)
+  expect_warning(expect_error(outlier_detection(data = d, formula = formula, ref_dist = "normal",
+                                 sign_level = gamma, initial_est = "iis",
+                                 user_model = NULL, iterations = 5,
+                                 convergence_criterion = NULL, max_iter = NULL,
+                                 shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
+                                 verbose = FALSE, iis_args = arglist3),
+               "IIS final model is NULL. See warning."))
+  # add both tests
+  arglist4 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
+                   turbo = FALSE, overid = 0.99, weak = 0.01)
+  expect_warning(expect_error(outlier_detection(data = d, formula = formula, ref_dist = "normal",
+                                                sign_level = gamma, initial_est = "iis",
+                                                user_model = NULL, iterations = 5,
+                                                convergence_criterion = NULL, max_iter = NULL,
+                                                shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
+                                                verbose = FALSE, iis_args = arglist4),
+                              "IIS final model is NULL. See warning."))
+
+  # try the built-in tests from gets
+  # normality test
+  arglist5 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = 0.05,
+                   turbo = FALSE, overid = NULL, weak = NULL)
+  model5 <- outlier_detection(data = d, formula = formula, ref_dist = "normal",
+                              sign_level = gamma, initial_est = "iis",
+                              user_model = NULL, iterations = 5,
+                              convergence_criterion = NULL, max_iter = NULL,
+                              shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
+                              verbose = FALSE, iis_args = arglist5)
+  # differs from model1 b/c of testing
+  # one indicator retained in iter 0, and then no further outlier detected in iterations
+  # check this manually
+  manual5 <- ivgets::ivisat(formula = formula, data = d, iis = TRUE,
+                            t.pval = gamma, normality.JarqueB = 0.05,
+                            print.searchinfo = FALSE)
+  # only second block is selected over, first one probably fails (is issue in gets)
+  # one retained in second block (39)
+  # check that diagnostics are present, normality test has been used
+  expect_identical(rownames(manual5$selection$diagnostics),
+                   c("Ljung-Box AR(1)", "Ljung-Box ARCH(1)", "Jarque-Bera"))
+  sel5 <- rep(TRUE, times = 50)
+  sel5[39] <- FALSE
+  names(sel5) <- as.character(1:50)
+  expect_identical(model5$sel$m0, sel5)
+
+  # PET test
+  arglist6 <- list(t.pval = 0.0000001, do.pet = TRUE, normality.JarqueB = NULL,
+                   turbo = FALSE, overid = NULL, weak = NULL)
+  model6 <- outlier_detection(data = d, formula = formula, ref_dist = "normal",
+                              sign_level = gamma, initial_est = "iis",
+                              user_model = NULL, iterations = 5,
+                              convergence_criterion = NULL, max_iter = NULL,
+                              shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
+                              verbose = FALSE, iis_args = arglist6)
+
+  expect_snapshot_output(model1)
+  expect_snapshot_output(model5)
+  expect_snapshot_output(model6)
 
 })
 
