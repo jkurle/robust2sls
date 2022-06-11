@@ -61,7 +61,7 @@ test_that("outlier_detection() with iis_init() works, fixed iterations", {
   # will have to re-estimate model based on selection (i.e. leaving out obs 19)
   # do manually to check whether correct
   iterd <- d$selection <- model1$sel$m0
-  iterm1 <- AER::ivreg(formula = formula, data = d, subset = selection)
+  iterm1 <- ivreg::ivreg(formula = formula, data = d, subset = selection)
   expect_identical(iterm1$nobs, 49L) # quick check that only 49 obs used in estim
   # check residuals, whether any outside cutoff
   res <- d[, "y"] - stats::predict(iterm1, newdata = d)
@@ -176,56 +176,56 @@ test_that("outlier_detection() with iis_init() works, convergence", {
 test_that("outlier_detection() works with iis_init(), tests turned on", {
 
   # base setup
-  set.seed(50)
-  p <- generate_param(dx1 = 1, dx2 = 1, dz2 = 2, intercept = TRUE,
-                      beta = c(2, 4), sigma = 1, mean_z = matrix(c(0,0), 2, 1),
-                      cov_z = matrix(c(1,0,0,1), 2, 2),
-                      Sigma2_half = matrix(1), Omega2 = matrix(3/4),
-                      Pi = t(matrix(c(1, 0, 0, 1, 0, 1), nrow = 2)))
-  d <- generate_data(parameters = p, n = 50)$data
-  formula <- y ~ -1+x1+x2 | -1+x1+z2+z3
-  gamma <- 0.05
-
-  # checked by stepping through function call that weak instrument test is actually applied
-
-  # iis arguments, no testing
-  arglist1 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
-                   turbo = FALSE, overid = NULL, weak = NULL)
-  model1 <- outlier_detection(data = d, formula = formula, ref_dist = "normal",
-                              sign_level = gamma, initial_est = "iis",
-                              user_model = NULL, iterations = 5,
-                              convergence_criterion = NULL, max_iter = NULL,
-                              shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
-                              verbose = FALSE, iis_args = arglist1)
-  # outliers: m0 = 5, m1 = 4, m2 = 2, m3 = 2, m4 = 2, m5 = 2
-  # add weak instrument test
-  arglist2 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
-                   turbo = FALSE, overid = 0.95, weak = 0.00000000000000000000001)
-  model2 <- outlier_detection(data = d, formula = formula, ref_dist = "normal",
-                              sign_level = gamma, initial_est = "iis",
-                              user_model = NULL, iterations = 5,
-                              convergence_criterion = NULL, max_iter = NULL,
-                              shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
-                              verbose = FALSE, iis_args = arglist2)
-
-
-  # set up a 2SLS structure (broadly)
-  set.seed(123)
-  df <- data.frame(u = stats::rnorm(50))
-  df$z2 <- stats::rnorm(50) # excluded instrument
-  df$z3 <- stats::rnorm(50) # excluded instrument
-  df$r <- 0.5 * df$u + stats::rnorm(50) # so r and u are correlated
-  df$x2 <- df$z2 - 0.5*df$z3 + df$r # endogenous regressor, relevant
-  df$cons <- 1 # intercept, relevant
-  df$x1 <- stats::rnorm(50) # exogenous regressor, relevant
-  df$y <- df$cons + 2*df$x1 - df$x2 + df$u # coefficients c(1,2,-1)
-  # delete unobserved errors
-  df$u <- NULL
-  df$r <- NULL
-  # GUM
-  fml <- y ~ -1+cons+x1+x2 | -1+cons+x1+z2+z3
-  model <- ivreg::ivreg(formula = fml, data = df) # model seems consistent
-  gamma <- 1/50
+  # set.seed(50)
+  # p <- generate_param(dx1 = 1, dx2 = 1, dz2 = 2, intercept = TRUE,
+  #                     beta = c(2, 4), sigma = 1, mean_z = matrix(c(0,0), 2, 1),
+  #                     cov_z = matrix(c(1,0,0,1), 2, 2),
+  #                     Sigma2_half = matrix(1), Omega2 = matrix(3/4),
+  #                     Pi = t(matrix(c(1, 0, 0, 1, 0, 1), nrow = 2)))
+  # d <- generate_data(parameters = p, n = 50)$data
+  # formula <- y ~ -1+x1+x2 | -1+x1+z2+z3
+  # gamma <- 0.05
+  #
+  # # checked by stepping through function call that weak instrument test is actually applied
+  #
+  # # iis arguments, no testing
+  # arglist1 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
+  #                  turbo = FALSE, overid = NULL, weak = NULL)
+  # model1 <- outlier_detection(data = d, formula = formula, ref_dist = "normal",
+  #                             sign_level = gamma, initial_est = "iis",
+  #                             user_model = NULL, iterations = 5,
+  #                             convergence_criterion = NULL, max_iter = NULL,
+  #                             shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
+  #                             verbose = FALSE, iis_args = arglist1)
+  # # outliers: m0 = 5, m1 = 4, m2 = 2, m3 = 2, m4 = 2, m5 = 2
+  # # add weak instrument test
+  # arglist2 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
+  #                  turbo = FALSE, overid = 0.95, weak = 0.00000000000000000000001)
+  # model2 <- outlier_detection(data = d, formula = formula, ref_dist = "normal",
+  #                             sign_level = gamma, initial_est = "iis",
+  #                             user_model = NULL, iterations = 5,
+  #                             convergence_criterion = NULL, max_iter = NULL,
+  #                             shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
+  #                             verbose = FALSE, iis_args = arglist2)
+  #
+  #
+  # # set up a 2SLS structure (broadly)
+  # set.seed(123)
+  # df <- data.frame(u = stats::rnorm(50))
+  # df$z2 <- stats::rnorm(50) # excluded instrument
+  # df$z3 <- stats::rnorm(50) # excluded instrument
+  # df$r <- 0.5 * df$u + stats::rnorm(50) # so r and u are correlated
+  # df$x2 <- df$z2 - 0.5*df$z3 + df$r # endogenous regressor, relevant
+  # df$cons <- 1 # intercept, relevant
+  # df$x1 <- stats::rnorm(50) # exogenous regressor, relevant
+  # df$y <- df$cons + 2*df$x1 - df$x2 + df$u # coefficients c(1,2,-1)
+  # # delete unobserved errors
+  # df$u <- NULL
+  # df$r <- NULL
+  # # GUM
+  # fml <- y ~ -1+cons+x1+x2 | -1+cons+x1+z2+z3
+  # model <- ivreg::ivreg(formula = fml, data = df) # model seems consistent
+  # gamma <- 1/50
 
   # arglist2 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
   #                  turbo = FALSE, overid = 0.95, weak = 0.05)
