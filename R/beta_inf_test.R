@@ -437,8 +437,8 @@ beta_t <- function(robust2sls_object, iteration, element, fp = FALSE) {
   avar <- beta_test_avar(robust2sls_object = robust2sls_object,
                          iteration = iteration, fp = fp)
   # estimate full sample
-  full <- AER::ivreg(formula = robust2sls_object$cons$formula,
-                data = robust2sls_object$cons$data)
+  full <- ivreg::ivreg(formula = robust2sls_object$cons$formula,
+                       data = robust2sls_object$cons$data)
 
   # extract vector of parameter estimates
   coef_robust <- robust2sls_object$model[[iteration + 1]]$coefficients
@@ -596,8 +596,8 @@ beta_hausman <- function(robust2sls_object, iteration, subset = NULL,
   avar <- beta_test_avar(robust2sls_object = robust2sls_object,
                          iteration = iteration, fp = fp)
   # estimate full sample
-  full <- AER::ivreg(formula = robust2sls_object$cons$formula,
-                data = robust2sls_object$cons$data)
+  full <- ivreg::ivreg(formula = robust2sls_object$cons$formula,
+                       data = robust2sls_object$cons$data)
 
   # extract vector of parameter estimates
   coef_robust <- robust2sls_object$model[[iteration + 1]]$coefficients

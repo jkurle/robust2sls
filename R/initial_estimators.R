@@ -25,14 +25,14 @@
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
 #' list is an integer vector with three values: 0 if the observations is judged
 #' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
-#' stores the \code{\link[AER]{ivreg}} model object based on which the four
+#' stores the \code{\link[ivreg]{ivreg}} model object based on which the four
 #' vectors were calculated.
 #'
 #' @export
 
 robustified_init <- function(data, formula, cutoff) {
 
-  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  full <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
 
   # extract all variables appearing in the regression formula
   vars <- extract_formula(formula)
@@ -50,7 +50,7 @@ robustified_init <- function(data, formula, cutoff) {
 #' Based on this estimator, observations are classified as outliers or not.
 #'
 #' @inheritParams robustified_init
-#' @param user_model A model object of \link{class} \link[AER]{ivreg} whose
+#' @param user_model A model object of \link{class} \link[ivreg]{ivreg} whose
 #' parameters are used to calculate the residuals.
 #'
 #' @section Warning:
@@ -71,7 +71,7 @@ robustified_init <- function(data, formula, cutoff) {
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
 #' list is an integer vector with three values: 0 if the observations is judged
 #' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
-#' stores the \code{\link[AER]{ivreg}} user-specified model object based on
+#' stores the \code{\link[ivreg]{ivreg}} user-specified model object based on
 #' which the four vectors were calculated.
 #'
 #' @export
@@ -80,7 +80,7 @@ user_init <- function(data, formula, cutoff, user_model) {
 
   if (class(user_model) != "ivreg") {
     stop(strwrap("The argument `user_model` is not of class `ivreg`, the model
-                 object class for 2SLS models from package `AER`",
+                 object class for 2SLS models from package `ivreg`",
                  initial = "", prefix = " "))
   }
 
@@ -130,7 +130,7 @@ user_init <- function(data, formula, cutoff, user_model) {
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
 #' list is an integer vector with three values: 0 if the observations is judged
 #' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
-#' is a list with the two initial \code{\link[AER]{ivreg}} model objects based
+#' is a list with the two initial \code{\link[ivreg]{ivreg}} model objects based
 #' on the two different sub-samples.
 #'
 #' @export
@@ -230,12 +230,12 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   # this way, we can use the contents of split1/2_name to refer to the var
   model_split1 <- NULL
   model_split2 <- NULL
-  command1 <- paste("model_split1 <- AER::ivreg(formula = formula, data = data,
+  command1 <- paste("model_split1 <- ivreg::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", split1_name, ")")
   expr1 <- parse(text = command1)
   eval(expr1)
 
-  command2 <- paste("model_split2 <- AER::ivreg(formula = formula, data = data,
+  command2 <- paste("model_split2 <- ivreg::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", split2_name, ")")
   expr2 <- parse(text = command2)
   eval(expr2)
@@ -309,7 +309,7 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
 #' list is an integer vector with three values: 0 if the observations is judged
 #' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
-#' stores the \code{\link[AER]{ivreg}} model object based on which the four
+#' stores the \code{\link[ivreg]{ivreg}} model object based on which the four
 #' vectors were calculated.
 #'
 #' @section Note:
@@ -330,7 +330,7 @@ iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
   }
 
   # run full model as reference
-  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  full <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
 
   # problems with ivregFun in combination with getsFun when have missings
   # reason: getsFun deletes trailing and leading NAs in x or y but not z (b/c treated separately)

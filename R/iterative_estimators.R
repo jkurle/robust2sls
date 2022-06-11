@@ -13,7 +13,7 @@
 #' the L2 norm.
 #'
 #' @param data A dataframe.
-#' @param formula A formula for the \code{\link[AER]{ivreg}} function, i.e. in
+#' @param formula A formula for the \code{\link[ivreg]{ivreg}} function, i.e. in
 #' the format \code{y ~ x1 + x2 | x1 + z2} where \code{y} is the dependent
 #' variable, \code{x1} are the exogenous regressors, \code{x2} the endogenous
 #' regressors, and \code{z2} the outside instruments.
@@ -33,7 +33,7 @@
 #'   applies impulse indicator saturation (IIS) as implemented in
 #'   \code{\link[ivgets]{ivisat}}. See section "Warning" for more information
 #'   and conditions.
-#' @param user_model A model object of \link{class} \link[AER]{ivreg}. Only
+#' @param user_model A model object of \link{class} \link[ivreg]{ivreg}. Only
 #' required if argument \code{initial_est} is set to \code{"user"}, otherwise
 #' \code{NULL}.
 #' @param iterations Either an integer >= 0 that specifies how often the outlier
@@ -105,7 +105,7 @@
 #'   converged already before the user-specified number of iterations were
 #'   reached.}
 #'   \item{\code{$model}}{A list storing the model objects of class
-#'   \link[AER]{ivreg} for each iteration. Each model is stored under
+#'   \link[ivreg]{ivreg} for each iteration. Each model is stored under
 #'   \code{$m0}, \code{$m1}, ...}
 #'   \item{\code{$res}}{A list storing the residuals of all observations for
 #'   each iteration. Residuals of observations where any of the y, x, or z
@@ -242,7 +242,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
       # new model of this iteration
       new <- NULL
-      command <- paste("new <- AER::ivreg(formula = formula, data = data,
+      command <- paste("new <- ivreg::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", selection_name, ")")
       expr <- parse(text = command)
       eval(expr)
@@ -311,7 +311,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
       # new model of this iteration
       new <- NULL
-      command <- paste("new <- AER::ivreg(formula = formula, data = data,
+      command <- paste("new <- ivreg::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", selection_name, ")")
       expr <- parse(text = command)
       eval(expr)

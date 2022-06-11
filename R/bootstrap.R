@@ -178,7 +178,7 @@ case_resampling <- function(robust2sls_object, R, coef = NULL, m = NULL,
   verbose <- robust2sls_object$cons$verbose
 
   # extract coefficient numbers (if given names)
-  full <- AER::ivreg(formula = formula, data = robust2sls_object$cons$data)
+  full <- ivreg::ivreg(formula = formula, data = robust2sls_object$cons$data)
   if (is.character(coef)) {
     coef.num <- which(coef == names(full$coefficients))
   } else if (is.numeric(coef)) {
