@@ -41,7 +41,7 @@ test_that("outlier_detection() with iis_init() works, fixed iterations", {
   sel[19] <- FALSE
   type <- rep(1L, times = NROW(d))
   type[19] <- 0L
-  fullmodel <- AER::ivreg(formula = formula, data = d)
+  fullmodel <- ivreg::ivreg(formula = formula, data = d)
   fullmodel$call <- NULL # won't coincide exactly
   model1$model$m0$call <- NULL
   names(res) <- names(stdres) <- names(sel) <- names(type) <- as.character(1:50)
@@ -227,18 +227,18 @@ test_that("outlier_detection() works with iis_init(), tests turned on", {
   model <- ivreg::ivreg(formula = fml, data = df) # model seems consistent
   gamma <- 1/50
 
-  arglist2 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
-                   turbo = FALSE, overid = 0.95, weak = 0.05)
-  model2 <- outlier_detection(data = df, formula = fml, ref_dist = "normal",
-                              sign_level = gamma, initial_est = "iis",
-                              user_model = NULL, iterations = 5,
-                              convergence_criterion = NULL, max_iter = NULL,
-                              shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
-                              verbose = FALSE, iis_args = arglist2)
-
-  x <- ivisat(formula = fml, data = df, iis = TRUE,
-         print.searchinfo = TRUE,
-         overid = 0.95, weak = 0.05)
+  # arglist2 <- list(t.pval = 0.01, do.pet = FALSE, normality.JarqueB = NULL,
+  #                  turbo = FALSE, overid = 0.95, weak = 0.05)
+  # model2 <- outlier_detection(data = df, formula = fml, ref_dist = "normal",
+  #                             sign_level = gamma, initial_est = "iis",
+  #                             user_model = NULL, iterations = 5,
+  #                             convergence_criterion = NULL, max_iter = NULL,
+  #                             shuffle = FALSE, shuffle_seed = NULL, split = 0.5,
+  #                             verbose = FALSE, iis_args = arglist2)
+  #
+  # x <- ivisat(formula = fml, data = df, iis = TRUE,
+  #        print.searchinfo = TRUE,
+  #        overid = 0.95, weak = 0.05)
 
 
 })

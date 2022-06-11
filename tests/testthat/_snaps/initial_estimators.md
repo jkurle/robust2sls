@@ -95,7 +95,7 @@
     $model
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
        x1     x2  
@@ -166,7 +166,7 @@
     $model
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
        x1     x2  
@@ -241,7 +241,7 @@
     $model
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
        x1     x2  
@@ -316,7 +316,7 @@
     $model
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
        x1     x2  
@@ -391,7 +391,7 @@
     $model
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
        x1     x2  
@@ -466,7 +466,7 @@
     $model
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
        x1     x2  
@@ -541,7 +541,7 @@
     $model
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
        x1     x2  
@@ -616,7 +616,7 @@
     $model
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
        x1     x2  

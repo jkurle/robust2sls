@@ -12,7 +12,7 @@ test_that("robustified_init() works correctly", {
   r1 <- robustified_init(data = data, formula = formula, cutoff = 1.96)
 
   expect_length(r1, 5)
-  expect_length(r1$model, 19)
+  expect_length(r1$model, 34)
   expect_length(r1$res, 32)
   expect_length(r1$stdres, 32)
   expect_length(r1$sel, 32)
@@ -123,7 +123,7 @@ test_that("user_init() works correctly", {
                "argument `user_model` is not of class `ivreg`")
 
   # test success (do robustified manually, compare output)
-  ivmodel <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  ivmodel <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
   expect_silent(ivtest <- outlier_detection(data = data, formula = formula, ref_dist = "normal",
                               sign_level = 0.05, initial_est = "user",
                               user_model = ivmodel, iterations = 1))
@@ -159,8 +159,8 @@ test_that("saturated_init() works correctly", {
   # "na.action", which lists the obs that are omitted b/c they have missing
   # since I exclude these obs in the selection vector already, they don't have
   # to be excluded by the model estimation command -> 1 fewer element
-  expect_length(r1$model$split1, 18)
-  expect_length(r1$model$split2, 18)
+  expect_length(r1$model$split1, 33)
+  expect_length(r1$model$split2, 33)
 
   expect_equal(class(r1$model$split1), "ivreg")
   expect_equal(class(r1$model$split2), "ivreg")
