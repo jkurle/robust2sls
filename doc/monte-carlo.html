@@ -12,11 +12,23 @@
 
 <meta name="author" content="Jonas Kurle" />
 
-<meta name="date" content="2021-11-12" />
+<meta name="date" content="2022-06-11" />
 
 <title>Monte Carlo Simulations</title>
 
-<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -26,6 +38,7 @@
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 <style type="text/css">
@@ -127,7 +140,187 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -141,7 +334,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Monte Carlo Simulations</h1>
 <h4 class="author">Jonas Kurle</h4>
-<h4 class="date">12 November 2021</h4>
+<h4 class="date">11 June 2022</h4>
 
 
 
@@ -151,60 +344,127 @@ text-align: justify}
 </style>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>We provide several functions for Monte Carlo simulations to assess the performance of the outlier detection algorithm <code>outlier_detection()</code> and the various statistical tools such as <code>outliers_prop()</code>. The simulations can be executed in parallel using various backends.</p>
+<p>We provide several functions for Monte Carlo simulations to assess
+the performance of the outlier detection algorithm
+<code>outlier_detection()</code> and the various statistical tools such
+as <code>outliers_prop()</code>. The simulations can be executed in
+parallel using various backends.</p>
 <p>Monte Carlo simulations involve the following steps:</p>
 <ol style="list-style-type: decimal">
-<li>create or choose a <em>true</em> 2SLS model (including parameters)</li>
+<li>create or choose a <em>true</em> 2SLS model (including
+parameters)</li>
 <li>specify the outlier detection algorithm to be analysed</li>
-<li><em>optionally</em> choose which simulation parameters to vary, such as the sample size</li>
-<li>choose whether to execute the simulations sequentially or in parallel and run the simulations</li>
+<li><em>optionally</em> choose which simulation parameters to vary, such
+as the sample size</li>
+<li>choose whether to execute the simulations sequentially or in
+parallel and run the simulations</li>
 </ol>
-<p>See the vignette <em>Introduction to the robust2sls Package</em> for more details on the model setup (step 1) and the different algorithms (step 2) that are implemented.</p>
+<p>See the vignette <em>Introduction to the robust2sls Package</em> for
+more details on the model setup (step 1) and the different algorithms
+(step 2) that are implemented.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>utils<span class="sc">::</span><span class="fu">vignette</span>(<span class="st">&quot;overview&quot;</span>, <span class="at">package =</span> <span class="st">&quot;robust2sls&quot;</span>)</span></code></pre></div>
 </div>
 <div id="step-1-true-model" class="section level1">
 <h1>Step 1: True model</h1>
-<p>We conceptualise data as being generated by some <em>true</em> model, the so-called data-generating process (DGP). Specifying a DGP ourselves in simulations, allows us to check whether the theory works in practice. For example, we could use Monte Carlo simulations to check whether the 2SLS estimator recovers the true parameters; whether the proportion of detected outliers corresponds to the expected proportion; or whether a statistical test has expected size even in finite samples.</p>
-<p>First of all, we need to specify a valid 2SLS model and its parameters. The function <code>generate_param()</code> can be used to generate random parameters of a 2SLS model that fulfill the 2SLS conditions. For instance, the parameters are created such that the structural error is uncorrelated to the instruments. Instead of random parameters, they can also - partly or fully - be specified by the user.</p>
+<p>We conceptualise data as being generated by some <em>true</em> model,
+the so-called data-generating process (DGP). Specifying a DGP ourselves
+in simulations, allows us to check whether the theory works in practice.
+For example, we could use Monte Carlo simulations to check whether the
+2SLS estimator recovers the true parameters; whether the proportion of
+detected outliers corresponds to the expected proportion; or whether a
+statistical test has expected size even in finite samples.</p>
+<p>First of all, we need to specify a valid 2SLS model and its
+parameters. The function <code>generate_param()</code> can be used to
+generate random parameters of a 2SLS model that fulfill the 2SLS
+conditions. For instance, the parameters are created such that the
+structural error is uncorrelated to the instruments. Instead of random
+parameters, they can also - partly or fully - be specified by the
+user.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(robust2sls)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">generate_param</span>(<span class="at">dx1 =</span> <span class="dv">3</span>, <span class="at">dx2 =</span> <span class="dv">2</span>, <span class="at">dz2 =</span> <span class="dv">3</span>, <span class="at">intercept =</span> <span class="cn">TRUE</span>, <span class="at">seed =</span> <span class="dv">10</span>)</span></code></pre></div>
-<p>Here, we create parameters for a model with 3 exogenous and 2 endogenous regressors, and 3 outside instruments. The model includes an intercept, so one of the exogenous instruments is simply a constant. The parameters are stored in a list.</p>
-<p>Structural equation: <span class="math inline">\(y_{i} = \beta_{1} x_{1,i} + \beta_{2} x_{2,i} + \beta_{3} x_{3,i} + \beta_{4} x_{4,i} + \beta_{5} x_{5,i} + u_{i}\)</span></p>
-<p>First stage: <span class="math inline">\(x_{i} = \Pi^{\prime} z_{i} + r_{i}\)</span>,</p>
-<p>where the vector <span class="math inline">\(x_{i}\)</span> contains all the regressors and the vector of instruments <span class="math inline">\(z_{i}\)</span> contains the 3 exogenous regressors and the two excluded instruments. <span class="math inline">\(\Pi\)</span> is the matrix of first stage coefficients.</p>
+<p>Here, we create parameters for a model with 3 exogenous and 2
+endogenous regressors, and 3 outside instruments. The model includes an
+intercept, so one of the exogenous instruments is simply a constant. The
+parameters are stored in a list.</p>
+<p>Structural equation: <span class="math inline">\(y_{i} = \beta_{1}
+x_{1,i} + \beta_{2} x_{2,i} + \beta_{3} x_{3,i} + \beta_{4} x_{4,i} +
+\beta_{5} x_{5,i} + u_{i}\)</span></p>
+<p>First stage: <span class="math inline">\(x_{i} = \Pi^{\prime} z_{i} +
+r_{i}\)</span>,</p>
+<p>where the vector <span class="math inline">\(x_{i}\)</span> contains
+all the regressors and the vector of instruments <span class="math inline">\(z_{i}\)</span> contains the 3 exogenous regressors
+and the two excluded instruments. <span class="math inline">\(\Pi\)</span> is the matrix of first stage
+coefficients.</p>
 </div>
 <div id="step-2-outlier-detection-algorithm" class="section level1">
 <h1>Step 2: Outlier detection algorithm</h1>
-<p>The workhorse command for different types of trimmed 2SLS algorithms in the <em>robust2sls</em> package is <code>outlier_detection()</code>. The main decisions are</p>
+<p>The workhorse command for different types of trimmed 2SLS algorithms
+in the <em>robust2sls</em> package is <code>outlier_detection()</code>.
+The main decisions are</p>
 <ul>
 <li>which initial estimator to use</li>
 <li>how the sample is trimmed, which is governed by
 <ul>
-<li>the reference distribution against which the errors are judged to be outliers or not</li>
-<li>the cut-off value <span class="math inline">\(c\)</span> that determines the size of the standardised errors beyond which observations are labelled as outliers and subsequently removed</li>
+<li>the reference distribution against which the errors are judged to be
+outliers or not</li>
+<li>the cut-off value <span class="math inline">\(c\)</span> that
+determines the size of the standardised errors beyond which observations
+are labelled as outliers and subsequently removed</li>
 </ul></li>
-<li>how often the algorithm is iterated, which is represented by the parameter <span class="math inline">\(m\)</span>.</li>
+<li>how often the algorithm is iterated, which is represented by the
+parameter <span class="math inline">\(m\)</span>.</li>
 </ul>
-<p>To keep things simple and the run-time of the simulations low, we do not iterate the algorithm in this example. We use the Robustified 2SLS algorithm, which uses the full sample for the initial estimates. As is commonly done, we use the normal distribution as the reference distribution. To target a <em>false outlier detection rate</em> of approximately 5%, we choose a cut-off value of approximately 1.96, meaning that observations with an absolute standardised residual larger than 1.96 are classified as outliers. This is set using the <code>sign_level</code> argument of the function, which together with the reference distribution, <code>ref_dist</code>, automatically determines the cut-off value.</p>
-<p>The simulation function <code>mc_grid()</code> also takes these arguments and internally uses them to call the <code>outlier_detection()</code> function repeatedly across replications.</p>
+<p>To keep things simple and the run-time of the simulations low, we do
+not iterate the algorithm in this example. We use the Robustified 2SLS
+algorithm, which uses the full sample for the initial estimates. As is
+commonly done, we use the normal distribution as the reference
+distribution. To target a <em>false outlier detection rate</em> of
+approximately 5%, we choose a cut-off value of approximately 1.96,
+meaning that observations with an absolute standardised residual larger
+than 1.96 are classified as outliers. This is set using the
+<code>sign_level</code> argument of the function, which together with
+the reference distribution, <code>ref_dist</code>, automatically
+determines the cut-off value.</p>
+<p>The simulation function <code>mc_grid()</code> also takes these
+arguments and internally uses them to call the
+<code>outlier_detection()</code> function repeatedly across
+replications.</p>
 </div>
 <div id="step-3-parameter-settings" class="section level1">
 <h1>Step 3: Parameter settings</h1>
-<p>Again to keep the run-time low, we only vary the sample size. We choose small sample sizes of 50 and 100, respectively.</p>
+<p>Again to keep the run-time low, we only vary the sample size. We
+choose small sample sizes of 50 and 100, respectively.</p>
 </div>
 <div id="step-4-backend-for-execution" class="section level1">
 <h1>Step 4: Backend for execution</h1>
-<p>The functions <code>mc()</code> and <code>mc_grid()</code> are designed to be used either sequentially or in parallel. They are implemented using the <a href="https://CRAN.R-project.org/package=foreach">foreach</a> package. To ensure that the results are reproducible across different ways of executing the simulations (sequentially or parallel; within the latter as multisession, multicore, cluster etc.), the package <a href="https://CRAN.R-project.org/package=doRNG">doRNG</a> is used to execute the loops.</p>
-<p>The Monte Carlo functions leave the registration of the foreach adaptor to the end-user. For example, both the packages <a href="https://CRAN.R-project.org/package=doParallel">doParallel</a> and <a href="https://CRAN.R-project.org/package=doFuture">doFuture</a> can be used.</p>
+<p>The functions <code>mc()</code> and <code>mc_grid()</code> are
+designed to be used either sequentially or in parallel. They are
+implemented using the <a href="https://CRAN.R-project.org/package=foreach">foreach</a> package.
+To ensure that the results are reproducible across different ways of
+executing the simulations (sequentially or parallel; within the latter
+as multisession, multicore, cluster etc.), the package <a href="https://CRAN.R-project.org/package=doRNG">doRNG</a> is used to
+execute the loops.</p>
+<p>The Monte Carlo functions leave the registration of the foreach
+adaptor to the end-user. For example, both the packages <a href="https://CRAN.R-project.org/package=doParallel">doParallel</a> and
+<a href="https://CRAN.R-project.org/package=doFuture">doFuture</a> can
+be used.</p>
 <div id="parallel-loop" class="section level2">
 <h2>Parallel loop</h2>
-<p>We first consider running the Monte Carlo simulation in parallel. We set the number of cores and create the cluster. Note that CRAN only allows for at most two cores, so the code limits the number of cores. For <code>registerDoParallel()</code>, we need to export the functions that are used within <code>mc_grid()</code> explicitly. With <code>registerDoFuture()</code>, it should not be necessary to explicitly export variables or packages because it identifies them automatically via static code inspection.</p>
+<p>We first consider running the Monte Carlo simulation in parallel. We
+set the number of cores and create the cluster. Note that CRAN only
+allows for at most two cores, so the code limits the number of cores.
+For <code>registerDoParallel()</code>, we need to export the functions
+that are used within <code>mc_grid()</code> explicitly. With
+<code>registerDoFuture()</code>, it should not be necessary to
+explicitly export variables or packages because it identifies them
+automatically via static code inspection.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(parallel)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ncores <span class="ot">&lt;-</span> <span class="dv">2</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">&lt;-</span> <span class="fu">makeCluster</span>(ncores)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># export libraries to all workers in the cluster</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">clusterCall</span>(<span class="at">cl =</span> cl, <span class="cf">function</span>(x) <span class="fu">.libPaths</span>(x), <span class="fu">.libPaths</span>()))</span></code></pre></div>
-<p>First, we use the <a href="https://CRAN.R-project.org/package=doParallel">doParallel</a> package to run the simulations in parallel.</p>
+<p>First, we use the <a href="https://CRAN.R-project.org/package=doParallel">doParallel</a>
+package to run the simulations in parallel.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(doParallel)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: foreach</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: iterators</span></span>
@@ -213,7 +473,8 @@ text-align: justify}
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">formula =</span> p<span class="sc">$</span>setting<span class="sc">$</span>formula, <span class="at">ref_dist =</span> <span class="st">&quot;normal&quot;</span>, </span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">sign_level =</span> <span class="fl">0.05</span>, <span class="at">initial_est =</span> <span class="st">&quot;robustified&quot;</span>, <span class="at">iterations =</span> <span class="dv">0</span>,</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">shuffle =</span> <span class="cn">FALSE</span>, <span class="at">shuffle_seed =</span> <span class="dv">42</span>, <span class="at">split =</span> <span class="fl">0.5</span>)</span></code></pre></div>
-<p>Next, we use the <a href="https://CRAN.R-project.org/package=doFuture">doFuture</a> package for the parallel loop. Both implementations yield the same result.</p>
+<p>Next, we use the <a href="https://CRAN.R-project.org/package=doFuture">doFuture</a> package
+for the parallel loop. Both implementations yield the same result.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(doFuture)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: future</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">registerDoFuture</span>()</span>
@@ -230,7 +491,9 @@ text-align: justify}
 </div>
 <div id="sequential-loop" class="section level2">
 <h2>Sequential loop</h2>
-<p>To run the loop sequentially, we can again use the <a href="https://CRAN.R-project.org/package=doFuture">doFuture</a> package but this time setting a different plan. The <a href="https://CRAN.R-project.org/package=doRNG">doRNG</a> ensures that the results are identical to those from the parallel loops.</p>
+<p>To run the loop sequentially, we can again use the <a href="https://CRAN.R-project.org/package=doFuture">doFuture</a> package
+but this time setting a different plan. The <a href="https://CRAN.R-project.org/package=doRNG">doRNG</a> ensures that
+the results are identical to those from the parallel loops.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(doFuture)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">registerDoFuture</span>()</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(sequential)</span>
