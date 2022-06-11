@@ -24,7 +24,7 @@ outlier_detection(
 \arguments{
 \item{data}{A dataframe.}
 
-\item{formula}{A formula for the \code{\link[AER]{ivreg}} function, i.e. in
+\item{formula}{A formula for the \code{\link[ivreg]{ivreg}} function, i.e. in
 the format \code{y ~ x1 + x2 | x1 + z2} where \code{y} is the dependent
 variable, \code{x1} are the exogenous regressors, \code{x2} the endogenous
 regressors, and \code{z2} the outside instruments.}
@@ -48,7 +48,7 @@ applies impulse indicator saturation (IIS) as implemented in
 \code{\link[ivgets]{ivisat}}. See section "Warning" for more information
 and conditions.}
 
-\item{user_model}{A model object of \link{class} \link[AER]{ivreg}. Only
+\item{user_model}{A model object of \link{class} \link[ivreg]{ivreg}. Only
 required if argument \code{initial_est} is set to \code{"user"}, otherwise
 \code{NULL}.}
 
@@ -129,7 +129,7 @@ reported.}
   converged already before the user-specified number of iterations were
   reached.}
   \item{\code{$model}}{A list storing the model objects of class
-  \link[AER]{ivreg} for each iteration. Each model is stored under
+  \link[ivreg]{ivreg} for each iteration. Each model is stored under
   \code{$m0}, \code{$m1}, ...}
   \item{\code{$res}}{A list storing the residuals of all observations for
   each iteration. Residuals of observations where any of the y, x, or z

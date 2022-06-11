@@ -59,7 +59,7 @@ convergence criterion should not be used.}
 \item{max_iter}{A numeric value that determines after which iteration the
 algorithm stops in case it does not converge.}
 
-\item{user_model}{A model object of \link{class} \link[AER]{ivreg}. Only
+\item{user_model}{A model object of \link{class} \link[ivreg]{ivreg}. Only
 required if argument \code{initial_est} is set to \code{"user"}, otherwise
 \code{NULL}.}
 

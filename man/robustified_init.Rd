@@ -31,7 +31,7 @@ the observation is judged as not outlying, \code{FALSE} if it is an outlier,
 and \code{NA} if any of y, x, or z are missing. The fourth element of the
 list is an integer vector with three values: 0 if the observations is judged
 to be an outlier, 1 if not, and -1 if missing. The fifth and last element
-stores the \code{\link[AER]{ivreg}} model object based on which the four
+stores the \code{\link[ivreg]{ivreg}} model object based on which the four
 vectors were calculated.
 }
 \description{

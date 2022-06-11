@@ -17,7 +17,7 @@ user_init(data, formula, cutoff, user_model)
 is an outlier or not. If its absolute value is larger than the cutoff value,
 the observations is classified as an outlier.}
 
-\item{user_model}{A model object of \link{class} \link[AER]{ivreg} whose
+\item{user_model}{A model object of \link{class} \link[ivreg]{ivreg} whose
 parameters are used to calculate the residuals.}
 }
 \value{
@@ -34,7 +34,7 @@ the observation is judged as not outlying, \code{FALSE} if it is an outlier,
 and \code{NA} if any of y, x, or z are missing. The fourth element of the
 list is an integer vector with three values: 0 if the observations is judged
 to be an outlier, 1 if not, and -1 if missing. The fifth and last element
-stores the \code{\link[AER]{ivreg}} user-specified model object based on
+stores the \code{\link[ivreg]{ivreg}} user-specified model object based on
 which the four vectors were calculated.
 }
 \description{
