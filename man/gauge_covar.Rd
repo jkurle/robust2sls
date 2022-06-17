@@ -8,7 +8,7 @@ gauge_covar(
   ref_dist = c("normal"),
   sign_level1,
   sign_level2,
-  initial_est = c("robustified", "saturated"),
+  initial_est = c("robustified", "saturated", "iis"),
   iteration,
   parameters,
   split
@@ -32,7 +32,8 @@ for the outlier detection algorithm. \code{"robustified"} means that the full
 sample 2SLS is used as initial estimator. \code{"saturated"} splits the
 sample into two parts and estimates a 2SLS on each subsample. The
 coefficients of one subsample are used to calculate residuals and determine
-outliers in the other subsample.}
+outliers in the other subsample. \code{"iis"} applies impulse indicator
+  saturation (IIS) as implemented in \code{\link[ivgets]{ivisat}}.}
 
 \item{iteration}{An integer >= 0 or character \code{"convergence"}
 representing the iteration for which the outliers are calculated. Uses the
@@ -53,4 +54,9 @@ in which proportions the sample will be split. Can be \code{NULL} if
 \code{gauge_covar} calculates the asymptotic covariance between two FODRs
 with different cut-off values s and t for a given iteration using a given set
 of parameters (true or estimated).
+}
+\details{
+Initial estimator \code{"iis"} uses the asymptotic variances of
+  \code{"robustified"} 2SLS because there is no formal theory for the
+  multi-block search.
 }

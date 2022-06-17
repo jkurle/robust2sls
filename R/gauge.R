@@ -397,7 +397,8 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
 #' sample 2SLS is used as initial estimator. \code{"saturated"} splits the
 #' sample into two parts and estimates a 2SLS on each subsample. The
 #' coefficients of one subsample are used to calculate residuals and determine
-#' outliers in the other subsample.
+#' outliers in the other subsample. \code{"iis"} applies impulse indicator
+#'   saturation (IIS) as implemented in \code{\link[ivgets]{ivisat}}.
 #' @param iteration An integer >= 0 or character \code{"convergence"}
 #' representing the iteration for which the outliers are calculated. Uses the
 #' fixed point value if set to \code{"convergence"}.
@@ -410,10 +411,14 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
 #'
 #' @return \code{gauge_covar} returns a numeric value.
 #'
+#' @details Initial estimator \code{"iis"} uses the asymptotic variances of
+#'   \code{"robustified"} 2SLS because there is no formal theory for the
+#'   multi-block search.
+#'
 #' @export
 
 gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
-                       initial_est = c("robustified", "saturated"),
+                       initial_est = c("robustified", "saturated", "iis"),
                        iteration, parameters, split) {
 
   if (!is.numeric(sign_level1) | !identical(length(sign_level1), 1L)) {
@@ -466,7 +471,7 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
     stop("Argument 'parameters' can only be NULL if ref_dist == 'normal'")
   } # nocov end
   if (is.null(split) & !identical(initial_est, "robustified")) {
-    stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified'")
+    stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified' or 'iis'")
   }
   if (!is.null(split)) { # only need to check these when is not NULL
     if (!is.numeric(split) | !identical(length(split), 1L)) {
@@ -483,7 +488,7 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
                  length 1", prefix = " ", initial = ""))
   }
   # available initial estimators:
-  initial_avail <- c("robustified", "saturated")
+  initial_avail <- c("robustified", "saturated", "iis")
   if (!(initial_est %in% initial_avail)) {
     stop(strwrap(paste(c("Argument 'initial_est' must be one of the available
                  initial estimators:", initial_avail), collapse = " "),
