@@ -241,7 +241,7 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
   # therefore if this is the case, can use the existing formulas for robustified
   sat_split_half <- (initial_est == "saturated" && split == 0.5)
 
-  if (initial_est == "robustified" | sat_split_half) {
+  if (initial_est == "robustified" | initial_est == "iis" | sat_split_half) {
     if (ref_dist == "normal") {
 
       # NOTE: under normality, general formula simplifies a lot
@@ -501,7 +501,7 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
   # therefore if this is the case, can use the existing formulas for robustified
   sat_split_half <- (initial_est == "saturated" && split == 0.5)
 
-  if (initial_est == "robustified" | sat_split_half) {
+  if (initial_est == "robustified" | initial_est == "iis" | sat_split_half) {
     if (ref_dist == "normal") {
 
       # NOTE: under normality, general formula simplifies a lot
