@@ -470,7 +470,7 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
   if (is.null(parameters) && !identical(ref_dist, "normal")){ # nocov start
     stop("Argument 'parameters' can only be NULL if ref_dist == 'normal'")
   } # nocov end
-  if (is.null(split) & !identical(initial_est, "robustified")) {
+  if (is.null(split) & !(initial_est %in% c("robustified", "iis"))) {
     stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified' or 'iis'")
   }
   if (!is.null(split)) { # only need to check these when is not NULL
