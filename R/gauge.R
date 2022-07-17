@@ -171,6 +171,10 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
                        initial_est = c("robustified", "saturated", "iis"),
                        iteration, parameters, split) {
 
+  if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
+    stop(strwrap("Argument 'initial_est' must be a character vector of
+                 length 1", prefix = " ", initial = ""))
+  }
   if (!is.numeric(sign_level) | !identical(length(sign_level), 1L)) {
     stop(strwrap("Argument 'sign_level' must be a numeric vector of length 1",
                  prefix = " ", initial = ""))
@@ -224,10 +228,6 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
       stop(strwrap("Argument 'split' must lie strictly between 0 and 1",
                    prefix = " ", initial = ""))
     }
-  }
-  if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
-    stop(strwrap("Argument 'initial_est' must be a character vector of
-                 length 1", prefix = " ", initial = ""))
   }
   # available initial estimators:
   initial_avail <- c("robustified", "saturated", "iis")
@@ -421,6 +421,10 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
                        initial_est = c("robustified", "saturated", "iis"),
                        iteration, parameters, split) {
 
+  if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
+    stop(strwrap("Argument 'initial_est' must be a character vector of
+                 length 1", prefix = " ", initial = ""))
+  }
   if (!is.numeric(sign_level1) | !identical(length(sign_level1), 1L)) {
     stop(strwrap("Argument 'sign_level1' must be a numeric vector of length 1",
                  prefix = " ", initial = ""))
@@ -483,10 +487,7 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
                    prefix = " ", initial = ""))
     }
   }
-  if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
-    stop(strwrap("Argument 'initial_est' must be a character vector of
-                 length 1", prefix = " ", initial = ""))
-  }
+
   # available initial estimators:
   initial_avail <- c("robustified", "saturated", "iis")
   if (!(initial_est %in% initial_avail)) {
