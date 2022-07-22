@@ -325,9 +325,9 @@ iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
                      weak = NULL) {
 
   # can only use this function when "ivgets" is installed
-  if (!requireNamespace("ivgets", quietly = TRUE)) {
+  if (!requireNamespace("ivgets", quietly = TRUE)) { # nocov start
     stop("Package 'ivgets' must be installed to use this function.", .call = FALSE)
-  }
+  } # nocov end
 
   # run full model as reference
   full <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
