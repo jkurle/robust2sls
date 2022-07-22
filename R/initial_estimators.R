@@ -78,7 +78,7 @@ robustified_init <- function(data, formula, cutoff) {
 
 user_init <- function(data, formula, cutoff, user_model) {
 
-  if (class(user_model) != "ivreg") {
+  if (!inherits(user_model, "ivreg")) {
     stop(strwrap("The argument `user_model` is not of class `ivreg`, the model
                  object class for 2SLS models from package `ivreg`",
                  initial = "", prefix = " "))

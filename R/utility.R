@@ -137,7 +137,7 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
       matrix `data`", prefix = " ", initial = ""))
   }
 
-  if (class(model) != "ivreg") {
+  if (!inherits(model, "ivreg")) {
     stop(strwrap("The `model` is not of class `ivreg`", prefix = " ",
       initial = ""))
   }
@@ -202,7 +202,7 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
 
 selection_iis <- function(x, data, yvar, complete, rownames_orig, refmodel) {
 
-  if (!identical(class(x), "ivisat")) {
+  if (!inherits(x, "ivisat")) {
     stop("Argument 'x' must be of class 'ivisat'.")
   }
   if (!identical(typeof(yvar), "character") | !identical(length(yvar), 1L)) {
@@ -217,7 +217,7 @@ selection_iis <- function(x, data, yvar, complete, rownames_orig, refmodel) {
   if (!identical(typeof(rownames_orig), "character") | !identical(length(rownames_orig), NROW(data))) {
     stop("Argument 'rownames_orig' must be a character vector with length equal to number of rows in 'data'.")
   }
-  if (!identical(class(refmodel), "ivreg")) {
+  if (!inherits(refmodel, "ivreg")) {
     stop("Argument 'refmodel' must be of class 'ivreg'.")
   }
 

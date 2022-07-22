@@ -35,7 +35,7 @@ outliers <- function(robust2sls_object, iteration) {
                  `iteration` specifies.", prefix = " ", initial = ""))
   }
 
-  if (class(robust2sls_object) != "robust2sls") {
+  if (!inherits(robust2sls_object, "robust2sls")) {
     stop(strwrap("The argument `robust2sls_object` does not have the correct
                  class", prefix = " ", initial = ""))
   }
@@ -78,7 +78,7 @@ outliers_prop <- function(robust2sls_object, iteration) {
                  `iteration` specifies.", prefix = " ", initial = ""))
   }
 
-  if (class(robust2sls_object) != "robust2sls") {
+  if (!inherits(robust2sls_object, "robust2sls")) {
     stop(strwrap("The argument `robust2sls_object` does not have the correct
                  class", prefix = " ", initial = ""))
   }
