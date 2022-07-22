@@ -41,7 +41,7 @@ test_that("selection() works correctly", {
   dta[1, "mpg"] <- NA
   dta[2, "cyl"] <- NA
   dta[3, "wt"] <- NA
-  test <- AER::ivreg(mpg ~ cyl + disp | cyl + wt, data = dta)
+  test <- ivreg::ivreg(mpg ~ cyl + disp | cyl + wt, data = dta)
 
   expect_equal(NROW(dta), 32) # 32 observations
   expect_equal(NROW(test$residuals), 29) # 29 obs due to NA values in y, x, z
@@ -92,7 +92,7 @@ test_that("selection() works correctly", {
   expect_equal(as.vector(sel[["type"]][25]), 0)
   expect_equal(as.vector(sel[["type"]][c(1,2,3)]), c(-1, -1, -1))
 
-  test <- AER::ivreg(mpg ~ cyl + disp | cyl + wt, data = mtcars)
+  test <- ivreg::ivreg(mpg ~ cyl + disp | cyl + wt, data = mtcars)
   sel <- selection(data = mtcars, yvar = "mpg", model = test, cutoff = 1.96)
   expect_equal(sel[["res"]], test$residuals)
 
@@ -691,5 +691,405 @@ test_that("mvn_sup() works correctly", {
   expect_equal((c >= 0), rep(TRUE, 10000))
   # output must have length of n (not mu)
   expect_equal(length(c), 10000L)
+
+})
+
+
+test_that("selection_iis() works correctly", {
+
+  set.seed(10)
+  p <- generate_param(1, 1, 1, beta = c(2, 4), sigma = 1,
+                      mean_z = 0, cov_z = matrix(1),
+                      Sigma2_half = matrix(1), Omega2 = matrix(3/4),
+                      Pi = t(matrix(c(1, 0, 0, 1), nrow = 2)))
+  d <- generate_data(parameters = p, n = 50)$data
+  rownames_orig <- rownames(d)
+  rownames(d) <- as.character(1:NROW(d))
+  formula <- y ~ -1+x1+x2 | -1+x1+z2
+  complete <- nonmissing(data = d, formula = formula)
+  gamma <- 0.05
+  y_var <- "y"
+
+  ### complete data
+  iismodel1 <- ivgets::ivisat(formula = formula, data = d, iis = TRUE,
+                              sis = FALSE, tis = FALSE, uis = FALSE,
+                              blocks = NULL, ratio.threshold = 0.8,
+                              max.block.size = 30, t.pval = gamma,
+                              wald.pval = t.pval, do.pet = FALSE,
+                              ar.LjungB = NULL, arch.LjungB = NULL,
+                              normality.JarqueB = NULL,
+                              info.method = "sc", include.1cut = FALSE,
+                              include.empty = FALSE, max.paths = NULL,
+                              parallel.options = NULL, turbo = FALSE,
+                              tol = 1e-07, max.regs = NULL,
+                              print.searchinfo = FALSE, plot = NULL,
+                              alarm = FALSE, overid = NULL, weak = NULL)
+  full <- ivreg::ivreg(formula = formula, data = d, model = TRUE, y = TRUE)
+  # retains indicator "iis19", i.e. observation 19 in the original data
+  selection1 <- selection_iis(x = iismodel1, data = d, yvar = y_var,
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
+  # expect the following:
+  res <- iismodel1$final$residuals
+  stdres <- res / (iismodel1$final$sigma * sqrt(iismodel1$final$df.residual / iismodel1$final$nobs))
+  sel <- rep(TRUE, times = NROW(d))
+  sel[19] <- FALSE
+  type <- rep(1L, times = NROW(d))
+  type[19] <- 0L
+  names(res) <- names(stdres) <- names(sel) <- names(type) <- rownames_orig
+
+  # check that correct iismodel
+  expect_identical(iismodel1$selection$ISnames, "iis19")
+  expect_identical(names(iismodel1$final$coefficients), c("x1", "iis19", "x2"))
+  # check correct output structure
+  expect_identical(class(selection1), "list")
+  expect_type(selection1, "list")
+  expect_identical(length(selection1), 5L)
+  expect_named(selection1, c("res", "stdres", "sel", "type", "model"))
+  expect_type(selection1$res, "double")
+  expect_type(selection1$stdres, "double")
+  expect_type(selection1$sel, "logical")
+  expect_type(selection1$type, "integer")
+  expect_type(selection1$model, "list")
+  expect_identical(class(selection1$res), "numeric")
+  expect_identical(class(selection1$stdres), "numeric")
+  expect_identical(class(selection1$sel), "logical")
+  expect_identical(class(selection1$type), "integer")
+  expect_identical(class(selection1$model), "ivreg")
+  expect_length(selection1$res, 50)
+  expect_length(selection1$stdres, 50)
+  expect_length(selection1$sel, 50)
+  expect_length(selection1$type, 50)
+  expect_named(selection1$res, rownames_orig)
+  expect_named(selection1$stdres, rownames_orig)
+  expect_named(selection1$sel, rownames_orig)
+  expect_named(selection1$type, rownames_orig)
+  # check important output
+  expect_identical(selection1$res, res)
+  expect_identical(selection1$stdres, stdres)
+  expect_identical(selection1$sel, sel)
+  expect_identical(selection1$type, type)
+
+  ### incomplete data, missing on y
+  d2 <- d
+  d2[1, "y"] <- NA
+  complete <- nonmissing(data = d2, formula = formula)
+  data <- d2[complete, ]
+  iismodel2 <- ivgets::ivisat(formula = formula, data = data, iis = TRUE,
+                              sis = FALSE, tis = FALSE, uis = FALSE,
+                              blocks = NULL, ratio.threshold = 0.8,
+                              max.block.size = 30, t.pval = gamma,
+                              wald.pval = t.pval, do.pet = FALSE,
+                              ar.LjungB = NULL, arch.LjungB = NULL,
+                              normality.JarqueB = NULL,
+                              info.method = "sc", include.1cut = FALSE,
+                              include.empty = FALSE, max.paths = NULL,
+                              parallel.options = NULL, turbo = FALSE,
+                              tol = 1e-07, max.regs = NULL,
+                              print.searchinfo = FALSE, plot = NULL,
+                              alarm = FALSE, overid = NULL, weak = NULL)
+  full <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  # retains indicators 11 and 18, but these correspond to observations 12 and 19
+  selection2 <- selection_iis(x = iismodel2, data = d2, yvar = y_var,
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
+  # expect the following:
+  res <- c(NA, iismodel2$final$residuals)
+  stdres <- res / (iismodel2$final$sigma * sqrt(iismodel2$final$df.residual / iismodel2$final$nobs))
+  sel <- rep(TRUE, times = NROW(d))
+  sel[1] <- NA
+  sel[12] <- FALSE
+  sel[19] <- FALSE
+  type <- rep(1L, times = NROW(d))
+  type[1] <- -1L
+  type[12] <- 0L
+  type[19] <- 0L
+  names(res) <- names(stdres) <- names(sel) <- names(type) <- rownames_orig
+
+  # check that correct iismodel
+  expect_identical(iismodel2$selection$ISnames, c("iis11", "iis18"))
+  expect_identical(names(iismodel2$final$coefficients), c("x1", "iis11", "iis18", "x2"))
+  # check correct output structure
+  expect_identical(class(selection2), "list")
+  expect_type(selection2, "list")
+  expect_identical(length(selection2), 5L)
+  expect_named(selection2, c("res", "stdres", "sel", "type", "model"))
+  expect_type(selection2$res, "double")
+  expect_type(selection2$stdres, "double")
+  expect_type(selection2$sel, "logical")
+  expect_type(selection2$type, "integer")
+  expect_type(selection2$model, "list")
+  expect_identical(class(selection2$res), "numeric")
+  expect_identical(class(selection2$stdres), "numeric")
+  expect_identical(class(selection2$sel), "logical")
+  expect_identical(class(selection2$type), "integer")
+  expect_identical(class(selection2$model), "ivreg")
+  expect_length(selection2$res, 50)
+  expect_length(selection2$stdres, 50)
+  expect_length(selection2$sel, 50)
+  expect_length(selection2$type, 50)
+  expect_named(selection2$res, rownames_orig)
+  expect_named(selection2$stdres, rownames_orig)
+  expect_named(selection2$sel, rownames_orig)
+  expect_named(selection2$type, rownames_orig)
+  expect_identical(selection2$res, res)
+  expect_identical(selection2$stdres, stdres)
+  expect_identical(selection2$sel, sel)
+  expect_identical(selection2$type, type)
+
+  ### incomplete data, missing x1, named rows in original data
+  d3 <- d
+  d3[2, "x1"] <- NA
+  rownames_orig <- paste0("obs", 1:50)
+  rownames(d3) <- rownames_orig
+  rownames(d3) <- as.character(1:NROW(d3))
+  complete <- nonmissing(data = d3, formula = formula)
+  data <- d3[complete, ]
+  iismodel3 <- ivgets::ivisat(formula = formula, data = data, iis = TRUE,
+                              sis = FALSE, tis = FALSE, uis = FALSE,
+                              blocks = NULL, ratio.threshold = 0.8,
+                              max.block.size = 30, t.pval = gamma,
+                              wald.pval = t.pval, do.pet = FALSE,
+                              ar.LjungB = NULL, arch.LjungB = NULL,
+                              normality.JarqueB = NULL,
+                              info.method = "sc", include.1cut = FALSE,
+                              include.empty = FALSE, max.paths = NULL,
+                              parallel.options = NULL, turbo = FALSE,
+                              tol = 1e-07, max.regs = NULL,
+                              print.searchinfo = FALSE, plot = NULL,
+                              alarm = FALSE, overid = NULL, weak = NULL)
+  full <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  # retains indicator 18, so corresponds to original observation 19
+  selection3 <- selection_iis(x = iismodel3, data = d3, yvar = y_var,
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
+  # expect the following:
+  res <- c(iismodel3$final$residuals[1], NA, iismodel3$final$residuals[-1])
+  stdres <- res / (iismodel3$final$sigma * sqrt(iismodel3$final$df.residual / iismodel3$final$nobs))
+  sel <- rep(TRUE, times = NROW(d))
+  sel[2] <- NA
+  sel[19] <- FALSE
+  type <- rep(1L, times = NROW(d))
+  type[2] <- -1L
+  type[19] <- 0L
+  names(res) <- names(stdres) <- names(sel) <- names(type) <- rownames_orig
+
+  # check that correct iismodel
+  expect_identical(iismodel3$selection$ISnames, c("iis18"))
+  expect_identical(names(iismodel3$final$coefficients), c("x1", "iis18", "x2"))
+  # check correct output structure
+  expect_identical(class(selection3), "list")
+  expect_type(selection3, "list")
+  expect_identical(length(selection3), 5L)
+  expect_named(selection3, c("res", "stdres", "sel", "type", "model"))
+  expect_type(selection3$res, "double")
+  expect_type(selection3$stdres, "double")
+  expect_type(selection3$sel, "logical")
+  expect_type(selection3$type, "integer")
+  expect_type(selection3$model, "list")
+  expect_identical(class(selection3$res), "numeric")
+  expect_identical(class(selection3$stdres), "numeric")
+  expect_identical(class(selection3$sel), "logical")
+  expect_identical(class(selection3$type), "integer")
+  expect_identical(class(selection3$model), "ivreg")
+  expect_length(selection3$res, 50)
+  expect_length(selection3$stdres, 50)
+  expect_length(selection3$sel, 50)
+  expect_length(selection3$type, 50)
+  expect_named(selection3$res, rownames_orig)
+  expect_named(selection3$stdres, rownames_orig)
+  expect_named(selection3$sel, rownames_orig)
+  expect_named(selection3$type, rownames_orig)
+  expect_identical(selection3$res, res)
+  expect_identical(selection3$stdres, stdres)
+  expect_identical(selection3$sel, sel)
+  expect_identical(selection3$type, type)
+
+  ### incomplete data, missing z2, named rows in original data
+  # use same row missing as x2, so that should get identical selection
+  d4 <- d
+  d4[2, "z2"] <- NA
+  rownames_orig <- paste0("obs", 1:50)
+  rownames(d4) <- rownames_orig
+  rownames(d4) <- as.character(1:NROW(d4))
+  complete <- nonmissing(data = d4, formula = formula)
+  data <- d4[complete, ]
+  iismodel4 <- ivgets::ivisat(formula = formula, data = data, iis = TRUE,
+                              sis = FALSE, tis = FALSE, uis = FALSE,
+                              blocks = NULL, ratio.threshold = 0.8,
+                              max.block.size = 30, t.pval = gamma,
+                              wald.pval = t.pval, do.pet = FALSE,
+                              ar.LjungB = NULL, arch.LjungB = NULL,
+                              normality.JarqueB = NULL,
+                              info.method = "sc", include.1cut = FALSE,
+                              include.empty = FALSE, max.paths = NULL,
+                              parallel.options = NULL, turbo = FALSE,
+                              tol = 1e-07, max.regs = NULL,
+                              print.searchinfo = FALSE, plot = NULL,
+                              alarm = FALSE, overid = NULL, weak = NULL)
+  full <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  # retains indicator 18, so corresponds to original observation 19
+  selection4 <- selection_iis(x = iismodel4, data = d4, yvar = y_var,
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
+  # expect same res, stdres, sel, type as for selection3
+  # check that correct iismodel
+  expect_identical(iismodel4$selection$ISnames, c("iis18"))
+  expect_identical(names(iismodel4$final$coefficients), c("x1", "iis18", "x2"))
+  # check correct output structure
+  expect_identical(class(selection4), "list")
+  expect_type(selection4, "list")
+  expect_identical(length(selection4), 5L)
+  expect_named(selection4, c("res", "stdres", "sel", "type", "model"))
+  expect_type(selection4$res, "double")
+  expect_type(selection4$stdres, "double")
+  expect_type(selection4$sel, "logical")
+  expect_type(selection4$type, "integer")
+  expect_type(selection4$model, "list")
+  expect_identical(class(selection4$res), "numeric")
+  expect_identical(class(selection4$stdres), "numeric")
+  expect_identical(class(selection4$sel), "logical")
+  expect_identical(class(selection4$type), "integer")
+  expect_identical(class(selection4$model), "ivreg")
+  expect_length(selection4$res, 50)
+  expect_length(selection4$stdres, 50)
+  expect_length(selection4$sel, 50)
+  expect_length(selection4$type, 50)
+  expect_named(selection4$res, rownames_orig)
+  expect_named(selection4$stdres, rownames_orig)
+  expect_named(selection4$sel, rownames_orig)
+  expect_named(selection4$type, rownames_orig)
+  expect_identical(selection4$res, res)
+  expect_identical(selection4$stdres, stdres)
+  expect_identical(selection4$sel, sel)
+  expect_identical(selection4$type, type)
+
+  ### go back to full data, choose tigh significance level so none selected
+  data <- d
+  rownames_orig <- rownames(data)
+  complete <- nonmissing(data = data, formula = formula)
+  iismodel5 <- ivgets::ivisat(formula = formula, data = data, iis = TRUE,
+                              sis = FALSE, tis = FALSE, uis = FALSE,
+                              blocks = NULL, ratio.threshold = 0.8,
+                              max.block.size = 30, t.pval = 0.001,
+                              wald.pval = t.pval, do.pet = FALSE,
+                              ar.LjungB = NULL, arch.LjungB = NULL,
+                              normality.JarqueB = NULL,
+                              info.method = "sc", include.1cut = FALSE,
+                              include.empty = FALSE, max.paths = NULL,
+                              parallel.options = NULL, turbo = FALSE,
+                              tol = 1e-07, max.regs = NULL,
+                              print.searchinfo = FALSE, plot = NULL,
+                              alarm = FALSE, overid = NULL, weak = NULL)
+  full <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  # retains no indicator
+  selection5 <- selection_iis(x = iismodel5, data = data, yvar = y_var,
+                              complete = complete, rownames_orig = rownames_orig,
+                              refmodel = full)
+  # expect the following:
+  res <- iismodel5$final$residuals
+  stdres <- res / (iismodel5$final$sigma * sqrt(iismodel5$final$df.residual / iismodel5$final$nobs))
+  sel <- rep(TRUE, times = NROW(d))
+  type <- rep(1L, times = NROW(d))
+  names(res) <- names(stdres) <- names(sel) <- names(type) <- rownames_orig
+
+  # check that correct iismodel
+  expect_identical(iismodel5$selection$ISnames, NULL)
+  expect_identical(names(iismodel5$final$coefficients), c("x1", "x2"))
+  # check correct output structure
+  expect_identical(class(selection5), "list")
+  expect_type(selection5, "list")
+  expect_identical(length(selection5), 5L)
+  expect_named(selection5, c("res", "stdres", "sel", "type", "model"))
+  expect_type(selection5$res, "double")
+  expect_type(selection5$stdres, "double")
+  expect_type(selection5$sel, "logical")
+  expect_type(selection5$type, "integer")
+  expect_type(selection5$model, "list")
+  expect_identical(class(selection5$res), "numeric")
+  expect_identical(class(selection5$stdres), "numeric")
+  expect_identical(class(selection5$sel), "logical")
+  expect_identical(class(selection5$type), "integer")
+  expect_identical(class(selection5$model), "ivreg")
+  expect_length(selection5$res, 50)
+  expect_length(selection5$stdres, 50)
+  expect_length(selection5$sel, 50)
+  expect_length(selection5$type, 50)
+  expect_named(selection5$res, rownames_orig)
+  expect_named(selection5$stdres, rownames_orig)
+  expect_named(selection5$sel, rownames_orig)
+  expect_named(selection5$type, rownames_orig)
+  expect_identical(selection5$res, res)
+  expect_identical(selection5$stdres, stdres)
+  expect_identical(selection5$sel, sel)
+  expect_identical(selection5$type, type)
+
+})
+
+test_that("selection_iis() returns correct input errors", {
+
+  # baseline values
+  set.seed(10)
+  p <- generate_param(1, 1, 1, beta = c(2, 4), sigma = 1,
+                      mean_z = 0, cov_z = matrix(1),
+                      Sigma2_half = matrix(1), Omega2 = matrix(3/4),
+                      Pi = t(matrix(c(1, 0, 0, 1), nrow = 2)))
+  d <- generate_data(parameters = p, n = 50)$data
+  rownames_orig <- rownames(d)
+  rownames(d) <- as.character(1:NROW(d))
+  formula <- y ~ -1+x1+x2 | -1+x1+z2
+  complete <- nonmissing(data = d, formula = formula)
+  gamma <- 0.05
+  y_var <- "y"
+  iismodel <- ivgets::ivisat(formula = formula, data = d, iis = TRUE,
+                              sis = FALSE, tis = FALSE, uis = FALSE,
+                              blocks = NULL, ratio.threshold = 0.8,
+                              max.block.size = 30, t.pval = gamma,
+                              wald.pval = t.pval, do.pet = FALSE,
+                              ar.LjungB = NULL, arch.LjungB = NULL,
+                              normality.JarqueB = NULL,
+                              info.method = "sc", include.1cut = FALSE,
+                              include.empty = FALSE, max.paths = NULL,
+                              parallel.options = NULL, turbo = FALSE,
+                              tol = 1e-07, max.regs = NULL,
+                              print.searchinfo = FALSE, plot = NULL,
+                              alarm = FALSE, overid = NULL, weak = NULL)
+  full <- ivreg::ivreg(formula = formula, data = d, model = TRUE, y = TRUE)
+
+  expect_error(selection_iis(x = iismodel$final, data = d, yvar = y_var,
+                             complete = complete, rownames_orig = rownames_orig,
+                             refmodel = full),
+               "Argument 'x' must be of class 'ivisat'")
+  expect_error(selection_iis(x = iismodel, data = d, yvar = 1,
+                             complete = complete, rownames_orig = rownames_orig,
+                             refmodel = full),
+               "Argument 'yvar' must be a character of length 1")
+  expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
+                             complete = as.numeric(complete),
+                             rownames_orig = rownames_orig, refmodel = full),
+               "Argument 'complete' must be a logical vector")
+  expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
+                             complete = complete[-1],
+                             rownames_orig = rownames_orig, refmodel = full),
+               "Argument 'complete' must be a logical vector with length equal to number of rows")
+  expect_error(selection_iis(x = iismodel, data = d, yvar = "yy",
+                             complete = complete, rownames_orig = rownames_orig,
+                             refmodel = full),
+               "Variable 'yvar' cannot be found in 'data'")
+  expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
+                             complete = complete,
+                             rownames_orig = as.numeric(rownames_orig),
+                             refmodel = full),
+               "Argument 'rownames_orig' must be a character vector")
+  expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
+                             complete = complete,
+                             rownames_orig = rownames_orig[-5],
+                             refmodel = full),
+               "Argument 'rownames_orig' must be a character vector with length equal to number of rows")
+  f <- unclass(full)
+  expect_error(selection_iis(x = iismodel, data = d, yvar = y_var,
+                             complete = complete, rownames_orig = rownames_orig,
+                             refmodel = f),
+               "Argument 'refmodel' must be of class 'ivreg'")
 
 })

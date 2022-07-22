@@ -13,7 +13,7 @@
 #' the L2 norm.
 #'
 #' @param data A dataframe.
-#' @param formula A formula for the \code{\link[AER]{ivreg}} function, i.e. in
+#' @param formula A formula for the \code{\link[ivreg]{ivreg}} function, i.e. in
 #' the format \code{y ~ x1 + x2 | x1 + z2} where \code{y} is the dependent
 #' variable, \code{x1} are the exogenous regressors, \code{x2} the endogenous
 #' regressors, and \code{z2} the outside instruments.
@@ -24,14 +24,16 @@
 #' in the reference distribution against which observations are judged as
 #' outliers or not.
 #' @param initial_est A character vector that specifies the initial estimator
-#' for the outlier detection algorithm. \code{"robustified"} means that the full
-#' sample 2SLS is used as initial estimator. \code{"saturated"} splits the
-#' sample into two parts and estimates a 2SLS on each subsample. The
-#' coefficients of one subsample are used to calculate residuals and determine
-#' outliers in the other subsample. \code{"user"} allows the user to specify a
-#' model based on which observations are classified as outliers. See section
-#' "Warning" for more information and conditions.
-#' @param user_model A model object of \link{class} \link[AER]{ivreg}. Only
+#'   for the outlier detection algorithm. \code{"robustified"} means that the
+#'   full sample 2SLS is used as initial estimator. \code{"saturated"} splits
+#'   the sample into two parts and estimates a 2SLS on each subsample. The
+#'   coefficients of one subsample are used to calculate residuals and determine
+#'   outliers in the other subsample. \code{"user"} allows the user to specify a
+#'   model based on which observations are classified as outliers. \code{"iis"}
+#'   applies impulse indicator saturation (IIS) as implemented in
+#'   \code{\link[ivgets]{ivisat}}. See section "Warning" for more information
+#'   and conditions.
+#' @param user_model A model object of \link{class} \link[ivreg]{ivreg}. Only
 #' required if argument \code{initial_est} is set to \code{"user"}, otherwise
 #' \code{NULL}.
 #' @param iterations Either an integer >= 0 that specifies how often the outlier
@@ -62,6 +64,10 @@
 #' in which proportions the sample will be split.
 #' @param verbose A logical value whether progress during estimation should be
 #' reported.
+#' @param iis_args A list with named entries corresponding to the arguments for
+#'   \code{\link{iis_init}} (\code{t.pval}, \code{do.pet},
+#'   \code{normality.JarqueB}, \code{turbo}, \code{overid}, \code{weak}). Can be
+#'   \code{NULL} if \code{initial_est != "iis"}.
 #'
 #' @return \code{outlier_detection} returns an object of class
 #' \code{"robust2sls"}, which is a list with the following components:
@@ -99,7 +105,7 @@
 #'   converged already before the user-specified number of iterations were
 #'   reached.}
 #'   \item{\code{$model}}{A list storing the model objects of class
-#'   \link[AER]{ivreg} for each iteration. Each model is stored under
+#'   \link[ivreg]{ivreg} for each iteration. Each model is stored under
 #'   \code{$m0}, \code{$m1}, ...}
 #'   \item{\code{$res}}{A list storing the residuals of all observations for
 #'   each iteration. Residuals of observations where any of the y, x, or z
@@ -125,15 +131,18 @@
 #' @section Warning:
 #' Check \href{https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view}{Jiao (2019)}
 #' (as well as forthcoming working paper in the future) about conditions on the
-#' initial estimator that should be satisfied for the initial estimator (e.g.
-#' they have to be Op(1)).
+#' initial estimator that should be satisfied for the initial estimator when
+#' using \code{initial_est == "user"} (e.g. they have to be Op(1)).
+#' IIS is a generalisation of \code{\link[=saturated_init]{Saturated 2SLS}} with
+#' multiple block search but no asymptotic theory exists for IIS.
 #'
 #' @export
 
 outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
-  initial_est = c("robustified", "saturated", "user"), user_model = NULL,
+  initial_est = c("robustified", "saturated", "user", "iis"), user_model = NULL,
   iterations = 1, convergence_criterion = NULL, max_iter = NULL,
-  shuffle = FALSE, shuffle_seed = NULL, split = 0.5, verbose = FALSE) {
+  shuffle = FALSE, shuffle_seed = NULL, split = 0.5, verbose = FALSE,
+  iis_args = NULL) {
 
   # capture the original function call
   cll <- sys.call()
@@ -184,6 +193,12 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   } else if (initial_est == "user") {
     initial <- user_init(data = data, formula = formula,
                          cutoff = out$cons$cutoff, user_model = user_model)
+  } else if (initial_est == "iis") {
+    initial <- iis_init(data = data, formula = formula, gamma = sign_level,
+                        t.pval = iis_args$t.pval, do.pet = iis_args$do.pet,
+                        normality.JarqueB = iis_args$normality.JarqueB,
+                        turbo = iis_args$turbo, overid = iis_args$overid,
+                        weak = iis_args$weak)
   # fail-safe, this should never be reached due to match.arg
   } else { # nocov start
     stop(strwrap("Unknown `initial_est` argument", prefix = " ", initial = ""))
@@ -227,7 +242,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
       # new model of this iteration
       new <- NULL
-      command <- paste("new <- AER::ivreg(formula = formula, data = data,
+      command <- paste("new <- ivreg::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", selection_name, ")")
       expr <- parse(text = command)
       eval(expr)
@@ -296,7 +311,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
 
       # new model of this iteration
       new <- NULL
-      command <- paste("new <- AER::ivreg(formula = formula, data = data,
+      command <- paste("new <- ivreg::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", selection_name, ")")
       expr <- parse(text = command)
       eval(expr)

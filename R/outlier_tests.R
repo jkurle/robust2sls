@@ -478,7 +478,7 @@ multi_cutoff_to_fodr_vec <- function(robust2sls_object, iteration) {
 #' the sum of the deviations between sample and population FODR differ
 #' significantly from its expected value.
 #' \loadmathjax
-#' \mjdeqn{ \sum_{k = 1}^{K} \sqrt{n}(\widehat{\gamma}_{c_{k}} - \gamma_{c_{k}}) }{}
+#' \mjdeqn{\sum_{k = 1}^{K} \sqrt{n}(\widehat{\gamma}_{c_{k}} - \gamma_{c_{k}}) }{sum k = (1 to K) sqrt(n) (gammahat_{c_{k}} - gamma_{c{k}})}
 #'
 #' @param robust2sls_object A list of \code{"robust2sls"} objects.
 #' @inheritParams proptest
@@ -599,7 +599,7 @@ sumtest <- function(robust2sls_object, alpha, iteration, one_sided = FALSE) {
 #' the supremum/maximum of the deviations between sample and population FODR
 #' differs significantly from its expected value.
 #' \loadmathjax
-#' \mjdeqn{ \sup_{c} |\sqrt{n}(\widehat{\gamma}_{c} - \gamma_{c})| }{}
+#' \mjdeqn{ \sup_{c} |\sqrt{n}(\widehat{\gamma}_{c} - \gamma_{c})| }{sup_c |sqrt(n)(gammahat_c - gamma_c)|}
 #'
 #' @inheritParams sumtest
 #' @inheritParams test_cpv

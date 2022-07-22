@@ -210,7 +210,7 @@
     $model$m0
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -220,7 +220,7 @@
     $model$m1
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -230,7 +230,7 @@
     $model$m2
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -240,7 +240,7 @@
     $model$m3
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -250,7 +250,7 @@
     $model$m4
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -260,7 +260,7 @@
     $model$m5
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -824,7 +824,7 @@
     $model$m0
     
     Call:
-    AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -834,7 +834,7 @@
     $model$m1
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1111,7 +1111,7 @@
     $model$m0$split1
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = split2, model = TRUE,     y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = split2,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1121,7 +1121,7 @@
     $model$m0$split2
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = split1, model = TRUE,     y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = split1,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1132,7 +1132,7 @@
     $model$m1
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1142,7 +1142,7 @@
     $model$m2
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1152,7 +1152,7 @@
     $model$m3
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1162,7 +1162,7 @@
     $model$m4
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1655,7 +1655,7 @@
     $model$m0$split1
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = split2, model = TRUE,     y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = split2,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1665,7 +1665,7 @@
     $model$m0$split2
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = split1, model = TRUE,     y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = split1,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1676,7 +1676,7 @@
     $model$m1
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1686,7 +1686,7 @@
     $model$m2
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -1696,7 +1696,7 @@
     $model$m3
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = selection,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -2117,7 +2117,7 @@
     $model$m0$split1
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = split2, model = TRUE,     y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = split2,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  
@@ -2127,7 +2127,7 @@
     $model$m0$split2
     
     Call:
-    AER::ivreg(formula = formula, data = data, subset = split1, model = TRUE,     y = TRUE)
+    ivreg::ivreg(formula = formula, data = data, subset = split1,     model = TRUE, y = TRUE)
     
     Coefficients:
     (Intercept)          cyl         disp  

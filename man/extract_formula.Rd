@@ -7,7 +7,7 @@
 extract_formula(formula)
 }
 \arguments{
-\item{formula}{A formula for the \code{\link[AER]{ivreg}} function, i.e. in
+\item{formula}{A formula for the \code{\link[ivreg]{ivreg}} function, i.e. in
 format \code{y ~ x1 + x2 | z1 + z2}.}
 }
 \value{
@@ -19,7 +19,7 @@ to be included again as instruments and hence coincide with \code{$x1_var}),
 and \code{$z2_var} refers to the outside instruments.
 }
 \description{
-\code{extract_formula} takes a formula object for \code{\link[AER]{ivreg}},
+\code{extract_formula} takes a formula object for \code{\link[ivreg]{ivreg}},
 i.e. in a format of \code{y ~ x1 + x2 | x1 + z2} and extracts the different
 elements in a list. Each element is a character vector storing the different
 types of regressors. Element \code{y_var} refers to the dependent variable,

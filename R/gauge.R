@@ -104,7 +104,7 @@ outliers_prop <- function(robust2sls_object, iteration) {
 #'
 #' @return \code{outlier} returns a vector that contains the 'type' value for
 #' the given observations across the different iterations. There are three
-#' possible values: 1 if the observations is judged to be an outlier, 0 if not,
+#' possible values: 0 if the observations is judged to be an outlier, 1 if not,
 #' and -1 if any of its x, y, or z values required for estimation is missing.
 #'
 #' @export
@@ -143,11 +143,12 @@ outlier <- function(robust2sls_object, obs) {
 #' in the reference distribution against which observations are judged as
 #' outliers or not.
 #' @param initial_est A character vector that specifies the initial estimator
-#' for the outlier detection algorithm. \code{"robustified"} means that the full
-#' sample 2SLS is used as initial estimator. \code{"saturated"} splits the
-#' sample into two parts and estimates a 2SLS on each subsample. The
-#' coefficients of one subsample are used to calculate residuals and determine
-#' outliers in the other subsample.
+#'   for the outlier detection algorithm. \code{"robustified"} means that the
+#'   full sample 2SLS is used as initial estimator. \code{"saturated"} splits
+#'   the sample into two parts and estimates a 2SLS on each subsample. The
+#'   coefficients of one subsample are used to calculate residuals and determine
+#'   outliers in the other subsample. \code{"iis"} applies impulse indicator
+#'   saturation (IIS) as implemented in \code{\link[ivgets]{ivisat}}.
 #' @param iteration An integer >= 0 or character \code{"convergence"}
 #' representing the iteration for which the outliers are calculated. Uses the
 #' fixed point value if set to \code{"convergence"}.
@@ -158,14 +159,22 @@ outlier <- function(robust2sls_object, obs) {
 #' in which proportions the sample will be split. Can be \code{NULL} if
 #' \code{initial_est == "robustified"}.
 #'
+#' @details Initial estimator \code{"iis"} uses the asymptotic variances of
+#'   \code{"robustified"} 2SLS because there is no formal theory for the
+#'   multi-block search.
+#'
 #' @return \code{gauge_avar} returns a numeric value.
 #'
 #' @export
 
 gauge_avar <- function(ref_dist = c("normal"), sign_level,
-                       initial_est = c("robustified", "saturated"),
+                       initial_est = c("robustified", "saturated", "iis"),
                        iteration, parameters, split) {
 
+  if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
+    stop(strwrap("Argument 'initial_est' must be a character vector of
+                 length 1", prefix = " ", initial = ""))
+  }
   if (!is.numeric(sign_level) | !identical(length(sign_level), 1L)) {
     stop(strwrap("Argument 'sign_level' must be a numeric vector of length 1",
                  prefix = " ", initial = ""))
@@ -207,8 +216,8 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
   if (is.null(parameters) && !identical(ref_dist, "normal")){ # nocov start
     stop("Argument 'parameters' can only be NULL if ref_dist == 'normal'")
   } # nocov end
-  if (is.null(split) & !identical(initial_est, "robustified")) {
-    stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified'")
+  if (is.null(split) & !(initial_est %in% c("robustified", "iis"))) {
+    stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified' or 'iis'")
   }
   if (!is.null(split)) { # only need to check these when is not NULL
     if (!is.numeric(split) | !identical(length(split), 1L)) {
@@ -220,12 +229,8 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
                    prefix = " ", initial = ""))
     }
   }
-  if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
-    stop(strwrap("Argument 'initial_est' must be a character vector of
-                 length 1", prefix = " ", initial = ""))
-  }
   # available initial estimators:
-  initial_avail <- c("robustified", "saturated")
+  initial_avail <- c("robustified", "saturated", "iis")
   if (!(initial_est %in% initial_avail)) {
     stop(strwrap(paste(c("Argument 'initial_est' must be one of the available
                  initial estimators:", initial_avail), collapse = " "),
@@ -236,7 +241,7 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
   # therefore if this is the case, can use the existing formulas for robustified
   sat_split_half <- (initial_est == "saturated" && split == 0.5)
 
-  if (initial_est == "robustified" | sat_split_half) {
+  if (initial_est == "robustified" | initial_est == "iis" | sat_split_half) {
     if (ref_dist == "normal") {
 
       # NOTE: under normality, general formula simplifies a lot
@@ -392,7 +397,8 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
 #' sample 2SLS is used as initial estimator. \code{"saturated"} splits the
 #' sample into two parts and estimates a 2SLS on each subsample. The
 #' coefficients of one subsample are used to calculate residuals and determine
-#' outliers in the other subsample.
+#' outliers in the other subsample. \code{"iis"} applies impulse indicator
+#'   saturation (IIS) as implemented in \code{\link[ivgets]{ivisat}}.
 #' @param iteration An integer >= 0 or character \code{"convergence"}
 #' representing the iteration for which the outliers are calculated. Uses the
 #' fixed point value if set to \code{"convergence"}.
@@ -405,12 +411,20 @@ gauge_avar <- function(ref_dist = c("normal"), sign_level,
 #'
 #' @return \code{gauge_covar} returns a numeric value.
 #'
+#' @details Initial estimator \code{"iis"} uses the asymptotic variances of
+#'   \code{"robustified"} 2SLS because there is no formal theory for the
+#'   multi-block search.
+#'
 #' @export
 
 gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
-                       initial_est = c("robustified", "saturated"),
+                       initial_est = c("robustified", "saturated", "iis"),
                        iteration, parameters, split) {
 
+  if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
+    stop(strwrap("Argument 'initial_est' must be a character vector of
+                 length 1", prefix = " ", initial = ""))
+  }
   if (!is.numeric(sign_level1) | !identical(length(sign_level1), 1L)) {
     stop(strwrap("Argument 'sign_level1' must be a numeric vector of length 1",
                  prefix = " ", initial = ""))
@@ -460,8 +474,8 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
   if (is.null(parameters) && !identical(ref_dist, "normal")){ # nocov start
     stop("Argument 'parameters' can only be NULL if ref_dist == 'normal'")
   } # nocov end
-  if (is.null(split) & !identical(initial_est, "robustified")) {
-    stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified'")
+  if (is.null(split) & !(initial_est %in% c("robustified", "iis"))) {
+    stop("Argument 'split' cannot be NULL unless initial estimator is 'robustified' or 'iis'")
   }
   if (!is.null(split)) { # only need to check these when is not NULL
     if (!is.numeric(split) | !identical(length(split), 1L)) {
@@ -473,12 +487,9 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
                    prefix = " ", initial = ""))
     }
   }
-  if (!is.character(initial_est) | !identical(length(initial_est), 1L)) {
-    stop(strwrap("Argument 'initial_est' must be a character vector of
-                 length 1", prefix = " ", initial = ""))
-  }
+
   # available initial estimators:
-  initial_avail <- c("robustified", "saturated")
+  initial_avail <- c("robustified", "saturated", "iis")
   if (!(initial_est %in% initial_avail)) {
     stop(strwrap(paste(c("Argument 'initial_est' must be one of the available
                  initial estimators:", initial_avail), collapse = " "),
@@ -491,7 +502,7 @@ gauge_covar <- function(ref_dist = c("normal"), sign_level1, sign_level2,
   # therefore if this is the case, can use the existing formulas for robustified
   sat_split_half <- (initial_est == "saturated" && split == 0.5)
 
-  if (initial_est == "robustified" | sat_split_half) {
+  if (initial_est == "robustified" | initial_est == "iis" | sat_split_half) {
     if (ref_dist == "normal") {
 
       # NOTE: under normality, general formula simplifies a lot

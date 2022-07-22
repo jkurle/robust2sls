@@ -32,5 +32,5 @@ gammas determining the different cut-offs were used in the scaling sum test.
 the sum of the deviations between sample and population FODR differ
 significantly from its expected value.
 \loadmathjax
-\mjdeqn{ \sum_{k = 1}^{K} \sqrt{n}(\widehat{\gamma}_{c_{k}} - \gamma_{c_{k}}) }{}
+\mjdeqn{\sum_{k = 1}^{K} \sqrt{n}(\widehat{\gamma}_{c_{k}} - \gamma_{c_{k}}) }{sum k = (1 to K) sqrt(n) (gammahat_{c_{k}} - gamma_{c{k}})}
 }

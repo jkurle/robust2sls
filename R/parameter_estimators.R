@@ -93,7 +93,7 @@ estimate_param_null <- function(robust2SLS_object) {
 
   # estimate E(r2i ui)
   # run full model and obtain the standardised residuals
-  full <- AER::ivreg(formula = robust2SLS_object$cons$formula, data = data,
+  full <- ivreg::ivreg(formula = robust2SLS_object$cons$formula, data = data,
                      model = TRUE, y = TRUE)
   u_std_hat <- full$residuals / full$sigma
   MRu_hat <- colMeans(R2_hat * u_std_hat)

@@ -23,16 +23,16 @@
 #' standardised residuals, the third one a logical vector with \code{TRUE} if
 #' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
-#' list is an integer vector with three values: 1 if the observations is judged
-#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
-#' stores the \code{\link[AER]{ivreg}} model object based on which the four
+#' list is an integer vector with three values: 0 if the observations is judged
+#' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
+#' stores the \code{\link[ivreg]{ivreg}} model object based on which the four
 #' vectors were calculated.
 #'
 #' @export
 
 robustified_init <- function(data, formula, cutoff) {
 
-  full <- AER::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+  full <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
 
   # extract all variables appearing in the regression formula
   vars <- extract_formula(formula)
@@ -50,7 +50,7 @@ robustified_init <- function(data, formula, cutoff) {
 #' Based on this estimator, observations are classified as outliers or not.
 #'
 #' @inheritParams robustified_init
-#' @param user_model A model object of \link{class} \link[AER]{ivreg} whose
+#' @param user_model A model object of \link{class} \link[ivreg]{ivreg} whose
 #' parameters are used to calculate the residuals.
 #'
 #' @section Warning:
@@ -69,9 +69,9 @@ robustified_init <- function(data, formula, cutoff) {
 #' standardised residuals, the third one a logical vector with \code{TRUE} if
 #' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
-#' list is an integer vector with three values: 1 if the observations is judged
-#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
-#' stores the \code{\link[AER]{ivreg}} user-specified model object based on
+#' list is an integer vector with three values: 0 if the observations is judged
+#' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
+#' stores the \code{\link[ivreg]{ivreg}} user-specified model object based on
 #' which the four vectors were calculated.
 #'
 #' @export
@@ -80,7 +80,7 @@ user_init <- function(data, formula, cutoff, user_model) {
 
   if (class(user_model) != "ivreg") {
     stop(strwrap("The argument `user_model` is not of class `ivreg`, the model
-                 object class for 2SLS models from package `AER`",
+                 object class for 2SLS models from package `ivreg`",
                  initial = "", prefix = " "))
   }
 
@@ -128,9 +128,9 @@ user_init <- function(data, formula, cutoff, user_model) {
 #' standardised residuals, the third one a logical vector with \code{TRUE} if
 #' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
-#' list is an integer vector with three values: 1 if the observations is judged
-#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
-#' is a list with the two initial \code{\link[AER]{ivreg}} model objects based
+#' list is an integer vector with three values: 0 if the observations is judged
+#' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
+#' is a list with the two initial \code{\link[ivreg]{ivreg}} model objects based
 #' on the two different sub-samples.
 #'
 #' @export
@@ -230,12 +230,12 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
   # this way, we can use the contents of split1/2_name to refer to the var
   model_split1 <- NULL
   model_split2 <- NULL
-  command1 <- paste("model_split1 <- AER::ivreg(formula = formula, data = data,
+  command1 <- paste("model_split1 <- ivreg::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", split1_name, ")")
   expr1 <- parse(text = command1)
   eval(expr1)
 
-  command2 <- paste("model_split2 <- AER::ivreg(formula = formula, data = data,
+  command2 <- paste("model_split2 <- ivreg::ivreg(formula = formula, data = data,
                     model = TRUE, y = TRUE, subset = ", split2_name, ")")
   expr2 <- parse(text = command2)
   eval(expr2)
@@ -285,4 +285,91 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
 
 }
 
+#' Impulse Indicator Saturation (IIS initial estimator)
+#'
+#' @inheritParams robustified_init
+#' @inheritParams ivgets::ivisat
+#' @param gamma A numeric value between 0 and 1 representing the significance
+#'   level used for two-sided significance t-test on the impulse indicators.
+#'   Corresponds to the probability of falsely classifying an observation as an
+#'   outlier.
+#' @param t.pval A numeric value between 0 and 1 representing the significance
+#'   level for the Parsimonious Encompassing Test (PET).
+#'
+#' @return \code{iis_init} returns a list with five elements. The first
+#' four are vectors whose length equals the number of observations in the data
+#' set. Unlike the residuals stored in a model object (usually accessible via
+#' \code{model$residuals}), it does not ignore observations where any of y, x
+#' or z are missing. It instead sets their values to \code{NA}.
+#'
+#' The first element is a double vector containing the residuals for each
+#' observation based on the model estimates. The second element contains the
+#' standardised residuals, the third one a logical vector with \code{TRUE} if
+#' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
+#' and \code{NA} if any of y, x, or z are missing. The fourth element of the
+#' list is an integer vector with three values: 0 if the observations is judged
+#' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
+#' stores the \code{\link[ivreg]{ivreg}} model object based on which the four
+#' vectors were calculated.
+#'
+#' @section Note:
+#' IIS runs multiple models, similar to \code{\link{saturated_init}} but with
+#' multiple block search. These intermediate models are not recorded. For
+#' simplicity, the element \code{$model} of the returned list stores the full
+#' sample model result, identical to \code{\link{robustified_init}}.
+#'
+#' @export
 
+iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
+                     normality.JarqueB = NULL, turbo = FALSE, overid = NULL,
+                     weak = NULL) {
+
+  # can only use this function when "ivgets" is installed
+  if (!requireNamespace("ivgets", quietly = TRUE)) {
+    stop("Package 'ivgets' must be installed to use this function.", .call = FALSE)
+  }
+
+  # run full model as reference
+  full <- ivreg::ivreg(formula = formula, data = data, model = TRUE, y = TRUE)
+
+  # problems with ivregFun in combination with getsFun when have missings
+  # reason: getsFun deletes trailing and leading NAs in x or y but not z (b/c treated separately)
+  # causes error in ivregFun when binding y, x, and z because different length
+  # need to ensure that run ivisat only on the subset of nonmissing observations
+  # still keep track of all to get complete classification vector in the end
+
+  # need to match indicators found in complete subset later to original obs
+  rownames.orig <- rownames(data)
+  rownames(data) <- as.character(1:NROW(data))
+
+  # check which observations are complete
+  complete <- nonmissing(data = data, formula = formula)
+  complete_data <- data[complete, ]
+
+  iismodel <- ivgets::ivisat(formula = formula, data = complete_data, iis = TRUE,
+                             sis = FALSE, tis = FALSE, uis = FALSE,
+                             blocks = NULL, ratio.threshold = 0.8,
+                             max.block.size = 30, t.pval = gamma,
+                             wald.pval = t.pval, do.pet = do.pet,
+                             # don't need these two tests b/c iid model
+                             ar.LjungB = NULL, arch.LjungB = NULL,
+                             normality.JarqueB = normality.JarqueB,
+                             info.method = "sc", include.1cut = FALSE,
+                             include.empty = FALSE, max.paths = NULL,
+                             parallel.options = NULL, turbo = turbo,
+                             tol = 1e-07, max.regs = NULL,
+                             print.searchinfo = FALSE, plot = NULL,
+                             alarm = FALSE, overid = overid, weak = weak)
+
+  if (is.null(iismodel$final)) {
+    stop("IIS final model is NULL. See warning.")
+  }
+
+  vars <- extract_formula(formula)
+  y_var <- vars$y_var
+
+  update_info <- selection_iis(x = iismodel, data = data, yvar = y_var,
+                               complete = complete, rownames_orig = rownames.orig,
+                               refmodel = full)
+
+}

@@ -2,7 +2,7 @@
 title: "Outlier Testing"
 output: rmarkdown::html_vignette
 author: "Jonas Kurle"
-date: "13 Februar 2022"
+date: "11 June 2022"
 vignette: >
   %\VignetteIndexEntry{Outlier Testing}
   %\VignetteEngine{knitr::rmarkdown}

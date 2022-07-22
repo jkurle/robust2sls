@@ -23,7 +23,7 @@ now appended with the new iteration results.
 }
 \description{
 \code{update_list} takes an existing \code{"robust2sls"} object and appends
-the estimation results (\link[AER]{ivreg} model object, residuals,
+the estimation results (\link[ivreg]{ivreg} model object, residuals,
 standardised residuals, selection and type vectors) of a new iteration.
 }
 \keyword{internal}

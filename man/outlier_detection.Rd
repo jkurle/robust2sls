@@ -9,7 +9,7 @@ outlier_detection(
   formula,
   ref_dist = c("normal"),
   sign_level,
-  initial_est = c("robustified", "saturated", "user"),
+  initial_est = c("robustified", "saturated", "user", "iis"),
   user_model = NULL,
   iterations = 1,
   convergence_criterion = NULL,
@@ -17,13 +17,14 @@ outlier_detection(
   shuffle = FALSE,
   shuffle_seed = NULL,
   split = 0.5,
-  verbose = FALSE
+  verbose = FALSE,
+  iis_args = NULL
 )
 }
 \arguments{
 \item{data}{A dataframe.}
 
-\item{formula}{A formula for the \code{\link[AER]{ivreg}} function, i.e. in
+\item{formula}{A formula for the \code{\link[ivreg]{ivreg}} function, i.e. in
 the format \code{y ~ x1 + x2 | x1 + z2} where \code{y} is the dependent
 variable, \code{x1} are the exogenous regressors, \code{x2} the endogenous
 regressors, and \code{z2} the outside instruments.}
@@ -37,15 +38,17 @@ in the reference distribution against which observations are judged as
 outliers or not.}
 
 \item{initial_est}{A character vector that specifies the initial estimator
-for the outlier detection algorithm. \code{"robustified"} means that the full
-sample 2SLS is used as initial estimator. \code{"saturated"} splits the
-sample into two parts and estimates a 2SLS on each subsample. The
+for the outlier detection algorithm. \code{"robustified"} means that the
+full sample 2SLS is used as initial estimator. \code{"saturated"} splits
+the sample into two parts and estimates a 2SLS on each subsample. The
 coefficients of one subsample are used to calculate residuals and determine
 outliers in the other subsample. \code{"user"} allows the user to specify a
-model based on which observations are classified as outliers. See section
-"Warning" for more information and conditions.}
+model based on which observations are classified as outliers. \code{"iis"}
+applies impulse indicator saturation (IIS) as implemented in
+\code{\link[ivgets]{ivisat}}. See section "Warning" for more information
+and conditions.}
 
-\item{user_model}{A model object of \link{class} \link[AER]{ivreg}. Only
+\item{user_model}{A model object of \link{class} \link[ivreg]{ivreg}. Only
 required if argument \code{initial_est} is set to \code{"user"}, otherwise
 \code{NULL}.}
 
@@ -83,6 +86,11 @@ in which proportions the sample will be split.}
 
 \item{verbose}{A logical value whether progress during estimation should be
 reported.}
+
+\item{iis_args}{A list with named entries corresponding to the arguments for
+\code{\link{iis_init}} (\code{t.pval}, \code{do.pet},
+\code{normality.JarqueB}, \code{turbo}, \code{overid}, \code{weak}). Can be
+\code{NULL} if \code{initial_est != "iis"}.}
 }
 \value{
 \code{outlier_detection} returns an object of class
@@ -121,7 +129,7 @@ reported.}
   converged already before the user-specified number of iterations were
   reached.}
   \item{\code{$model}}{A list storing the model objects of class
-  \link[AER]{ivreg} for each iteration. Each model is stored under
+  \link[ivreg]{ivreg} for each iteration. Each model is stored under
   \code{$m0}, \code{$m1}, ...}
   \item{\code{$res}}{A list storing the residuals of all observations for
   each iteration. Residuals of observations where any of the y, x, or z
@@ -161,7 +169,9 @@ the L2 norm.
 
 Check \href{https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view}{Jiao (2019)}
 (as well as forthcoming working paper in the future) about conditions on the
-initial estimator that should be satisfied for the initial estimator (e.g.
-they have to be Op(1)).
+initial estimator that should be satisfied for the initial estimator when
+using \code{initial_est == "user"} (e.g. they have to be Op(1)).
+IIS is a generalisation of \code{\link[=saturated_init]{Saturated 2SLS}} with
+multiple block search but no asymptotic theory exists for IIS.
 }
 

@@ -1,6 +1,14 @@
-# robust2sls 0.2.0.9000
+# robust2sls 0.2.1
 
+## Major changes
 
+* addition of Impulse Indicator Saturation (IIS) as initial estimator for outlier detection
+(from ivgets package)
+
+## Minor changes
+
+* code coverage has been extended to 100%
+* update formulae for FODR under normality (estimation not required)
 
 
 # robust2sls 0.2.0

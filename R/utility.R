@@ -1,6 +1,6 @@
 #' Extract the elements of ivreg formula
 #'
-#' \code{extract_formula} takes a formula object for \code{\link[AER]{ivreg}},
+#' \code{extract_formula} takes a formula object for \code{\link[ivreg]{ivreg}},
 #' i.e. in a format of \code{y ~ x1 + x2 | x1 + z2} and extracts the different
 #' elements in a list. Each element is a character vector storing the different
 #' types of regressors. Element \code{y_var} refers to the dependent variable,
@@ -9,7 +9,7 @@
 #' included again as instruments and hence coincide with \code{x1_var}), and
 #' \code{z2_var} refers to the outside instruments.
 #'
-#' @param formula A formula for the \code{\link[AER]{ivreg}} function, i.e. in
+#' @param formula A formula for the \code{\link[ivreg]{ivreg}} function, i.e. in
 #' format \code{y ~ x1 + x2 | z1 + z2}.
 #'
 #' @return \code{extract_formula} returns a list with five named components,
@@ -20,6 +20,7 @@
 #' and \code{$z2_var} refers to the outside instruments.
 #'
 #' @keywords internal
+#' @export
 
 extract_formula <- function(formula) {
 
@@ -80,7 +81,7 @@ extract_formula <- function(formula) {
 #' @param data A dataframe.
 #' @param yvar A character vector of length 1 that refers to the name of the
 #' dependent variable in the data set.
-#' @param model A model object of \link{class} \code{\link[AER]{ivreg}} whose
+#' @param model A model object of \link{class} \code{\link[ivreg]{ivreg}} whose
 #' parameters are used to calculate the residuals.
 #' @param cutoff A numeric cutoff value used to judge whether an observation
 #' is an outlier or not. If its absolute value is larger than the cutoff value,
@@ -100,9 +101,9 @@ extract_formula <- function(formula) {
 #' standardised residuals, the third one a logical vector with \code{TRUE} if
 #' the observation is judged as not outlying, \code{FALSE} if it is an outlier,
 #' and \code{NA} if any of y, x, or z are missing. The fourth element of the
-#' list is an integer vector with three values: 1 if the observations is judged
-#' to be an outlier, 0 if not, and -1 if missing. The fifth and last element
-#' stores the \code{\link[AER]{ivreg}} model object based on which the four
+#' list is an integer vector with three values: 0 if the observations is judged
+#' to be an outlier, 1 if not, and -1 if missing. The fifth and last element
+#' stores the \code{\link[ivreg]{ivreg}} model object based on which the four
 #' vectors were calculated.
 #'
 #' @section Warning:
@@ -173,6 +174,108 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
 
 }
 
+#' Create selection (non-outlying) vector from IIS model
+#'
+#' \code{selection_iis} uses the data and isat model object to create a list
+#' with five elements that are used to determine whether the observations are
+#' judged as outliers or not.
+#'
+#' @param x An object of class \code{\link[ivgets:ivisat]{ivisat}}.
+#' @inheritParams selection
+#' @param complete A logical vector with the same length as the number of
+#'   observations in the data set that specifies whether an observation has any
+#'   missing values in any of y, x, or z variables.
+#' @param rownames_orig A character vector storing the original rownames of the
+#'   dataframe.
+#' @param refmodel A model object that will be stored in \code{$model}.
+#'
+#' @inheritSection selection Warning
+#' @inherit selection return
+#'
+#' @section Note:
+#' IIS runs multiple models, similar to \code{\link{saturated_init}} but with
+#' multiple block search. These intermediate models are not recorded. For
+#' simplicity, the element \code{$model} of the returned list stores the full
+#' sample model result, identical to \code{\link{robustified_init}}.
+#'
+#' @export
+
+selection_iis <- function(x, data, yvar, complete, rownames_orig, refmodel) {
+
+  if (!identical(class(x), "ivisat")) {
+    stop("Argument 'x' must be of class 'ivisat'.")
+  }
+  if (!identical(typeof(yvar), "character") | !identical(length(yvar), 1L)) {
+    stop("Argument 'yvar' must be a character of length 1.")
+  }
+  if (!identical(typeof(complete), "logical") | !identical(length(complete), NROW(data))) {
+    stop("Argument 'complete' must be a logical vector with length equal to number of rows in 'data'.")
+  }
+  if (!(yvar %in% colnames(data))) {
+    stop("Variable 'yvar' cannot be found in 'data'.")
+  }
+  if (!identical(typeof(rownames_orig), "character") | !identical(length(rownames_orig), NROW(data))) {
+    stop("Argument 'rownames_orig' must be a character vector with length equal to number of rows in 'data'.")
+  }
+  if (!identical(class(refmodel), "ivreg")) {
+    stop("Argument 'refmodel' must be of class 'ivreg'.")
+  }
+
+  # initialise vector outputs
+  res <- rep(NA, times = NROW(data))
+  stdres <- rep(NA, times = NROW(data))
+  sel <- rep(NA, times = NROW(data))
+  type <- rep(-1, times = NROW(data))
+
+  # use residuals from IIS model (even though these are not truly the residuals)
+  # residuals are not unique in this set-up because each obs has several models
+  # NOTE: residual will be zero for obs with a corresponding indicator
+  res[complete] <- x$final$residuals
+  # undo df correction because our theory did not use it (asymp. equivalent and here irrelevant for selection)
+  stdres[complete] <- x$final$residuals / (x$final$sigma * sqrt(x$final$df.residual / x$final$nobs))
+
+  # check how many indicators were retained, is NULL if none were retained
+  indnames <- x$selection$ISnames
+  indnum <- length(indnames)
+
+  # fill in sel and type with correct values
+  if (identical(indnum, 0L)) { # no indicator retained
+
+    # update values
+    # all observations TRUE (except for incomplete observations)
+    sel[complete] <- TRUE
+    # all observations 1 (except for incomplete observations)
+    type[complete] <- 1
+
+  } else { # at least one indicator retained
+
+    # check which observations (relates to those used in estimation, in case have missings)
+    obs <- sub(pattern = "iis", replacement = "", x = indnames)
+    obs.numeric <- as.numeric(obs)
+    # corresponding observations in original data frame
+    complete_data <- data[complete, ]
+    obs.original <- as.numeric(rownames(complete_data)[obs.numeric])
+
+    # update values
+    sel[complete] <- TRUE
+    sel[obs.original] <- FALSE
+    type[complete] <- 1
+    type[obs.original] <- 0
+
+  } # end creation of 4 vectors
+
+  # ensure type is integer
+  type <- as.integer(type)
+
+  # give names if previously named
+  names(res) <- names(stdres) <- names(sel) <- names(type) <- rownames_orig
+
+  # output
+  return(list(res = res, stdres = stdres, sel = sel, type = type,
+              model = refmodel))
+
+}
+
 #' Determine which observations can be used for estimation
 #'
 #' \code{nonmissing} takes a dataframe and a formula and determines which
@@ -193,6 +296,7 @@ selection <- function(data, yvar, model, cutoff, bias_correction = NULL) {
 #' means at least one of these variables necessary for estimation is missing.
 #'
 #' @keywords internal
+#' @export
 
 nonmissing <- function(data, formula) {
 
@@ -204,6 +308,9 @@ nonmissing <- function(data, formula) {
   vars <- extract_formula(formula = formula)
   all_vars <- union(union(union(union(vars$y_var, vars$x1_var), vars$x2_var),
                           vars$z1_var), vars$z2_var)
+
+  # if formula contains "0", "-1", or "1", don't need to check
+  all_vars <- setdiff(all_vars, c("0", "-1", "1"))
 
   # initialise logical vector with all TRUE
   non_missing <- !logical(length = NROW(data))
@@ -253,7 +360,7 @@ nonmissing <- function(data, formula) {
 #' convergence criterion should not be used.
 #' @param max_iter A numeric value that determines after which iteration the
 #' algorithm stops in case it does not converge.
-#' @param user_model A model object of \link{class} \link[AER]{ivreg}. Only
+#' @param user_model A model object of \link{class} \link[ivreg]{ivreg}. Only
 #' required if argument \code{initial_est} is set to \code{"user"}, otherwise
 #' \code{NULL}.
 #' @param verbose A logical value whether progress during estimation should be
@@ -344,7 +451,7 @@ constants <- function(call, formula, data, reference = c("normal"), sign_level,
 #' Append new iteration results to \code{"robust2sls"} object
 #'
 #' \code{update_list} takes an existing \code{"robust2sls"} object and appends
-#' the estimation results (\link[AER]{ivreg} model object, residuals,
+#' the estimation results (\link[ivreg]{ivreg} model object, residuals,
 #' standardised residuals, selection and type vectors) of a new iteration.
 #'
 #' @param current_list A list object of class \code{"robust2sls"}.
