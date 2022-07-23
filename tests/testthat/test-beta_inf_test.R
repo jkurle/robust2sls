@@ -1,5 +1,7 @@
 test_that("beta_inf_correction() throws correct errors to invalid inputs", {
 
+  skip_on_cran()
+
   data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
   data[1, "mpg"] <- NA
@@ -53,6 +55,8 @@ test_that("beta_inf_correction() throws correct errors to invalid inputs", {
 })
 
 test_that("beta_inf_correction() produces the correct output", {
+
+  skip_on_cran()
 
   data <- datasets::swiss
   formula <- Fertility ~ Education + Infant.Mortality | Catholic + Infant.Mortality
@@ -124,6 +128,8 @@ test_that("beta_inf_correction() produces the correct output", {
 
 test_that("beta_inf() throws correct errors to invalid inputs", {
 
+  skip_on_cran()
+
   data <- datasets::swiss
   formula <- Fertility ~ Education + Infant.Mortality | Catholic + Infant.Mortality
   # this example only converges after the second iteration
@@ -174,6 +180,8 @@ test_that("beta_inf() throws correct errors to invalid inputs", {
 
 test_that("beta_inf produces the correct output", {
 
+  skip_on_cran()
+
   data <- datasets::swiss
   formula <- Fertility ~ Education + Infant.Mortality | Catholic + Infant.Mortality
   # this example only converges after the second iteration
@@ -220,6 +228,8 @@ test_that("beta_inf produces the correct output", {
 
 test_that("beta_test_avar() throws the correct errors to invalid inputs", {
 
+  skip_on_cran()
+
   data <- datasets::swiss
   formula <- Fertility ~ Education + Infant.Mortality | Catholic + Infant.Mortality
   # this example only converges after the second iteration
@@ -258,6 +268,8 @@ test_that("beta_test_avar() throws the correct errors to invalid inputs", {
 })
 
 test_that("beta_test_avar() produces the correct output", {
+
+  skip_on_cran()
 
   data <- datasets::swiss
   formula <- Fertility ~ Education + Infant.Mortality | Catholic + Infant.Mortality
@@ -336,6 +348,8 @@ test_that("beta_test_avar() produces the correct output", {
 
 test_that("beta_t() throws the correct errors to invalid inputs", {
 
+  skip_on_cran()
+
   data <- datasets::swiss
   formula <- Fertility ~ Education + Infant.Mortality | Catholic + Infant.Mortality
   # this example only converges after the second iteration
@@ -393,6 +407,8 @@ test_that("beta_t() throws the correct errors to invalid inputs", {
 })
 
 test_that("beta_t() produces the correct output", {
+
+  skip_on_cran()
 
   data <- datasets::swiss
   formula <- Fertility ~ Education + Infant.Mortality | Catholic + Infant.Mortality
@@ -482,6 +498,8 @@ test_that("beta_t() produces the correct output", {
 
 test_that("beta_hausman() throws the correct errors to invalid inputs", {
 
+  skip_on_cran()
+
   data <- datasets::swiss
   formula <- Fertility ~ Education + Infant.Mortality | Catholic + Infant.Mortality
   # this example only converges after the second iteration
@@ -539,6 +557,8 @@ test_that("beta_hausman() throws the correct errors to invalid inputs", {
 })
 
 test_that("beta_hausman() produces the correct output", {
+
+  skip_on_cran()
 
   data <- datasets::swiss
   formula <- Fertility ~ Education + Infant.Mortality | Catholic + Infant.Mortality
