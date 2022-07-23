@@ -3,6 +3,8 @@
 
 test_that("nonparametric() works as intended", {
 
+  skip_on_cran()
+
   indices <- 1:100
   R <- 10
 
@@ -36,6 +38,8 @@ test_that("nonparametric() works as intended", {
 })
 
 test_that("count_indices() works as intended", {
+
+  skip_on_cran()
 
   indices <- 1:10
   R <- 5
@@ -95,6 +99,8 @@ test_that("count_indices() works as intended", {
 
 test_that("nonparametric_resampling() works correctly", {
 
+  skip_on_cran()
+
   data <- mtcars
   resamples <- nonparametric(indices = 1:NROW(data), R = 5, replacement = TRUE,
                              seed = 1)
@@ -114,6 +120,8 @@ test_that("nonparametric_resampling() works correctly", {
 })
 
 test_that("case_resampling() works correctly", {
+
+  skip_on_cran()
 
   library(future)
   library(parallel)
@@ -244,6 +252,8 @@ test_that("case_resampling() works correctly", {
 
 test_that("extract_boot() works correctly", {
 
+  skip_on_cran()
+
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data
   r1 <- outlier_detection(data = d, formula = p$setting$formula,
@@ -290,6 +300,8 @@ test_that("extract_boot() works correctly", {
 })
 
 test_that("evaluate_boot() works correctly", {
+
+  skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data

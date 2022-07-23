@@ -1,6 +1,8 @@
 
 test_that("outlier_detection() produces correct output", {
 
+  skip_on_cran()
+
   data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
   data[1, "mpg"] <- NA
@@ -338,6 +340,8 @@ test_that("outlier_detection() produces correct output", {
 
 test_that("outlier_detection() printing verbose works correctly", {
 
+  skip_on_cran()
+
   data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt
   data[1, "mpg"] <- NA
@@ -369,6 +373,8 @@ test_that("outlier_detection() printing verbose works correctly", {
 })
 
 test_that("outlier_detection() works correctly when 'selection' variable exists", {
+
+  skip_on_cran()
 
   data <- datasets::mtcars
   formula <- mpg ~ cyl + disp | cyl + wt

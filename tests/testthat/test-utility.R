@@ -1,5 +1,7 @@
 test_that("extract_formula() works correctly", {
 
+  skip_on_cran()
+
   f1 <- y ~ x1 + x2 | x1 + z2 + z3
   v1 <- extract_formula(f1)
 
@@ -37,6 +39,9 @@ test_that("extract_formula() works correctly", {
 })
 
 test_that("selection() works correctly", {
+
+  skip_on_cran()
+
   dta <- datasets::mtcars
   dta[1, "mpg"] <- NA
   dta[2, "cyl"] <- NA
@@ -111,6 +116,8 @@ test_that("selection() works correctly", {
 
 test_that("nonmissing() works correctly", {
 
+  skip_on_cran()
+
   expect_equal(nonmissing(data = mtcars, formula = mpg ~ cyl + disp | cyl + wt),
                !logical(length = 32))
 
@@ -138,6 +145,8 @@ test_that("nonmissing() works correctly", {
 })
 
 test_that("constants() works correctly", {
+
+  skip_on_cran()
 
   # working values
   data <- datasets::mtcars
@@ -419,6 +428,8 @@ test_that("constants() works correctly", {
 
 test_that("update_list() works correctly", {
 
+  skip_on_cran()
+
   # these tests will only test the mechanics and not its actual usage
   # but I emulate the mechanics:
   # start with a list that has the components that will be updated + another one
@@ -478,6 +489,8 @@ test_that("update_list() works correctly", {
 })
 
 test_that("conv_difference() works correctly", {
+
+  skip_on_cran()
 
   # working values
   data <- datasets::mtcars
@@ -539,6 +552,8 @@ test_that("conv_difference() works correctly", {
 
 test_that("conv_difference() throws correct errors", {
 
+  skip_on_cran()
+
   # working values
   data <- datasets::mtcars
   # since formula has an environment, whose memory address changes each time
@@ -594,6 +609,8 @@ test_that("conv_difference() throws correct errors", {
 
 
 test_that("varrho() works correctly", {
+
+  skip_on_cran()
 
   # set some parameters
   sign_level <- 0.05
@@ -671,6 +688,8 @@ test_that("varrho() works correctly", {
 
 test_that("mvn_sup() works correctly", {
 
+  skip_on_cran()
+
   m <- c(0, 1)
   S <- matrix(c(2, 1, 1, 3), 2, 2)
 
@@ -696,6 +715,8 @@ test_that("mvn_sup() works correctly", {
 
 
 test_that("selection_iis() works correctly", {
+
+  skip_on_cran()
 
   set.seed(10)
   p <- generate_param(1, 1, 1, beta = c(2, 4), sigma = 1,
@@ -1027,6 +1048,8 @@ test_that("selection_iis() works correctly", {
 })
 
 test_that("selection_iis() returns correct input errors", {
+
+  skip_on_cran()
 
   # baseline values
   set.seed(10)

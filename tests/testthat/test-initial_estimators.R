@@ -1,6 +1,8 @@
 
 test_that("robustified_init() works correctly", {
 
+  skip_on_cran()
+
   data <- datasets::mtcars
   data[1, "mpg"] <- NA # y missing
   data[2, "cyl"] <- NA # x1 missing
@@ -108,6 +110,8 @@ test_that("robustified_init() works correctly", {
 
 test_that("user_init() works correctly", {
 
+  skip_on_cran()
+
   # test errors
   data <- datasets::mtcars
   data[1, "mpg"] <- NA # y missing
@@ -135,6 +139,8 @@ test_that("user_init() works correctly", {
 })
 
 test_that("saturated_init() works correctly", {
+
+  skip_on_cran()
 
   data <- datasets::mtcars
   data[1, "mpg"] <- NA # y missing
@@ -274,6 +280,8 @@ test_that("saturated_init() works correctly", {
 
 test_that("saturated_init() throws correct errors", {
 
+  skip_on_cran()
+
   data <- datasets::mtcars
   data[1, "mpg"] <- NA # y missing
   data[2, "cyl"] <- NA # x1 missing
@@ -318,6 +326,8 @@ test_that("saturated_init() throws correct errors", {
 
 test_that("saturated_init() works correctly when split variable exists", {
 
+  skip_on_cran()
+
   data <- datasets::mtcars
   data[1, "mpg"] <- NA # y missing
   data[2, "cyl"] <- NA # x1 missing
@@ -354,6 +364,8 @@ test_that("saturated_init() works correctly when split variable exists", {
 })
 
 test_that("iis_init() works corectly", {
+
+  skip_on_cran()
 
   set.seed(10)
   p <- generate_param(1, 1, 1, beta = c(2, 4), sigma = 1,

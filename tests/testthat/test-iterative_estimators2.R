@@ -4,6 +4,8 @@
 
 test_that("outlier_detection() with iis_init() works, fixed iterations", {
 
+  skip_on_cran()
+
   # base setup
   set.seed(10)
   p <- generate_param(1, 1, 1, beta = c(2, 4), sigma = 1,
@@ -98,6 +100,8 @@ test_that("outlier_detection() with iis_init() works, fixed iterations", {
 
 test_that("outlier_detection() with iis_init() works, convergence", {
 
+  skip_on_cran()
+
   # base setup
   set.seed(10)
   p <- generate_param(1, 1, 1, beta = c(2, 4), sigma = 1,
@@ -174,6 +178,8 @@ test_that("outlier_detection() with iis_init() works, convergence", {
 })
 
 test_that("outlier_detection() works with iis_init(), tests turned on", {
+
+  skip_on_cran()
 
   # base setup
   set.seed(50)

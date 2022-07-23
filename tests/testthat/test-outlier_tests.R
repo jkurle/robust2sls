@@ -1,5 +1,7 @@
 test_that("test_cpv() works correctly", {
 
+  skip_on_cran()
+
   expect_error(test_cpv(c("a", "b", "c"), 1, 0.1), "'dist' must be a numeric vector")
   expect_error(test_cpv(c(0, 1, 2), "a", 0.1), "'teststat' must be a single numeric value")
   expect_error(test_cpv(c(0, 1, 2), c(1.1, 1.2), 0.1), "'teststat' must be a single numeric value")
@@ -21,6 +23,8 @@ test_that("test_cpv() works correctly", {
 })
 
 test_that("simes() works correctly", {
+
+  skip_on_cran()
 
   expect_error(simes(pvals = c("a", "b"), alpha = 0.05), "'pvals' must be a numeric vector")
   expect_error(simes(pvals = c(0.1, 0.05, 1.1), alpha = 0.05), "'pvals' must lie between 0 and 1")
@@ -67,6 +71,8 @@ test_that("simes() works correctly", {
 })
 
 test_that("multi_cutoff() works correctly", {
+
+  skip_on_cran()
 
   library(robust2sls)
   p <- generate_param(1, 1, 1, seed = 40)
@@ -164,6 +170,8 @@ test_that("multi_cutoff() works correctly", {
 })
 
 test_that("proptest() works correctly", {
+
+  skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data
@@ -301,6 +309,8 @@ test_that("proptest() works correctly", {
 
 test_that("proptest() raises correct errors", {
 
+  skip_on_cran()
+
   expect_error(proptest(robust2sls_object = 1, alpha = 0.05, iteration = 1,
                         one_sided = TRUE),
                "'robust2sls_object' must be of class 'robust2sls' or a list")
@@ -346,6 +356,8 @@ test_that("proptest() raises correct errors", {
 })
 
 test_that("counttest() raises correct errors", {
+
+  skip_on_cran()
 
   expect_error(counttest(robust2sls_object = 1, alpha = 0.05, iteration = 1,
                         one_sided = TRUE),
@@ -401,6 +413,8 @@ test_that("counttest() raises correct errors", {
 })
 
 test_that("counttest() works correctly", {
+
+  skip_on_cran()
 
   # note: since changed from poisson.test() to poisson.exact() need to specify
   # tsmethod = "minlike" to reproduce tests as had done originally
@@ -589,6 +603,8 @@ test_that("counttest() works correctly", {
 
 test_that("multi_cutoff_to_fodr_vec() raises correct errors", {
 
+  skip_on_cran()
+
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data
   gammas <- seq(0.01, 0.1, 0.01)
@@ -618,6 +634,8 @@ test_that("multi_cutoff_to_fodr_vec() raises correct errors", {
 })
 
 test_that("multi_cutoff_to_fodr_vec() works correctly", {
+
+  skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data
@@ -681,6 +699,8 @@ test_that("multi_cutoff_to_fodr_vec() works correctly", {
 
 test_that("sumtest() raises correct errors", {
 
+  skip_on_cran()
+
   expect_error(sumtest(robust2sls_object = 1, alpha = 0.05, iteration = 1,
                         one_sided = TRUE),
                "'robust2sls_object' must be a list of 'robust2sls' objects")
@@ -726,6 +746,8 @@ test_that("sumtest() raises correct errors", {
 })
 
 test_that("sumtest() works correctly", {
+
+  skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data
@@ -813,6 +835,8 @@ test_that("sumtest() works correctly", {
 
 test_that("suptest() raises correct error", {
 
+  skip_on_cran()
+
   expect_error(suptest(robust2sls_object = 1, alpha = 0.05, iteration = 1),
                "'robust2sls_object' must be a list of 'robust2sls' objects")
   expect_error(suptest(robust2sls_object = list(1, 2), alpha = 0.05,
@@ -852,6 +876,8 @@ test_that("suptest() raises correct error", {
 })
 
 test_that("suptest() works correctly", {
+
+  skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data
@@ -919,6 +945,8 @@ test_that("suptest() works correctly", {
 
 test_that("globaltest() raises correct errors", {
 
+  skip_on_cran()
+
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data
   gammas <- seq(0.01, 0.05, 0.01)
@@ -944,6 +972,8 @@ test_that("globaltest() raises correct errors", {
 })
 
 test_that("globaltest() works correctly", {
+
+  skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   d <- generate_data(parameters = p, n = 1000)$data

@@ -1,5 +1,7 @@
 test_that("generate_param() gives correct error messages", {
 
+  skip_on_cran()
+
   # dx1
   expect_error(generate_param(dx1 = "1", dx2 = 2, dz2 = 2),
                "'dx1' must be numeric")
@@ -134,6 +136,8 @@ test_that("generate_param() gives correct error messages", {
 
 test_that("generate_param() works correctly", {
 
+  skip_on_cran()
+
   # expect no error for:
   p <- generate_param(3, 2, 3)
   expect_silent(generate_param(3, 2, 3, beta = p$params$beta))
@@ -164,6 +168,8 @@ test_that("generate_param() works correctly", {
 
 
 test_that("generate_data() works correctly", {
+
+  skip_on_cran()
 
   # checked that this replicates the output from original data_gen_2SLS() fun
   p1 <- generate_param(3, 2, 3, seed = 42)
