@@ -1,5 +1,5 @@
 # CRAN Comments for: robust2sls
-#### 22 July 2022, version 0.2.1
+#### 15 August 2022, version 0.2.1
 
 ## Test environments
 
@@ -11,13 +11,18 @@
     * R version 4.2.1 (2022-06-23)
     * R under development (unstable) (2022-07-21 r82611)
 * win-builder:
-  * Windows x86_64-w64-mingw32 (64-bit), R version 4.2.1 (2022-06-23 ucrt)
+  * old-release: Windows x86_64-w64-mingw32 (64-bit), R version 4.1.3 (2022-03-10)
+  * release: Windows x86_64-w64-mingw32 (64-bit), R version 4.2.1 (2022-06-23 ucrt)
+  * development: Windows x86_64-w64-mingw32 (64-bit), R under development (unstable) (2022-08-14 r82716 ucrt)
 * own machine:
   * Windows 11, version 21H2, Build 22000.739, x86_64-w64-mingw32/x64 (64-bit), R version 4.1.3 (2022-03-10)
 
 ## R CMD check results
 
-There were no ERRORs, WARNINGS, or NOTEs.
+Checks produced no ERRORs, WARNINGS, or NOTEs except for:
+
+* win-builder old-release had 1 NOTE: Possibly mis-spelled words in DESCRIPTION: *Jiao* and *SLS*
+  * both spellings are correct: *Jiao* is an author name, *SLS* is a standard abbreviation in *2SLS* standing for "Two Stage Least Squares" 
 
 ## Downstream dependencies
 
