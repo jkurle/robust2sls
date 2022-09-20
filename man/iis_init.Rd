@@ -13,7 +13,8 @@ iis_init(
   normality.JarqueB = NULL,
   turbo = FALSE,
   overid = NULL,
-  weak = NULL
+  weak = NULL,
+  fast = FALSE
 )
 }
 \arguments{
@@ -46,6 +47,10 @@ as the significance level.}
 should be used as a diagnostic check for model selection or a numeric value
 between 0 and 1. In the latter case, the test is conducted using this value
 as the significance level.}
+
+\item{fast}{A logical value indicating whether to speed up the 2SLS
+estimation but providing less details. Requires \code{overid == NULL} and
+\code{weak == NULL}.}
 }
 \value{
 \code{iis_init} returns a list with five elements. The first
