@@ -322,7 +322,7 @@ saturated_init <- function(data, formula, cutoff, shuffle, shuffle_seed,
 
 iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
                      normality.JarqueB = NULL, turbo = FALSE, overid = NULL,
-                     weak = NULL) {
+                     weak = NULL, parallel.options = parallel.options) {
 
   # can only use this function when "ivgets" is installed
   if (!requireNamespace("ivgets", quietly = TRUE)) { # nocov start
@@ -356,7 +356,7 @@ iis_init <- function(data, formula, gamma, t.pval = gamma, do.pet = FALSE,
                              normality.JarqueB = normality.JarqueB,
                              info.method = "sc", include.1cut = FALSE,
                              include.empty = FALSE, max.paths = NULL,
-                             parallel.options = NULL, turbo = turbo,
+                             parallel.options = parallel.options, turbo = turbo,
                              tol = 1e-07, max.regs = NULL,
                              print.searchinfo = FALSE, plot = NULL,
                              alarm = FALSE, overid = overid, weak = weak)
