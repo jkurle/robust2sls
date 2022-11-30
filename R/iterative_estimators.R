@@ -198,7 +198,8 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
                         t.pval = iis_args$t.pval, do.pet = iis_args$do.pet,
                         normality.JarqueB = iis_args$normality.JarqueB,
                         turbo = iis_args$turbo, overid = iis_args$overid,
-                        weak = iis_args$weak)
+                        weak = iis_args$weak,
+                        parallel.options = iis_args$parallel.options)
   # fail-safe, this should never be reached due to match.arg
   } else { # nocov start
     stop(strwrap("Unknown `initial_est` argument", prefix = " ", initial = ""))
