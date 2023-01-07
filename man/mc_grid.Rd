@@ -107,6 +107,9 @@ the theory of the gauge, simple proportion tests, and count tests.
 }
 \section{Details}{
 
+Requires the package \href{https://cran.r-project.org/package=doRNG}{doRNG}
+to be installed, which has been orphaned as of 2022-12-09.
+
 The following arguments can also be supplied as a vector of their type:
 \code{n}, \code{sign_level}, \code{initial_est}, and \code{split}. This makes
 the function estimate all possible combinations of the arguments. Note that

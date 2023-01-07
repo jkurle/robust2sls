@@ -532,6 +532,9 @@ generate_data <- function(parameters, n) {
 #' @param verbose A logical value whether any messages should be printed.
 #'
 #' @section Details:
+#' Requires the package \href{https://cran.r-project.org/package=doRNG}{doRNG}
+#' to be installed, which has been orphaned as of 2022-12-09.
+#'
 #' The following arguments can also be supplied as a vector of their type:
 #' \code{n}, \code{sign_level}, \code{initial_est}, and \code{split}. This makes
 #' the function estimate all possible combinations of the arguments. Note that
@@ -556,7 +559,6 @@ generate_data <- function(parameters, n) {
 #' adjusted by the sample size - are calculated ("var_ratio"). Furthermore,
 #' tentative results of size and power for the tests are calculated.
 #'
-#' @import doRNG
 #' @importFrom foreach %dopar% %do%
 #' @importFrom stats poisson.test
 #' @export
@@ -565,6 +567,12 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
                     initial_est, iterations, convergence_criterion = NULL,
                     max_iter = NULL, shuffle = FALSE, shuffle_seed = 10,
                     split = 0.5, path = FALSE, verbose = FALSE) {
+
+  `%dorng%` <- doRNG::`%dorng%`
+
+  if (!requireNamespace("doRNG", quietly = TRUE)) {
+    stop("Package \"doRNG\" must be installed to use this function.", call. = FALSE)
+  }
 
   gamma <- sign_level
 
