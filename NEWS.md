@@ -1,4 +1,14 @@
-# robust2sls 0.2.1.9000
+# robust2sls 0.2.2
+
+## Minor changes
+
+* move package [doRNG](https://cran.r-project.org/package=doRNG) from `Imports` to `Suggests`
+because the package has been orphaned as of 2022-12-19. Only affects the function 
+`mc_grid()`, which is anyway for advanced users only
+
+## Bug Fixes
+
+* fix bug in unit testing
 
 # robust2sls 0.2.1
 
