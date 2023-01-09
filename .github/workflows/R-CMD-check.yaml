@@ -30,6 +30,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - uses: r-lib/actions/setup-pandoc@v2
 
