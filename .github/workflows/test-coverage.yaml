@@ -1,4 +1,4 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Workflow derived from https://github.com/r-lib/actions/tree/master/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
@@ -15,17 +15,17 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
-      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r@v1
         with:
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      - uses: r-lib/actions/setup-r-dependencies@v1
         with:
-          extra-packages: any::covr
-          needs: coverage
+          extra-packages: covr
 
       - name: Test coverage
-        run: covr::codecov(quiet = FALSE, function_exclusions = c("estimate_param$", "plot\\.robust2sls$"))
+        # exclude two functions: estimate_param() superseded; plot.robust2sls() tested locally but problems with CI
+        run: covr::codecov(function_exclusions = c("estimate_param$", "plot\\.robust2sls$"))
         shell: Rscript {0}
