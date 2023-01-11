@@ -571,7 +571,7 @@ mc_grid <- function(M, n, seed, parameters, formula, ref_dist, sign_level,
   `%dorng%` <- doRNG::`%dorng%`
 
   if (!requireNamespace("doRNG", quietly = TRUE)) {
-    stop("Package \"doRNG\" must be installed to use this function.", call. = FALSE)
+    stop("Package \"doRNG\" must be installed to use this function.", call. = FALSE) # nocov
   }
 
   gamma <- sign_level

@@ -1,5 +1,5 @@
 # CRAN Comments for: robust2sls
-#### 07 January 2023, version 0.2.2
+#### 11 January 2023, version 0.2.2
 
 * Follows the email from Prof Brian Ripley that the package "doRNG" has been orphaned and therefore 
 needs to be removed from the Imports field.
@@ -9,12 +9,12 @@ needs to be removed from the Imports field.
 ## Test environments
 
 * GitHub Actions:
-  ** Windows 10.0.20348, Build 768, x86_64-w64-mingw32 (64-bit), R version 4.2.1 (2022-06-23 ucrt)
-  ** MacOS 11.6.7 (20G630), x86_64-apple-darwin17.0 (64-bit), R version 4.2.1 (2022-06-23)
-  ** Ubuntu 20.04.4 LTS, Linux kernel version: 5.15.0-1014-azure, x86_64-pc-linux-gnu (64-bit),
-    ** R version 4.1.3 (2022-03-10)
-    ** R version 4.2.1 (2022-06-23)
-    ** R under development (unstable) (2022-07-21 r82611)
+  * Windows 10.0.20348, Build 1366, x86_64-w64-mingw32 (64-bit), R version 4.2.2 (2022-10-31 ucrt)
+  * MacOS 12.6.2 (21G320), x86_64-apple-darwin17.0 (64-bit), R version 4.2.2 (2022-10-31)
+  * Ubuntu 20.04.5 LTS, Linux kernel version: 5.15.0-1023-azure, x86_64-pc-linux-gnu (64-bit),
+    * R version 4.1.3 (2022-03-10)
+    * R version 4.2.2 (2022-10-31)
+    * R under development (unstable) (2023-01-09 r83588)
 * win-builder:
   * old-release: Windows x86_64-w64-mingw32 (64-bit), R version 4.1.3 (2022-03-10)
   * release: Windows x86_64-w64-mingw32 (64-bit), R version 4.2.2 (2022-06-23 ucrt)
