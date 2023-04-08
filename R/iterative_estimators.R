@@ -66,8 +66,8 @@
 #' reported.
 #' @param iis_args A list with named entries corresponding to the arguments for
 #'   \code{\link{iis_init}} (\code{t.pval}, \code{do.pet},
-#'   \code{normality.JarqueB}, \code{turbo}, \code{overid}, \code{weak}). Can be
-#'   \code{NULL} if \code{initial_est != "iis"}.
+#'   \code{normality.JarqueB}, \code{turbo}, \code{overid}, \code{weak},
+#'   \code{fast}). Can be \code{NULL} if \code{initial_est != "iis"}.
 #'
 #' @return \code{outlier_detection} returns an object of class
 #' \code{"robust2sls"}, which is a list with the following components:
@@ -147,6 +147,17 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
   # capture the original function call
   cll <- sys.call()
 
+  # match the iis_args if not all specified
+  if (!is.null(iis_args)) {
+    iis_args_default <- list(t.pval = sign_level, do.pet = FALSE,
+                             normality.JarqueB = NULL, turbo = FALSE,
+                             overid = NULL, weak = NULL, fast = FALSE)
+    iis_args_match <- match(c("t.pval", "do.pet", "normality.JarqueB", "turbo",
+                              "overid", "weak", "fast"), names(iis_args), 0)
+    iis_args_default[iis_args_match > 0] <- iis_args
+    iis_args <- iis_args_default
+  }
+
   # initialise the robust2sls (class) object
   out <- list(cons = list(), model = list(), res = list(), stdres = list(),
               sel = list(), type = list())
@@ -198,7 +209,7 @@ outlier_detection <- function(data, formula, ref_dist = c("normal"), sign_level,
                         t.pval = iis_args$t.pval, do.pet = iis_args$do.pet,
                         normality.JarqueB = iis_args$normality.JarqueB,
                         turbo = iis_args$turbo, overid = iis_args$overid,
-                        weak = iis_args$weak)
+                        weak = iis_args$weak, fast = iis_args$fast)
   # fail-safe, this should never be reached due to match.arg
   } else { # nocov start
     stop(strwrap("Unknown `initial_est` argument", prefix = " ", initial = ""))
