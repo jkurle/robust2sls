@@ -1,3 +1,10 @@
+# robust2sls 0.2.3
+
+## Bug Fixes
+
+* update documentation
+* re-create binaries with newer R version to address CRAN NOTEs
+
 # robust2sls 0.2.2
 
 ## Minor changes

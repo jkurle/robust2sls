@@ -42,8 +42,8 @@ gauge
 }
 \details{
 Argument \code{parallel} allows for parallel computing using the
-\link{foreach} package, so the user has to register a parallel backend before
-invoking this command.
+\link[foreach]{foreach} package, so the user has to register a parallel
+backend before invoking this command.
 
 Argument \code{coef} is useful if the model includes many controls whose
 parameters are not of interest. This can reduce the memory space needed to

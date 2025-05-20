@@ -2,6 +2,7 @@
 % Please edit documentation in R/robust2sls.R
 \docType{package}
 \name{robust2sls-package}
+\alias{robust2sls}
 \alias{robust2sls-package}
 \title{robust2sls: A package for outlier robust 2SLS inference and testing}
 \description{
@@ -19,4 +20,16 @@ Second, the robust2sls package provides easy-to-use statistical tests on
 whether the difference between the original and the outlier-robust estimates
 is statistically significant. Furthermore, several different statistical
 tests are implemented to test whether the sample actually contains outliers.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/jkurle/robust2sls}
+  \item Report bugs at \url{https://github.com/jkurle/robust2sls/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Jonas Kurle \email{mail@jonaskurle.com} (\href{https://orcid.org/0000-0003-2197-2012}{ORCID})
+
 }

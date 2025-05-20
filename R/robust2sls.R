@@ -17,6 +17,5 @@
 #' tests are implemented to test whether the sample actually contains outliers.
 #'
 #' @name robust2sls-package
-#' @docType package
-NULL
+"_PACKAGE"
 
