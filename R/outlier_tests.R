@@ -61,8 +61,7 @@ test_cpv <- function(dist, teststat, p) {
 #' the adjusted significance level according to Simes' procedure, and the
 #' rejection decision for each individual hypothesis test.
 #'
-#' @details See
-#' \href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
+#' @details See Simes (1986), \doi{doi:10.1093/biomet/73.3.751}.
 #'
 #' @keywords internal
 #' @export
@@ -718,8 +717,7 @@ suptest <- function(robust2sls_object, alpha, iteration, p = c(0.9, 0.95, 0.99),
 #'
 #' @seealso [proptest()], [counttest()]
 #'
-#' @details See
-#' \href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
+#' @details See Simes (1986), \doi{doi:10.1093/biomet/73.3.751}.
 #'
 #' @return A list with three entries. The first entry named \code{$reject}
 #'   contains the global rejection decision. The second entry named

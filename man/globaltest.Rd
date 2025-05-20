@@ -28,8 +28,7 @@ cut-offs to test a global hypothesis of no outliers using the Simes (1986)
 procedure to account for multiple testing.
 }
 \details{
-See
-\href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
+See Simes (1986), \doi{doi:10.1093/biomet/73.3.751}.
 }
 \seealso{
 [proptest()], [counttest()]
