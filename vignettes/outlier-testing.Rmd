@@ -143,8 +143,7 @@ deviations from the expected value while the two-sided test rejects in both
 directions.
 
 When testing several settings of the algorithms, we have a multiple testing 
-issue. We can apply the 
-[Simes (1986)](https://academic.oup.com/biomet/article/73/3/751/250538) 
+issue. We can apply the Simes (1986) (DOI: 10.1093/biomet/73.3.751) 
 procedure to fix the significance level for the global null hypothesis, which is
 rejected if any of the individual null hypotheses is rejected at the adjusted
 significance level.
@@ -181,8 +180,7 @@ counttest(model, alpha = 0.05, iteration = 5, one_sided = FALSE)
 counttest(models, alpha = 0.05, iteration = 5, one_sided = TRUE)
 ```
 
-As before, we can use the 
-[Simes (1986)](https://academic.oup.com/biomet/article/73/3/751/250538) 
+As before, we can use the Simes (1986) (DOI: 10.1093/biomet/73.3.751) 
 procedure to account for multiple hypothesis testing.
 
 ```{r, counttest simes}

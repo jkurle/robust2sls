@@ -27,7 +27,6 @@ hypothesis. The global null hypothesis is the intersection of all individual
 null hypotheses.
 }
 \details{
-See
-\href{https://academic.oup.com/biomet/article/73/3/751/250538}{Simes (1986)}.
+See Simes (1986), \doi{doi:10.1093/biomet/73.3.751}.
 }
 \keyword{internal}

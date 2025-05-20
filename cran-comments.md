@@ -1,8 +1,11 @@
 # CRAN Comments for: robust2sls
 #### 20 May 2025, version 0.2.3
 
+* This is a resubmissions
+
 * Follows the email from Kurt Hornik alerting me about NOTEs in the CRAN incoming feasibility checks
 * These issues are now fixed with minor changes to function documentation and re-building the binaries
+* new: replaced links with DOIs
 
 ## Test environments
 
