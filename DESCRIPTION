@@ -28,6 +28,7 @@ Suggests:
     grDevices,
     ivgets,
     knitr,
+    mockery,
     parallel,
     rmarkdown,
     testthat,

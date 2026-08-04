@@ -1,3 +1,29 @@
+make_mock_generate_data <- function(root_dir) {
+  state <- new.env(parent = emptyenv())
+  state$last_n <- NULL
+  state$m <- 0L
+  state$max_m <- 0L
+  mock_generate_data <- function(parameters, n) {
+    key <- as.character(n)
+    n_dir <- file.path(root_dir, paste0("n", n))
+    # if n has changed from before, need to update and reset counter
+    if (!identical(state$last_n, key)) {
+      state$last_n <- key
+      state$m <- 0L
+      state$max_m <- length(list.files(n_dir, pattern = paste0("^n", key, "_m[0-9]+\\.rds$")))
+    }
+    state$m <- state$m + 1L
+    if (state$m > state$max_m) {
+      state$m <- 1L
+    }
+    f <- file.path(n_dir, paste0("n", key, "_m", state$m, ".rds"))
+    print(paste0("n", key, "m", state$m))
+    readRDS(f)
+  }
+  return(mock_generate_data)
+}
+
+
 test_that("generate_param() gives correct error messages", {
 
   skip_on_cran()
@@ -257,12 +283,17 @@ test_that("mc_grid() works correctly", {
 
   skip_on_cran() # probably too long and might have problems with parallel
   # skip_on_ci() # causes trouble on Windows server
+
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d1"))
+  mockery::stub(mc_grid, "generate_data", mock_generate_data)
+
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  # ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallel::makeCluster(ncores)
-  parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
-  future::plan(future::cluster, workers = cl)
+  # cl <- parallel::makeCluster(ncores)
+  # parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
+  # future::plan(future::cluster, workers = cl)
+  future::plan(future::sequential)
   results <- mc_grid(100, n = c(100, 1000), seed = 42, parameters = p,
                               formula = p$setting$formula, ref_dist = "normal",
                               sign_level = c(0.01, 0.05),
@@ -271,27 +302,33 @@ test_that("mc_grid() works correctly", {
                               shuffle_seed = NULL, split = c(0.3, 0.4, 0.5))
 
   expect_snapshot_output(results) # checked with manual original simulations
-  parallel::stopCluster(cl)
+  # parallel::stopCluster(cl)
 
 })
 
 test_that("mc_grid() works correctly with convergence setting", {
 
+  message("reached here")
   skip_on_cran() # probably too long and might have problems with parallel
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d2"))
+  mockery::stub(mc_grid, "generate_data", mock_generate_data)
+
   p <- generate_param(dx1 = 2, dx2 = 1, dz2 = 1, seed = 42)
 
   # know the values because tested the settings before in a separate file
   # convergence without max_iter
-  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  # ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallel::makeCluster(ncores)
-  parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
-  future::plan(future::cluster, workers = cl)
+  # cl <- parallel::makeCluster(ncores)
+  # parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
+  # future::plan(future::cluster, workers = cl)
+  future::plan(future::sequential)
+  message("reached here2")
   out <- mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
                  formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
                  sign_level = 0.05, initial_est = "robustified",
                  iterations = "convergence", convergence_criterion = 0)
-  parallel::stopCluster(cl)
+  # parallel::stopCluster(cl)
 
   outfreq <- list(list("2" = 1L, "3" = 3L, "4" = 3L, "5" = 1L, "8" = 1L, "9" = 1L),
                   list("5" = 4L, "6" = 2L, "7" = 1L, "8" = 1L, "10" = 1L, "15" = 1L))
@@ -302,17 +339,18 @@ test_that("mc_grid() works correctly with convergence setting", {
   expect_equal(out$max, c("NULL", "NULL"))
 
   # convergence with max_iter
-  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  # ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallel::makeCluster(ncores)
-  parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
-  future::plan(future::cluster, workers = cl)
+  # cl <- parallel::makeCluster(ncores)
+  # parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
+  # future::plan(future::cluster, workers = cl)
+  future::plan(future::sequential)
   out2 <- mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
                   formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
                   sign_level = 0.05, initial_est = "robustified",
                   iterations = "convergence", convergence_criterion = 0,
                   max_iter = 5)
-  parallel::stopCluster(cl)
+  # parallel::stopCluster(cl)
 
   outfreq2 <- list(list("2" = 1L, "3" = 3L, "4" = 3L, "5" = 3L),
                    list("5" = 10L))
