@@ -99,7 +99,8 @@ test_that("beta_inf_correction() produces the correct output", {
 
   # synthetic data
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  dat <- generate_data(parameters = p, n = 1000)$data
+  # dat <- generate_data(parameters = p, n = 1000)$data
+  dat <- readRDS(test_path("./testdata/testdata1.rds"))
   # this one does not converge, so $convergence$converged and $iter are NULL
   obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
                            0.1, "robustified", iterations = "convergence",
@@ -311,7 +312,8 @@ test_that("beta_test_avar() produces the correct output", {
 
   # synthetic data
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  dat <- generate_data(parameters = p, n = 1000)$data
+  # dat <- generate_data(parameters = p, n = 1000)$data
+  dat <- readRDS(test_path("./testdata/testdata1.rds"))
   obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
                            0.1, "robustified", iterations = "convergence",
                            convergence_criterion = 0, max_iter = 20)

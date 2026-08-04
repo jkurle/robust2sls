@@ -372,7 +372,8 @@ test_that("iis_init() works corectly", {
                       mean_z = 0, cov_z = matrix(1),
                       Sigma2_half = matrix(1), Omega2 = matrix(3/4),
                       Pi = t(matrix(c(1, 0, 0, 1), nrow = 2)))
-  d <- generate_data(parameters = p, n = 50)$data
+  # d <- generate_data(parameters = p, n = 50)$data
+  d <- readRDS(test_path("./testdata/testdata2.rds"))
   formula <- y ~ -1+x1+x2 | -1+x1+z2
   gamma <- 0.05
 

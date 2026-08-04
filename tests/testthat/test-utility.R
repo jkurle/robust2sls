@@ -723,7 +723,8 @@ test_that("selection_iis() works correctly", {
                       mean_z = 0, cov_z = matrix(1),
                       Sigma2_half = matrix(1), Omega2 = matrix(3/4),
                       Pi = t(matrix(c(1, 0, 0, 1), nrow = 2)))
-  d <- generate_data(parameters = p, n = 50)$data
+  # d <- generate_data(parameters = p, n = 50)$data
+  d <- readRDS(test_path("./testdata/testdata2.rds"))
   rownames_orig <- rownames(d)
   rownames(d) <- as.character(1:NROW(d))
   formula <- y ~ -1+x1+x2 | -1+x1+z2
@@ -1057,7 +1058,8 @@ test_that("selection_iis() returns correct input errors", {
                       mean_z = 0, cov_z = matrix(1),
                       Sigma2_half = matrix(1), Omega2 = matrix(3/4),
                       Pi = t(matrix(c(1, 0, 0, 1), nrow = 2)))
-  d <- generate_data(parameters = p, n = 50)$data
+  # d <- generate_data(parameters = p, n = 50)$data
+  d <- readRDS(test_path("./testdata/testdata2.rds"))
   rownames_orig <- rownames(d)
   rownames(d) <- as.character(1:NROW(d))
   formula <- y ~ -1+x1+x2 | -1+x1+z2

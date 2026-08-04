@@ -130,7 +130,8 @@ test_that("case_resampling() works correctly", {
 
   # setup
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   r <- outlier_detection(data = d, formula = p$setting$formula,
                          ref_dist = "normal", sign_level = 0.05,
                          initial_est = "robustified", iterations = 3)
@@ -255,7 +256,8 @@ test_that("extract_boot() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   r1 <- outlier_detection(data = d, formula = p$setting$formula,
                          ref_dist = "normal", sign_level = 0.05,
                          initial_est = "robustified", iterations = 3)
@@ -304,7 +306,8 @@ test_that("evaluate_boot() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   r1 <- outlier_detection(data = d, formula = p$setting$formula,
                           ref_dist = "normal", sign_level = 0.05,
                           initial_est = "robustified", iterations = 3)

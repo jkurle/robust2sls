@@ -76,7 +76,8 @@ test_that("multi_cutoff() works correctly", {
 
   library(robust2sls)
   p <- generate_param(1, 1, 1, seed = 40)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata6.rds"))
   f <- p$setting$formula
 
   expect_error(multi_cutoff(gamma = c("a", "b"), data = d, formula = f,
@@ -174,7 +175,8 @@ test_that("proptest() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.1, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -319,7 +321,8 @@ test_that("proptest() raises correct errors", {
                "is a list but not all elements have class 'robust2sls'")
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.1)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -367,7 +370,8 @@ test_that("counttest() raises correct errors", {
                "is a list but not all elements have class 'robust2sls'")
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.1)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -420,7 +424,8 @@ test_that("counttest() works correctly", {
   # tsmethod = "minlike" to reproduce tests as had done originally
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.1, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -606,7 +611,8 @@ test_that("multi_cutoff_to_fodr_vec() raises correct errors", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.1, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -638,7 +644,8 @@ test_that("multi_cutoff_to_fodr_vec() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.1, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -709,7 +716,8 @@ test_that("sumtest() raises correct errors", {
                "'robust2sls_object' must be a list of 'robust2sls' objects")
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -750,7 +758,8 @@ test_that("sumtest() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -844,7 +853,8 @@ test_that("suptest() raises correct error", {
                "'robust2sls_object' must be a list of 'robust2sls' objects")
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -880,7 +890,9 @@ test_that("suptest() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data # this is needed to move the seed to same state as before, because suptest simulates the critical values
+  assign(".Random.seed", readRDS(test_path("./testdata/rng_state_outlier_tests.rds"))[[1]], envir = .GlobalEnv)
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -948,7 +960,8 @@ test_that("globaltest() raises correct errors", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
@@ -976,7 +989,8 @@ test_that("globaltest() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
   models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
                          ref_dist = "normal", initial_est = "robustified",
