@@ -20,9 +20,9 @@ make_mock_generate_data <- function(root_dir) {
     print(paste0("n", key, "m", state$m))
     readRDS(f)
   }
+  cat(sprintf("%s %s \n", key, state$m), file = file.path(root_dir, "logfile.txt"), append = TRUE)
   return(mock_generate_data)
 }
-
 
 test_that("generate_param() gives correct error messages", {
 
@@ -283,7 +283,6 @@ test_that("mc_grid() works correctly", {
 
   skip_on_cran() # probably too long and might have problems with parallel
   # skip_on_ci() # causes trouble on Windows server
-
   mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d1"))
   mockery::stub(mc_grid, "generate_data", mock_generate_data)
 
@@ -367,12 +366,15 @@ test_that("mc_grid() works correctly with convergence setting", {
 
 test_that("mc_grid() prints correct output when verbose = TRUE", {
 
+  message("reached here3")
   skip_on_cran() # probably too long and might have problems with parallel
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d3"))
+  mockery::stub(mc_grid, "generate_data", mock_generate_data)
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
   future::plan(future::sequential)
-
+  message("reached here4")
   # iterations fixed setting
   expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
                         formula = p$setting$formula, ref_dist = "normal",
@@ -381,6 +383,7 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
                         iterations = 0, shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Total number of Monte Carlo experiments:")
+  message("reached here5")
   expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
                         formula = p$setting$formula, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
