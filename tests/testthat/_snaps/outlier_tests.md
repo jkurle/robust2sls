@@ -685,7 +685,7 @@
 # suptest() works correctly
 
       iter_test test_value    pval alpha reject
-    1         0   0.284605 0.08934  0.05  FALSE
+    1         0   0.284605 0.08828  0.05  FALSE
 
 ---
 
@@ -738,7 +738,7 @@
 ---
 
         iter_test test_value    pval alpha reject
-    1 convergence    0.56921 0.12024  0.05  FALSE
+    1 convergence    0.56921 0.11954  0.05  FALSE
 
 # globaltest() works correctly
 
