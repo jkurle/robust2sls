@@ -606,10 +606,8 @@ plot.robust2sls <- function(x, iteration = NULL, ...) {
                       width = 0.05, na.rm = TRUE) +
     ggplot2::scale_fill_manual(values = c("red","blue"), name="non-outlying",
                       guide = ggplot2::guide_legend(reverse=TRUE)) +
-    ggplot2::geom_segment(ggplot2::aes(x=1, y=critical, xend=NROW(gr),
-                                       yend=critical, color=""), size=1) +
-    ggplot2::geom_segment(ggplot2::aes(x=1, y=-critical, xend=NROW(gr),
-                                       yend=-critical, color=""), size=1) +
+    ggplot2::geom_hline(ggplot2::aes(yintercept=critical, color=""), linewidth=1) +
+    ggplot2::geom_hline(ggplot2::aes(yintercept=-critical, color=""), linewidth=1) +
     ggplot2::labs(x="index",y="standardised residuals",title=title_name) +
     ggplot2::scale_color_manual(name="critical values",values=c("darkgrey")) +
     ggplot2::theme(legend.position="top")
