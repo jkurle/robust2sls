@@ -102,7 +102,7 @@ test_that("beta_inf_correction() produces the correct output", {
   # dat <- generate_data(parameters = p, n = 1000)$data
   dat <- readRDS(test_path("./testdata/testdata1.rds"))
   # this one does not converge, so $convergence$converged and $iter are NULL
-  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
+  obj <- outlier_detection(data = dat, formula = y ~ -1 + x1 + x2 + x3 + x4 + x5 | -1 + x1 + x2 + x3 + z4 + z5 + z6, "normal",
                            0.1, "robustified", iterations = "convergence",
                            convergence_criterion = 0, max_iter = 20)
   # has not converged, so in neither case should use fixed point
@@ -118,7 +118,7 @@ test_that("beta_inf_correction() produces the correct output", {
   expect_equal(attr(d, "type of correction"), "iteration m = 20")
 
   # has not converged, so should not use fixed point
-  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
+  obj <- outlier_detection(data = dat, formula = y ~ -1 + x1 + x2 + x3 + x4 + x5 | -1 + x1 + x2 + x3 + z4 + z5 + z6, "normal",
                            0.1, "robustified", iterations = 1,
                            convergence_criterion = 0)
   a <- beta_inf_correction(obj, iteration = 1, fp = FALSE)
@@ -314,7 +314,7 @@ test_that("beta_test_avar() produces the correct output", {
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   # dat <- generate_data(parameters = p, n = 1000)$data
   dat <- readRDS(test_path("./testdata/testdata1.rds"))
-  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
+  obj <- outlier_detection(data = dat, formula = y ~ -1 + x1 + x2 + x3 + x4 + x5 | -1 + x1 + x2 + x3 + z4 + z5 + z6, "normal",
                            0.1, "robustified", iterations = "convergence",
                            convergence_criterion = 0, max_iter = 20)
   # has not converged, so in neither case should use fixed point
@@ -330,7 +330,7 @@ test_that("beta_test_avar() produces the correct output", {
   expect_equal(attr(d, "type of avar"), "iteration m = 20")
 
   # has not converged, so should not use fixed point
-  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
+  obj <- outlier_detection(data = dat, formula = y ~ -1 + x1 + x2 + x3 + x4 + x5 | -1 + x1 + x2 + x3 + z4 + z5 + z6, "normal",
                            0.1, "robustified", iterations = 1,
                            convergence_criterion = 0)
   a <- beta_test_avar(obj, iteration = 1, fp = FALSE)
@@ -338,7 +338,7 @@ test_that("beta_test_avar() produces the correct output", {
   expect_equal(a, b)
 
   # convergence
-  obj <- outlier_detection(data = dat, formula = p$setting$formula, "normal",
+  obj <- outlier_detection(data = dat, formula = y ~ -1 + x1 + x2 + x3 + x4 + x5 | -1 + x1 + x2 + x3 + z4 + z5 + z6, "normal",
                            0.01, "robustified", iterations = "convergence",
                            convergence_criterion = 0)
   a <- beta_test_avar(obj, iteration = 4, fp = FALSE)
