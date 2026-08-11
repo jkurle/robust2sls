@@ -231,7 +231,7 @@ test_that("generate_data() works correctly", {
   expect_equal(mean(d1$data[, "z6"]), p1$structural$mean[[8]], tolerance = 0.01)
 
   # check that ivreg() recovers beta approximately
-  model <- ivreg::ivreg(y ~ -1 + x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6, data = d1$data)
+  model <- ivreg::ivreg(y ~ -1 + x1 + x2 + x3 + x4 + x5 | -1 + x1 + x2 + x3 + z4 + z5 + z6, data = d1$data)
   coef <- model$coefficients
   names(coef) <- NULL
   coef <- matrix(coef, 5, 1)
@@ -246,7 +246,7 @@ test_that("mc_grid() throws correct error", {
 
   # check error from invalid input "iterations"
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = "nonexist", convergence_criterion = 0),
                "Argument iterations not correctly specified.")
@@ -256,22 +256,22 @@ test_that("mc_grid() throws correct error", {
   doFuture::registerDoFuture()
   future::plan(future::sequential)
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = 3, convergence_criterion = 0, path = "test/"),
                "Argument 'path' should not end with a path separator")
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = 3, convergence_criterion = 0, path = "test\\"),
                "Argument 'path' should not end with a path separator")
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = "convergence", convergence_criterion = 0, path = "test/"),
                "Argument 'path' should not end with a path separator")
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = "convergence", convergence_criterion = 0, path = "test\\"),
                "Argument 'path' should not end with a path separator")
@@ -293,7 +293,7 @@ test_that("mc_grid() works correctly", {
   # future::plan(future::cluster, workers = cl)
   future::plan(future::sequential)
   results <- mc_grid(100, n = c(100, 1000), seed = 42, parameters = p,
-                              formula = p$setting$formula, ref_dist = "normal",
+                              formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                               sign_level = c(0.01, 0.05),
                               initial_est = c("saturated", "robustified"),
                               iterations = 0, shuffle = FALSE,
@@ -321,7 +321,7 @@ test_that("mc_grid() works correctly with convergence setting", {
   # future::plan(future::cluster, workers = cl)
   future::plan(future::sequential)
   out <- mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                 formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                 formula = y~x2+x3|x2+z3, ref_dist = "normal",
                  sign_level = 0.05, initial_est = "robustified",
                  iterations = "convergence", convergence_criterion = 0)
   # parallel::stopCluster(cl)
@@ -342,7 +342,7 @@ test_that("mc_grid() works correctly with convergence setting", {
   # future::plan(future::cluster, workers = cl)
   future::plan(future::sequential)
   out2 <- mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                  formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                  formula = y~x2+x3|x2+z3, ref_dist = "normal",
                   sign_level = 0.05, initial_est = "robustified",
                   iterations = "convergence", convergence_criterion = 0,
                   max_iter = 5)
@@ -372,21 +372,21 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
   future::plan(future::sequential)
   # iterations fixed setting
   expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
                         initial_est = "robustified",
                         iterations = 0, shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Total number of Monte Carlo experiments:")
   expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
                         initial_est = "robustified",
                         iterations = 0, shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Monte Carlo experiment:")
   expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
                         initial_est = "robustified",
                         iterations = 0, shuffle = FALSE,
@@ -395,7 +395,7 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
 
   # convergence setting
   expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01),
                         initial_est = "robustified",
                         iterations = "convergence", convergence_criterion = 3,
@@ -403,7 +403,7 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Total number of Monte Carlo experiments:")
   expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01),
                         initial_est = "robustified",
                         iterations = "convergence", convergence_criterion = 3,
@@ -411,7 +411,7 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Monte Carlo experiment:")
   expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01),
                         initial_est = "robustified",
                         iterations = "convergence", convergence_criterion = 3,
@@ -442,7 +442,7 @@ test_that("mc_grid() saves intermediate results correctly", {
   }
 
   expect_snapshot_file(path = save_file(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                                                  formula = p$setting$formula, ref_dist = "normal",
+                                                  formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                                                   sign_level = c(0.01), path = pth,
                                                   initial_est = "robustified",
                                                   iterations = 0, shuffle = FALSE,
@@ -459,7 +459,7 @@ test_that("mc_grid() saves intermediate results correctly", {
   }
 
   expect_snapshot_file(path = save_file(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                                                formula = p$setting$formula, ref_dist = "normal",
+                                                formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                                                 sign_level = c(0.01), path = pth,
                                                 initial_est = "robustified",
                                                 iterations = "convergence", convergence_criterion = 3,
@@ -482,14 +482,14 @@ test_that("CI::mc_grid() saves intermediate results correctly", {
   future::plan(future::sequential)
 
   expect_silent(a <- mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                formula = p$setting$formula, ref_dist = "normal",
+                formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                 sign_level = c(0.01), path = tempdir(),
                 initial_est = "robustified",
                 iterations = 0, shuffle = FALSE,
                 shuffle_seed = NULL, split = 0.5))
 
   expect_silent(a <- mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                formula = p$setting$formula, ref_dist = "normal",
+                formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                 sign_level = c(0.01), path = tempdir(),
                 initial_est = "robustified",
                 iterations = "convergence", convergence_criterion = 3,
