@@ -313,7 +313,7 @@ test_that("saturated_init() throws correct errors", {
                                 shuffle = FALSE, shuffle_seed = 1, split = 0.2),
                  "Very unequal `split`")
   expect_warning(saturated_init(data = data, formula = formula, cutoff = c,
-                                shuffle = FALSE, shuffle_seed = 1, split = 0.9),
+                                shuffle = FALSE, shuffle_seed = 1, split = 0.8),
                  "Very unequal `split`")
   expect_error(saturated_init(data = data, formula = formula, cutoff = c,
                               shuffle = 1, shuffle_seed = 1, split = 0.5),
