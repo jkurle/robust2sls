@@ -44,7 +44,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 | x1 + z2 
+    Two-stage Least-Squares Model: y ~ x2 | z2 
     Iterations:  0 
     Final selection:  Outliers found:  9     Outliers proportion:  0.009 
     
@@ -52,7 +52,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 | x1 + z2 
+    Two-stage Least-Squares Model: y ~ x2 | z2 
     Iterations:  0 
     Final selection:  Outliers found:  21     Outliers proportion:  0.021 
     
@@ -63,7 +63,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  4 
     Final selection:  Outliers found:  4     Outliers proportion:  0.004 
     
@@ -71,7 +71,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  13     Outliers proportion:  0.013 
     
@@ -79,7 +79,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  21     Outliers proportion:  0.021 
     
@@ -87,7 +87,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  26     Outliers proportion:  0.026 
     
@@ -95,7 +95,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  6 
     Final selection:  Outliers found:  32     Outliers proportion:  0.032 
     
@@ -103,7 +103,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  7 
     Final selection:  Outliers found:  39     Outliers proportion:  0.039 
     
@@ -111,7 +111,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  200 
     Final selection:  Outliers found:  44     Outliers proportion:  0.044 
     
@@ -119,7 +119,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  200 
     Final selection:  Outliers found:  53     Outliers proportion:  0.053 
     
@@ -127,7 +127,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  6 
     Final selection:  Outliers found:  83     Outliers proportion:  0.083 
     
@@ -135,7 +135,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  200 
     Final selection:  Outliers found:  93     Outliers proportion:  0.093 
     
@@ -242,7 +242,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  4 
     Final selection:  Outliers found:  4     Outliers proportion:  0.004 
     
@@ -250,7 +250,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  13     Outliers proportion:  0.013 
     
@@ -258,7 +258,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  21     Outliers proportion:  0.021 
     
@@ -266,7 +266,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  26     Outliers proportion:  0.026 
     
@@ -274,7 +274,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  6 
     Final selection:  Outliers found:  32     Outliers proportion:  0.032 
     
@@ -282,7 +282,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  7 
     Final selection:  Outliers found:  39     Outliers proportion:  0.039 
     
@@ -290,7 +290,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  200 
     Final selection:  Outliers found:  44     Outliers proportion:  0.044 
     
@@ -298,7 +298,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  200 
     Final selection:  Outliers found:  53     Outliers proportion:  0.053 
     
@@ -306,7 +306,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  6 
     Final selection:  Outliers found:  83     Outliers proportion:  0.083 
     
@@ -314,7 +314,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  200 
     Final selection:  Outliers found:  93     Outliers proportion:  0.093 
     
@@ -485,7 +485,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  4 
     Final selection:  Outliers found:  4     Outliers proportion:  0.004 
     
@@ -493,7 +493,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  13     Outliers proportion:  0.013 
     
@@ -501,7 +501,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  21     Outliers proportion:  0.021 
     
@@ -509,7 +509,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  26     Outliers proportion:  0.026 
     
@@ -517,7 +517,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  6 
     Final selection:  Outliers found:  32     Outliers proportion:  0.032 
     
@@ -525,7 +525,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  7 
     Final selection:  Outliers found:  39     Outliers proportion:  0.039 
     
@@ -533,7 +533,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  20 
     Final selection:  Outliers found:  44     Outliers proportion:  0.044 
     
@@ -541,7 +541,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  20 
     Final selection:  Outliers found:  52     Outliers proportion:  0.052 
     
@@ -549,7 +549,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  6 
     Final selection:  Outliers found:  83     Outliers proportion:  0.083 
     
@@ -557,7 +557,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  20 
     Final selection:  Outliers found:  92     Outliers proportion:  0.092 
     
@@ -592,7 +592,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  4 
     Final selection:  Outliers found:  4     Outliers proportion:  0.004 
     
@@ -600,7 +600,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  13     Outliers proportion:  0.013 
     
@@ -608,7 +608,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  21     Outliers proportion:  0.021 
     
@@ -616,7 +616,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  26     Outliers proportion:  0.026 
     
@@ -624,7 +624,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  6 
     Final selection:  Outliers found:  32     Outliers proportion:  0.032 
     
@@ -640,7 +640,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  saturated 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  4     Outliers proportion:  0.004 
     
@@ -648,7 +648,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  saturated 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  13     Outliers proportion:  0.013 
     
@@ -656,7 +656,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  saturated 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  20     Outliers proportion:  0.02 
     
@@ -664,7 +664,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  saturated 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  21     Outliers proportion:  0.021 
     
@@ -672,7 +672,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  saturated 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  29     Outliers proportion:  0.029 
     
@@ -698,7 +698,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  4 
     Final selection:  Outliers found:  4     Outliers proportion:  0.004 
     
@@ -706,7 +706,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  13     Outliers proportion:  0.013 
     
@@ -714,7 +714,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  21     Outliers proportion:  0.021 
     
@@ -722,7 +722,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  3 
     Final selection:  Outliers found:  26     Outliers proportion:  0.026 
     
@@ -730,7 +730,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  6 
     Final selection:  Outliers found:  32     Outliers proportion:  0.032 
     
@@ -746,7 +746,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  4     Outliers proportion:  0.004 
     
@@ -754,7 +754,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  13     Outliers proportion:  0.013 
     
@@ -762,7 +762,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  21     Outliers proportion:  0.021 
     
@@ -770,7 +770,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  26     Outliers proportion:  0.026 
     
@@ -778,7 +778,7 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  2 
     Final selection:  Outliers found:  36     Outliers proportion:  0.036 
     
