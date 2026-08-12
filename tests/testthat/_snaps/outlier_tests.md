@@ -44,17 +44,17 @@
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x2 | z2 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  0 
-    Final selection:  Outliers found:  9     Outliers proportion:  0.009 
+    Final selection:  Outliers found:  6     Outliers proportion:  0.006 
     
     $gamma0.02
     Outlier-Robust 2SLS Model 
     Initial estimator:  robustified 
     Reference distribution:  normal 
-    Two-stage Least-Squares Model: y ~ x2 | z2 
+    Two-stage Least-Squares Model: y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6 
     Iterations:  0 
-    Final selection:  Outliers found:  21     Outliers proportion:  0.021 
+    Final selection:  Outliers found:  14     Outliers proportion:  0.014 
     
 
 # proptest() works correctly

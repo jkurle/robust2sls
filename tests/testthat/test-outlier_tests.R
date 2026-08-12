@@ -75,10 +75,10 @@ test_that("multi_cutoff() works correctly", {
   skip_on_cran()
 
   library(robust2sls)
-  p <- generate_param(1, 1, 1, seed = 40)
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   # d <- generate_data(parameters = p, n = 1000)$data
-  d <- readRDS(test_path("./testdata/testdata6.rds"))
-  f <- y ~ x2 | z2
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
+  f <- y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6
 
   expect_error(multi_cutoff(gamma = c("a", "b"), data = d, formula = f,
                             ref_dist = "normal", initial_est = "robustified",

@@ -46,11 +46,11 @@ saveRDS(d3, file = test_path("./testdata/testdata3.rds"))
 # saveRDS(d5, file = test_path("./testdata/testdata5.rds"))
 # # used once in test-monte_carlo
 
-### artificial data VI
-p6 <- generate_param(1, 1, 1, seed = 40)
-d6 <- generate_data(parameters = p6, n = 1000)$data
-saveRDS(d6, file = test_path("./testdata/testdata6.rds"))
-# used once in test-outlier_test
+# ### artificial data VI
+# p6 <- generate_param(1, 1, 1, seed = 40)
+# d6 <- generate_data(parameters = p6, n = 1000)$data
+# saveRDS(d6, file = test_path("./testdata/testdata6.rds"))
+# # used once in test-outlier_test
 
 # data in mc_grid is special, created inside
 # to save, temporarily add a saveRDS() command inside the mc_grid() function
