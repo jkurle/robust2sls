@@ -31,20 +31,20 @@ d3 <- generate_data(parameters = p3, n = 50)$data
 saveRDS(d3, file = test_path("./testdata/testdata3.rds"))
 # used once in test-iterative_estimators2
 
-##### to test generate_data directly
-### artificial data IV
-p4 <- generate_param(3, 2, 3, seed = 42)
-set.seed(42)
-d4 <- generate_data(p4, n = 30)
-saveRDS(d4, file = test_path("./testdata/testdata4.rds"))
-# used once in test-monte_carlo
-
-### artificial data V
-p5 <- generate_param(3, 2, 3, seed = 42)
-set.seed(42)
-d5 <- generate_data(p5, n = 500000)
-saveRDS(d5, file = test_path("./testdata/testdata5.rds"))
-# used once in test-monte_carlo
+# ##### to test generate_data directly
+# ### artificial data IV
+# p4 <- generate_param(3, 2, 3, seed = 42)
+# set.seed(42)
+# d4 <- generate_data(p4, n = 30)
+# saveRDS(d4, file = test_path("./testdata/testdata4.rds"))
+# # used once in test-monte_carlo
+#
+# ### artificial data V
+# p5 <- generate_param(3, 2, 3, seed = 42)
+# set.seed(42)
+# d5 <- generate_data(p5, n = 500000)
+# saveRDS(d5, file = test_path("./testdata/testdata5.rds"))
+# # used once in test-monte_carlo
 
 ### artificial data VI
 p6 <- generate_param(1, 1, 1, seed = 40)
