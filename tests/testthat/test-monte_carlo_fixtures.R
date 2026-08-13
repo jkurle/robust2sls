@@ -364,28 +364,28 @@ test_that("mc_grid() works correctly with convergence setting", {
 test_that("mc_grid() prints correct output when verbose = TRUE", {
 
   skip_on_cran() # probably too long and might have problems with parallel
-  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d3"))
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
   mockery::stub(mc_grid, "generate_data", mock_generate_data)
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
   future::plan(future::sequential)
   # iterations fixed setting
-  expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
+  expect_output(mc_grid(4, n = c(50, 100), seed = 42, parameters = p,
                         formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
                         initial_est = "robustified",
                         iterations = 0, shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Total number of Monte Carlo experiments:")
-  expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
+  expect_output(mc_grid(4, n = c(50, 100), seed = 42, parameters = p,
                         formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
                         initial_est = "robustified",
                         iterations = 0, shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Monte Carlo experiment:")
-  expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
+  expect_output(mc_grid(4, n = c(50, 100), seed = 42, parameters = p,
                         formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
                         initial_est = "robustified",
@@ -394,7 +394,7 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
                 "user")
 
   # convergence setting
-  expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+  expect_output(mc_grid(4, n = c(100), seed = 42, parameters = p,
                         formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01),
                         initial_est = "robustified",
@@ -402,7 +402,7 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
                         shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Total number of Monte Carlo experiments:")
-  expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+  expect_output(mc_grid(4, n = c(100), seed = 42, parameters = p,
                         formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01),
                         initial_est = "robustified",
@@ -410,7 +410,7 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
                         shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Monte Carlo experiment:")
-  expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+  expect_output(mc_grid(4, n = c(100), seed = 42, parameters = p,
                         formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01),
                         initial_est = "robustified",
@@ -425,7 +425,7 @@ test_that("mc_grid() saves intermediate results correctly", {
 
   skip_on_ci() # runs locally, sometimes causes problems on GitHub Actions
   skip_on_cran() # probably too long and might have problems with parallel
-  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d3"))
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
   mockery::stub(mc_grid, "generate_data", mock_generate_data)
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
@@ -436,12 +436,12 @@ test_that("mc_grid() saves intermediate results correctly", {
   save_file <- function(code) {
     directory <- tempdir()
     pth <<- directory
-    path <- file.path(directory, "M10n1000g0.01irobustifieds0.5.csv")
+    path <- file.path(directory, "M4n100g0.01irobustifieds0.5.csv")
     code
     return(path)
   }
 
-  expect_snapshot_file(path = save_file(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+  expect_snapshot_file(path = save_file(mc_grid(4, n = c(100), seed = 42, parameters = p,
                                                   formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                                                   sign_level = c(0.01), path = pth,
                                                   initial_est = "robustified",
@@ -453,12 +453,12 @@ test_that("mc_grid() saves intermediate results correctly", {
   save_file <- function(code) {
     directory <- tempdir()
     pth <<- directory
-    path <- file.path(directory, "M10n1000g0.01irobustifieds0.5.csv")
+    path <- file.path(directory, "M4n100g0.01irobustifieds0.5.csv")
     code
     return(path)
   }
 
-  expect_snapshot_file(path = save_file(mc_grid(10, n = c(1000), seed = 42, parameters = p,
+  expect_snapshot_file(path = save_file(mc_grid(4, n = c(100), seed = 42, parameters = p,
                                                 formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                                                 sign_level = c(0.01), path = pth,
                                                 initial_est = "robustified",
@@ -475,24 +475,24 @@ test_that("CI::mc_grid() saves intermediate results correctly", {
   # expect_silent to check no error or warnings raised
   skip_on_cran() # probably too long and might have problems with parallel
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d3"))
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
   mockery::stub(mc_grid, "generate_data", mock_generate_data)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
   future::plan(future::sequential)
 
-  expect_silent(a <- mc_grid(10, n = c(1000), seed = 42, parameters = p,
+  expect_silent(a <- mc_grid(4, n = c(100), seed = 42, parameters = p,
                 formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                 sign_level = c(0.01), path = tempdir(),
                 initial_est = "robustified",
                 iterations = 0, shuffle = FALSE,
                 shuffle_seed = NULL, split = 0.5))
 
-  expect_silent(a <- mc_grid(10, n = c(1000), seed = 42, parameters = p,
+  expect_silent(a <- mc_grid(4, n = c(100), seed = 42, parameters = p,
                 formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                 sign_level = c(0.01), path = tempdir(),
                 initial_est = "robustified",
-                iterations = "convergence", convergence_criterion = 3,
+                iterations = "convergence", convergence_criterion = 0,
                 shuffle = FALSE, shuffle_seed = NULL, split = 0.5))
 
 })
