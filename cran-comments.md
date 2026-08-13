@@ -1,11 +1,5 @@
 # CRAN Comments for: robust2sls
-#### 20 May 2025, version 0.2.3
-
-* This is a resubmissions
-
-* Follows the email from Kurt Hornik alerting me about NOTEs in the CRAN incoming feasibility checks
-* These issues are now fixed with minor changes to function documentation and re-building the binaries
-* new: replaced links with DOIs
+#### 13 August 2026, version 0.2.4
 
 ## Test environments
 
@@ -21,7 +15,7 @@
   * MacOS 13.3.1 (22E261), aarch64-apple-darwin20 (64-bit), R version 4.4.2 (2024-10-31)
 
 * own machine:
-  * Windows 11, version 24H2, Build 226100, x86_64-w64-mingw32/x64 (64-bit), R version 4.5.0 (2025-04-11)
+  * Windows 11 Pro, version 25H2, Build 26200.8875, x86_64-w64-mingw32/x64, R version 4.4.1 (2024-06-14 ucrt)
 
 ## R CMD check results
 
