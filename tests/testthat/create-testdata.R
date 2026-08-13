@@ -70,3 +70,8 @@ saveRDS(d, paste0("tests/testthat/testdata/mcgrid/d3/n", n, "_m", m, ".rds"))
 p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
 mc_grid(10, n = c(100, 1000), seed = 42, parameters = p, formula = p$setting$formula, ref_dist = "normal", sign_level = c(0.01, 0.05), initial_est = "robustified", iterations = 0, shuffle = FALSE, shuffle_seed = NULL, split = 0.5, verbose = TRUE)
 
+### d4 new fixture to be used across all tests
+saveRDS(d, paste0("tests/testthat/testdata/mcgrid/d4/n", n, "_m", m, ".rds"))
+p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+mc_grid(4, n = c(50), seed = 99991, parameters = p, formula = p$setting$formula, ref_dist = "normal", sign_level = c(0.01, 0.05), initial_est = "robustified", iterations = 0, shuffle = FALSE, shuffle_seed = NULL, split = 0.5, verbose = TRUE)
+mc_grid(4, n = c(100), seed = 2389, parameters = p, formula = p$setting$formula, ref_dist = "normal", sign_level = c(0.01, 0.05), initial_est = "robustified", iterations = 0, shuffle = FALSE, shuffle_seed = NULL, split = 0.5, verbose = TRUE)
