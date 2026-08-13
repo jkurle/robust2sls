@@ -149,7 +149,11 @@ test_that("case_resampling() works correctly", {
   set.seed(10)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallel::makeCluster(ncores)
+  cl <- parallelly::makeClusterPSOCK(ncores)
+  on.exit({
+    future::plan(future::sequential)
+    if (!is.null(cl)) parallel::stopCluster(cl)
+  }, add = TRUE)
   parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
   future::plan(future::cluster, workers = cl)
   cr11 <- case_resampling(robust2sls_object = r, R = 10, parallel = TRUE)
@@ -161,8 +165,9 @@ test_that("case_resampling() works correctly", {
   # only one coefficient by name
   cr41 <- case_resampling(robust2sls_object = r, R = 10, coef = "x2", m = 1,
                           parallel = TRUE)
-  stopCluster(cl)
   future::plan(future::sequential)
+  parallel::stopCluster(cl)
+  cl <- NULL
 
   # first, ensure that same results whether parallel or not
   expect_identical(cr1, cr11)
@@ -239,11 +244,18 @@ test_that("case_resampling() works correctly", {
   cr5 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence")
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  future::plan(future::cluster, workers = ncores)
+  cl <- parallelly::makeClusterPSOCK(ncores)
+  on.exit({
+    future::plan(future::sequential)
+    if (!is.null(cl)) parallel::stopCluster(cl)
+  }, add = TRUE)
+  future::plan(future::cluster, workers = cl)
   set.seed(10)
   cr6 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence",
                          parallel = TRUE)
   future::plan(future::sequential)
+  parallel::stopCluster(cl)
+  cl <- NULL
 
   expect_snapshot_output(cr5)
   expect_snapshot_output(cr6)

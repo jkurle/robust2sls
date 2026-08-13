@@ -97,10 +97,17 @@ test_that("multi_cutoff() works correctly", {
   gamma1 <- c(0.01, 0.02)
   library(doFuture, quietly = TRUE)
   registerDoFuture()
-  plan(cluster, workers = 2)
+  cl <- parallelly::makeClusterPSOCK(2)
+  on.exit({
+    future::plan(future::sequential)
+    if (!is.null(cl)) parallel::stopCluster(cl)
+  }, add = TRUE)
+  plan(cluster, workers = cl)
   a0 <- multi_cutoff(gamma = gamma1, data = d, formula = f, ref_dist = "normal",
                      initial_est = "robustified", iterations = 0)
   plan(sequential)
+  parallel::stopCluster(cl)
+  cl <- NULL
   b0 <- multi_cutoff(gamma = gamma1, data = d, formula = f, ref_dist = "normal",
                      initial_est = "robustified", iterations = 0)
   # they will differ in their environments, so need to set to 0 manually
