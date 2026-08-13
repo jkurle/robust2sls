@@ -22,6 +22,7 @@ library(doFuture)
 
 ncores <- 2
 cl <- makeClusterPSOCK(ncores)
+f <- y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6
 
 tryCatch({
   # export libraries to all workers in the cluster
@@ -29,7 +30,7 @@ tryCatch({
 
   registerDoParallel(cl)
   sim1 <- mc_grid(M = 100, n = c(100, 1000), seed = 42, parameters = p,
-                  formula = p$setting$formula, ref_dist = "normal",
+                  formula = f, ref_dist = "normal",
                   sign_level = 0.05, initial_est = "robustified", iterations = 0,
                   shuffle = FALSE, shuffle_seed = 42, split = 0.5)
 
@@ -38,7 +39,7 @@ tryCatch({
   registerDoFuture()
   plan(cluster, workers = cl)
   sim2 <- mc_grid(M = 100, n = c(100, 1000), seed = 42, parameters = p,
-                  formula = p$setting$formula, ref_dist = "normal",
+                  formula = f, ref_dist = "normal",
                   sign_level = 0.05, initial_est = "robustified", iterations = 0,
                   shuffle = FALSE, shuffle_seed = 42, split = 0.5)
 
@@ -54,7 +55,7 @@ library(doFuture)
 registerDoFuture()
 plan(sequential)
 sim3 <- mc_grid(M = 100, n = c(100, 1000), seed = 42, parameters = p, 
-               formula = p$setting$formula, ref_dist = "normal", 
+               formula = f, ref_dist = "normal", 
                sign_level = 0.05, initial_est = "robustified", iterations = 0,
                shuffle = FALSE, shuffle_seed = 42, split = 0.5)
 

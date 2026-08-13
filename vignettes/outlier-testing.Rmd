@@ -60,7 +60,8 @@ of class *robust2sls*. This is a list storing, inter alia, the model estimates
 and classifications as outliers for each iteration.
 
 ```{r, single_alg}
-model <- outlier_detection(data = d, formula = p$setting$formula, ref_dist = "normal",
+f <- y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6
+model <- outlier_detection(data = d, formula = f, ref_dist = "normal",
                            sign_level = 0.05, initial_est = "robustified", iterations = 5)
 print(model)
 ```
@@ -84,7 +85,7 @@ gammas <- seq(0.01, 0.05, 0.01)
 library(doFuture)
 registerDoFuture()
 plan(sequential)
-models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula, ref_dist = "normal",
+models <- multi_cutoff(gamma = gammas, data = d, formula = f, ref_dist = "normal",
                        initial_est = "robustified", iterations = 5)
 length(models)
 ```
