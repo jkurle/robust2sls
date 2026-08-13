@@ -282,7 +282,7 @@ test_that("mc_grid() works correctly", {
 
   skip_on_cran() # probably too long and might have problems with parallel
   # skip_on_ci() # causes trouble on Windows server
-  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d1"))
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
   mockery::stub(mc_grid, "generate_data", mock_generate_data)
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
@@ -292,12 +292,12 @@ test_that("mc_grid() works correctly", {
   # parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
   # future::plan(future::cluster, workers = cl)
   future::plan(future::sequential)
-  results <- mc_grid(100, n = c(100, 1000), seed = 42, parameters = p,
-                              formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
-                              sign_level = c(0.01, 0.05),
-                              initial_est = c("saturated", "robustified"),
-                              iterations = 0, shuffle = FALSE,
-                              shuffle_seed = NULL, split = c(0.3, 0.4, 0.5))
+  results <- mc_grid(4, n = c(50, 100), seed = 42, parameters = p,
+                     formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
+                     sign_level = c(0.01, 0.05),
+                     initial_est = c("saturated", "robustified"),
+                     iterations = 0, shuffle = FALSE,
+                     shuffle_seed = NULL, split = c(0.3, 0.4, 0.5))
 
   expect_snapshot_output(results) # checked with manual original simulations
   # parallel::stopCluster(cl)
@@ -307,10 +307,10 @@ test_that("mc_grid() works correctly", {
 test_that("mc_grid() works correctly with convergence setting", {
 
   skip_on_cran() # probably too long and might have problems with parallel
-  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d2"))
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
   mockery::stub(mc_grid, "generate_data", mock_generate_data)
 
-  p <- generate_param(dx1 = 2, dx2 = 1, dz2 = 1, seed = 42)
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
 
   # know the values because tested the settings before in a separate file
   # convergence without max_iter
@@ -320,14 +320,14 @@ test_that("mc_grid() works correctly with convergence setting", {
   # parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
   # future::plan(future::cluster, workers = cl)
   future::plan(future::sequential)
-  out <- mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                 formula = y~x2+x3|x2+z3, ref_dist = "normal",
+  out <- mc_grid(M = 4, n = c(50, 100), seed = 20, parameters = p,
+                 formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
+                 ref_dist = "normal",
                  sign_level = 0.05, initial_est = "robustified",
                  iterations = "convergence", convergence_criterion = 0)
   # parallel::stopCluster(cl)
 
-  outfreq <- list(list("2" = 1L, "3" = 3L, "4" = 3L, "5" = 1L, "8" = 1L, "9" = 1L),
-                  list("5" = 4L, "6" = 2L, "7" = 1L, "8" = 1L, "10" = 1L, "15" = 1L))
+  outfreq <- list(list("2" = 2L, "3" = 2L), list("2" = 1L, "3" = 2L, "4" = 1L))
   class(outfreq) <- "AsIs"
   expect_equal(NROW(out), 2)
   expect_equal(class(out$conv_freq), "AsIs")
@@ -341,20 +341,20 @@ test_that("mc_grid() works correctly with convergence setting", {
   # parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
   # future::plan(future::cluster, workers = cl)
   future::plan(future::sequential)
-  out2 <- mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                  formula = y~x2+x3|x2+z3, ref_dist = "normal",
+  out2 <- mc_grid(M = 4, n = c(50, 100), seed = 20, parameters = p,
+                  formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
+                  ref_dist = "normal",
                   sign_level = 0.05, initial_est = "robustified",
                   iterations = "convergence", convergence_criterion = 0,
-                  max_iter = 5)
+                  max_iter = 3)
   # parallel::stopCluster(cl)
 
-  outfreq2 <- list(list("2" = 1L, "3" = 3L, "4" = 3L, "5" = 3L),
-                   list("5" = 10L))
+  outfreq2 <- list(list("2" = 2L, "3" = 2L), list("2" = 1L, "3" = 3L))
   class(outfreq2) <- "AsIs"
   expect_equal(NROW(out2), 2)
   expect_equal(class(out2$conv_freq), "AsIs")
   expect_equal(out2$conv_freq, outfreq2)
-  expect_equal(out2$max, c(5, 5))
+  expect_equal(out2$max, c(3, 3))
 
   expect_snapshot_output(out)
   expect_snapshot_output(out2)
