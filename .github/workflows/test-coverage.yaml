@@ -27,7 +27,15 @@ jobs:
           extra-packages: any::covr
           needs: coverage
 
+      - name: Run tests
+        run: testthat::test_local(reporter = "progress")
+        shell: Rscript {0}
+
       - name: Test coverage
-        # exclude two functions: estimate_param() superseded; plot.robust2sls() tested locally but problems with CI
-        run: covr::codecov(function_exclusions = c("estimate_param$", "plot\\.robust2sls$"), quiet = FALSE)
+        run: |
+          coverage <- covr::package_coverage(
+            function_exclusions = c("estimate_param$", "plot\\.robust2sls$")
+          )
+          print(coverage)
+          covr::codecov(coverage = coverage, quiet = FALSE)
         shell: Rscript {0}
