@@ -149,10 +149,6 @@ test_that("case_resampling() works correctly", {
   set.seed(10)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  print(.libPaths())
-  print(sapply(.libPaths(), function(lib) {
-    file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
-  }))
   cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
   on.exit({
     future::plan(future::sequential)
@@ -160,16 +156,6 @@ test_that("case_resampling() works correctly", {
   }, add = TRUE)
   parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
   future::plan(future::cluster, workers = cl)
-  probe_future <- future::future({
-    list(
-      libs = .libPaths(),
-      pkg_path = system.file(package = "robust2sls"),
-      meta = sapply(.libPaths(), function(lib) {
-        file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
-      })
-    )
-  })
-  print(future::value(probe_future))
   cr11 <- case_resampling(robust2sls_object = r, R = 10, parallel = TRUE)
   # only one iteration
   cr21 <- case_resampling(robust2sls_object = r, R = 10, m = 1, parallel = TRUE)
@@ -258,27 +244,12 @@ test_that("case_resampling() works correctly", {
   cr5 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence")
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  print(.libPaths())
-  print(sapply(.libPaths(), function(lib) {
-    file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
-  }))
   cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)
   }, add = TRUE)
   future::plan(future::cluster, workers = cl)
-  probe_future <- future::future({
-    list(
-      libs = .libPaths(),
-      pkg_exists = requireNamespace("robust2sls", quietly = TRUE),
-      pkg_path = system.file(package = "robust2sls"),
-      meta = sapply(.libPaths(), function(lib) {
-        file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
-      })
-    )
-  })
-  print(future::value(probe_future))
   set.seed(10)
   cr6 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence",
                          parallel = TRUE)
