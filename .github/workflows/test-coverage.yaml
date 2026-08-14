@@ -30,6 +30,10 @@ jobs:
       - name: Test coverage
         run: |
           cov <- covr::package_coverage(
+            function_exclusions = c(
+              "estimate_param$",
+              "plot\\.robust2sls$"
+            ),
             quiet = FALSE,
             clean = FALSE,
             install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")

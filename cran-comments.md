@@ -1,5 +1,5 @@
 # CRAN Comments for: robust2sls
-#### 13 August 2026, version 0.2.4
+#### 14 August 2026, version 0.2.4
 
 ## Test environments
 
@@ -22,7 +22,7 @@
 
 ## R CMD check results
 
-Checks produced no ERRORs, no WARNINGs, no NOTEs.
+Checks produced no ERRORs, no WARNINGs, only acceptable NOTEs ("unable to verify current time").
 
 ## Downstream dependencies
 

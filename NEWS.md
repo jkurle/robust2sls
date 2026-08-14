@@ -14,6 +14,9 @@ which were traced back to changes in the environment and changes in the `MASS` p
   and macked the function to read in the stored datasets instead of drawing
   randim data
 * fixed GH issue #19, making parallel execution more robust
+* introduced some tolerance to numerical comparisons
+  - sup_test simulates pvalue, allowed for 0.015 tolerance diff (e.g. across OS)
+  - iis_init snapshots rounded to tolerance 12 digits, set to 0 if smaller than that
 
 ## Detailed Comments
 * created two tags, which represented steps along the way of these improvements:
