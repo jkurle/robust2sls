@@ -28,11 +28,14 @@ jobs:
           needs: coverage
 
       - name: Run tests
-        run: testthat::test_local(reporter = "progress")
+        run: |
+          testthat::set_max_fails(Inf)
+          testthat::test_local(reporter = "progress")
         shell: Rscript {0}
 
       - name: Test coverage
         run: |
+          testthat::set_max_fails(Inf)
           coverage <- covr::package_coverage(
             function_exclusions = c("estimate_param$", "plot\\.robust2sls$")
           )
