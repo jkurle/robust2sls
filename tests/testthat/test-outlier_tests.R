@@ -75,9 +75,10 @@ test_that("multi_cutoff() works correctly", {
   skip_on_cran()
 
   library(robust2sls)
-  p <- generate_param(1, 1, 1, seed = 40)
-  d <- generate_data(parameters = p, n = 1000)$data
-  f <- p$setting$formula
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
+  f <- y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6
 
   expect_error(multi_cutoff(gamma = c("a", "b"), data = d, formula = f,
                             ref_dist = "normal", initial_est = "robustified",
@@ -96,10 +97,17 @@ test_that("multi_cutoff() works correctly", {
   gamma1 <- c(0.01, 0.02)
   library(doFuture, quietly = TRUE)
   registerDoFuture()
-  plan(cluster, workers = 2)
+  cl <- parallelly::makeClusterPSOCK(2, rscript_libs = .libPaths())
+  on.exit({
+    future::plan(future::sequential)
+    if (!is.null(cl)) parallel::stopCluster(cl)
+  }, add = TRUE)
+  plan(cluster, workers = cl)
   a0 <- multi_cutoff(gamma = gamma1, data = d, formula = f, ref_dist = "normal",
                      initial_est = "robustified", iterations = 0)
   plan(sequential)
+  parallel::stopCluster(cl)
+  cl <- NULL
   b0 <- multi_cutoff(gamma = gamma1, data = d, formula = f, ref_dist = "normal",
                      initial_est = "robustified", iterations = 0)
   # they will differ in their environments, so need to set to 0 manually
@@ -174,9 +182,10 @@ test_that("proptest() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.1, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = "convergence", convergence_criterion = 0,
                          max_iter = 200)
@@ -225,7 +234,7 @@ test_that("proptest() works correctly", {
   expect_snapshot_output(c)
 
   # try different setting
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 10)
   a <- proptest(models, alpha = 0.05, iteration = 3, one_sided = TRUE)
@@ -249,7 +258,7 @@ test_that("proptest() works correctly", {
   expect_snapshot_output(b)
 
   # try a single robust2sls_object instead of a list
-  model <- outlier_detection(data = d, formula = p$setting$formula,
+  model <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                              initial_est = "saturated", ref_dist = "normal",
                              sign_level = 0.05, iterations = 3, split = 0.5)
   a <- proptest(model, alpha = 0.1, iteration = 1, one_sided = FALSE)
@@ -291,7 +300,7 @@ test_that("proptest() works correctly", {
   expect_identical(pval2side, a$pval)
 
   # single model until convergence (codecov)
-  model <- outlier_detection(data = d, formula = p$setting$formula,
+  model <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                              initial_est = "robustified", ref_dist = "normal",
                              sign_level = 0.01, iterations = "convergence", convergence_criterion = 0)
   c <- proptest(model, alpha = 0.1, iteration = "convergence", one_sided = FALSE)
@@ -319,9 +328,10 @@ test_that("proptest() raises correct errors", {
                "is a list but not all elements have class 'robust2sls'")
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.1)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 2)
 
@@ -367,9 +377,10 @@ test_that("counttest() raises correct errors", {
                "is a list but not all elements have class 'robust2sls'")
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.1)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 2)
 
@@ -420,9 +431,10 @@ test_that("counttest() works correctly", {
   # tsmethod = "minlike" to reproduce tests as had done originally
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.1, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = "convergence", convergence_criterion = 0,
                          max_iter = 200)
@@ -483,7 +495,7 @@ test_that("counttest() works correctly", {
   expect_snapshot_output(c)
 
   # try different setting
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 10)
   a <- counttest(models, alpha = 0.05, iteration = 3, one_sided = TRUE, tsmethod = "minlike")
@@ -515,7 +527,7 @@ test_that("counttest() works correctly", {
   expect_snapshot_output(b)
 
   # try a single robust2sls_object instead of a list
-  model <- outlier_detection(data = d, formula = p$setting$formula,
+  model <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                              initial_est = "saturated", ref_dist = "normal",
                              sign_level = 0.05, iterations = 3, split = 0.5)
   a <- counttest(model, alpha = 0.1, iteration = 1, one_sided = FALSE, tsmethod = "minlike")
@@ -606,13 +618,14 @@ test_that("multi_cutoff_to_fodr_vec() raises correct errors", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.1, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = "convergence", convergence_criterion = 0,
                          max_iter = 20)
-  model <- outlier_detection(data = d, formula = p$setting$formula,
+  model <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                              ref_dist = "normal", iterations = 3,
                              sign_level = 0.01, initial_est = "robustified")
 
@@ -638,9 +651,10 @@ test_that("multi_cutoff_to_fodr_vec() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.1, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = "convergence", convergence_criterion = 0,
                          max_iter = 20)
@@ -709,9 +723,10 @@ test_that("sumtest() raises correct errors", {
                "'robust2sls_object' must be a list of 'robust2sls' objects")
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 2)
 
@@ -750,9 +765,10 @@ test_that("sumtest() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 2)
 
@@ -781,7 +797,7 @@ test_that("sumtest() works correctly", {
   expect_equal(attr(b, "gammas"), seq(0.01, 0.05, 0.01))
 
   # test convergence iteration
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = "convergence", convergence_criterion = 0,
                          max_iter = 20)
@@ -804,7 +820,7 @@ test_that("sumtest() works correctly", {
   expect_equal(a$t, t, tolerance = 0.00000000000001)
 
   # check saturated 2sls as input
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "saturated",
                          iterations = 2, split = 0.3)
   expect_snapshot_output(models)
@@ -824,7 +840,7 @@ test_that("sumtest() works correctly", {
   expect_error(sumtest(models, alpha = 0.05, iteration = 5))
 
   # when input a list of length 1, then get error -> doesn't make sense then
-  models <- multi_cutoff(gamma = 0.01, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = 0.01, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "saturated",
                          iterations = 2, split = 0.5)
   expect_error(sumtest(models, alpha = 0.05, iteration = 0, one_sided = FALSE),
@@ -844,9 +860,10 @@ test_that("suptest() raises correct error", {
                "'robust2sls_object' must be a list of 'robust2sls' objects")
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 2)
 
@@ -880,14 +897,23 @@ test_that("suptest() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data # this is needed to move the seed to same state as before, because suptest simulates the critical values
+  assign(".Random.seed", readRDS(test_path("./testdata/rng_state_outlier_tests.rds"))[[1]], envir = .GlobalEnv)
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 2)
 
   a <- suptest(models, alpha = 0.05, iteration = 0, p = c(0.1, 0.5, 0.9))
   b <- suptest(models, alpha = 0.1, iteration = 1)
+  # pvalue is simulated, can differ slightly by OS
+  expect_true(abs(a$pval - 0.08828) <= 0.01)
+  expect_true(abs(b$pval - 0.09846) <= 0.01)
+  expect_false(a$reject)
+  expect_true(b$reject)
+  a$pval <- NA_real_
+  b$pval <- NA_real_
   expect_snapshot_output(a)
   expect_snapshot_output(b)
 
@@ -912,20 +938,25 @@ test_that("suptest() works correctly", {
   expect_equal(b$reject, TRUE)
 
   # expect error if give only a single model
-  models <- multi_cutoff(gamma = 0.05, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = 0.05, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 2)
   expect_error(suptest(models, 0.1, 0),
                "requires several different cutoffs")
 
   # test convergence iteration
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = "convergence", convergence_criterion = 0,
                          max_iter = 20)
   # so that notice if input changes, might not be change in suptest
   expect_snapshot_output(models)
+  # pvalue is simulated, can differ slightly by OS
   a <- suptest(models, alpha = 0.05, iteration = "convergence")
+  # pvalue is simulated, can differ slightly by OS
+  expect_true(abs(a$pval - 0.11954) <= 0.01)
+  expect_false(a$reject)
+  a$pval <- NA_real_
   expect_snapshot_output(a)
 
   # 0.01 converges at 4, 0.02 at 3, 0.03 at 3, 0.04 at 3, 0.05 at 6
@@ -948,9 +979,10 @@ test_that("globaltest() raises correct errors", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 2)
   tests <- proptest(models, alpha = 0.05, iteration = 0)
@@ -976,9 +1008,10 @@ test_that("globaltest() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
   gammas <- seq(0.01, 0.05, 0.01)
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "robustified",
                          iterations = 2)
   # check to find if models has changed
@@ -1017,7 +1050,7 @@ test_that("globaltest() works correctly", {
   expect_equal(a$global_alpha, 0.05)
 
   # try "convergence" and "saturated", e.g. proptest
-  models <- multi_cutoff(gamma = gammas, data = d, formula = p$setting$formula,
+  models <- multi_cutoff(gamma = gammas, data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", initial_est = "saturated",
                          iterations = "convergence", convergence_criterion = 0,
                          max_iter = 20, split = 0.5)

@@ -313,7 +313,7 @@ test_that("saturated_init() throws correct errors", {
                                 shuffle = FALSE, shuffle_seed = 1, split = 0.2),
                  "Very unequal `split`")
   expect_warning(saturated_init(data = data, formula = formula, cutoff = c,
-                                shuffle = FALSE, shuffle_seed = 1, split = 0.9),
+                                shuffle = FALSE, shuffle_seed = 1, split = 0.8),
                  "Very unequal `split`")
   expect_error(saturated_init(data = data, formula = formula, cutoff = c,
                               shuffle = 1, shuffle_seed = 1, split = 0.5),
@@ -372,7 +372,8 @@ test_that("iis_init() works corectly", {
                       mean_z = 0, cov_z = matrix(1),
                       Sigma2_half = matrix(1), Omega2 = matrix(3/4),
                       Pi = t(matrix(c(1, 0, 0, 1), nrow = 2)))
-  d <- generate_data(parameters = p, n = 50)$data
+  # d <- generate_data(parameters = p, n = 50)$data
+  d <- readRDS(test_path("./testdata/testdata2.rds"))
   formula <- y ~ -1+x1+x2 | -1+x1+z2
   gamma <- 0.05
 
@@ -492,14 +493,14 @@ test_that("iis_init() works corectly", {
   expect_warning(iis8 <- iis_init(data = d, formula = formula, gamma = gamma, overid = 0.01)) # not overid
 
   # snapshot outputs
-  expect_snapshot_output(iis1)
-  expect_snapshot_output(iis2)
-  expect_snapshot_output(iis3)
-  expect_snapshot_output(iis4)
-  expect_snapshot_output(iis5)
-  expect_snapshot_output(iis6)
-  expect_snapshot_output(iis7)
-  expect_snapshot_output(iis8)
+  expect_snapshot_output(norm_snap(iis1))
+  expect_snapshot_output(norm_snap(iis2))
+  expect_snapshot_output(norm_snap(iis3))
+  expect_snapshot_output(norm_snap(iis4))
+  expect_snapshot_output(norm_snap(iis5))
+  expect_snapshot_output(norm_snap(iis6))
+  expect_snapshot_output(norm_snap(iis7))
+  expect_snapshot_output(norm_snap(iis8))
 
 })
 

@@ -344,7 +344,7 @@ outliers as Robustified 2SLS.
 After using the trimmed 2SLS algorithms, we want to do inference on the
 structural parameters. Since the procedures exclude observations with large
 errors, we would underestimate the error variance. [Jiao
-(2019)](https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view)
+(2026)](https://arxiv.org/abs/2607.26960)
 has derived the correction factor for the estimator of the variance, which is
 both implemented in the algorithms for the selection and in the command
 `beta_inf()` function, which provides corrected standard errors. It returns both
@@ -384,7 +384,7 @@ cbind(beta_inf(robustified_conv, iteration = 1, exact = TRUE)[, 1:3], mat)
 ## Testing for difference in coefficient estimates
 
 [Jiao
-(2019)](https://drive.google.com/file/d/1qPxDJnLlzLqdk94X9wwVASptf1MPpI2w/view)
+(2026)](https://arxiv.org/abs/2607.26960)
 also devises a Hausman-type test for whether the difference between the full
 sample and trimmed sample coefficient estimates is statistically significant.
 The test can be used on subsets of the coefficient vector or the whole vector

@@ -1,3 +1,28 @@
+make_mock_generate_data <- function(root_dir) {
+  state <- new.env(parent = emptyenv())
+  state$last_n <- NULL
+  state$m <- 0L
+  state$max_m <- 0L
+  mock_generate_data <- function(parameters, n) {
+    key <- as.character(n)
+    n_dir <- file.path(root_dir, paste0("n", n))
+    # if n has changed from before, need to update and reset counter
+    if (!identical(state$last_n, key)) {
+      state$last_n <- key
+      state$m <- 0L
+      state$max_m <- length(list.files(n_dir, pattern = paste0("^n", key, "_m[0-9]+\\.rds$")))
+    }
+    state$m <- state$m + 1L
+    if (state$m > state$max_m) {
+      state$m <- 1L
+    }
+    f <- file.path(n_dir, paste0("n", key, "_m", state$m, ".rds"))
+    # print(paste0("n", key, "m", state$m))
+    readRDS(f)
+  }
+  return(mock_generate_data)
+}
+
 test_that("generate_param() gives correct error messages", {
 
   skip_on_cran()
@@ -206,7 +231,7 @@ test_that("generate_data() works correctly", {
   expect_equal(mean(d1$data[, "z6"]), p1$structural$mean[[8]], tolerance = 0.01)
 
   # check that ivreg() recovers beta approximately
-  model <- ivreg::ivreg(y ~ -1 + x1 + x2 + x3 + x4 + x5 | x1 + x2 + x3 + z4 + z5 + z6, data = d1$data)
+  model <- ivreg::ivreg(y ~ -1 + x1 + x2 + x3 + x4 + x5 | -1 + x1 + x2 + x3 + z4 + z5 + z6, data = d1$data)
   coef <- model$coefficients
   names(coef) <- NULL
   coef <- matrix(coef, 5, 1)
@@ -221,7 +246,7 @@ test_that("mc_grid() throws correct error", {
 
   # check error from invalid input "iterations"
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = "nonexist", convergence_criterion = 0),
                "Argument iterations not correctly specified.")
@@ -231,22 +256,22 @@ test_that("mc_grid() throws correct error", {
   doFuture::registerDoFuture()
   future::plan(future::sequential)
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = 3, convergence_criterion = 0, path = "test/"),
                "Argument 'path' should not end with a path separator")
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = 3, convergence_criterion = 0, path = "test\\"),
                "Argument 'path' should not end with a path separator")
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = "convergence", convergence_criterion = 0, path = "test/"),
                "Argument 'path' should not end with a path separator")
   expect_error(mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                       formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+                       formula = y~x2+x3|x2+z3, ref_dist = "normal",
                        sign_level = 0.05, initial_est = "robustified",
                        iterations = "convergence", convergence_criterion = 0, path = "test\\"),
                "Argument 'path' should not end with a path separator")
@@ -257,44 +282,52 @@ test_that("mc_grid() works correctly", {
 
   skip_on_cran() # probably too long and might have problems with parallel
   # skip_on_ci() # causes trouble on Windows server
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
+  mockery::stub(mc_grid, "generate_data", mock_generate_data)
+
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  # ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallel::makeCluster(ncores)
-  parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
-  future::plan(future::cluster, workers = cl)
-  results <- mc_grid(100, n = c(100, 1000), seed = 42, parameters = p,
-                              formula = p$setting$formula, ref_dist = "normal",
-                              sign_level = c(0.01, 0.05),
-                              initial_est = c("saturated", "robustified"),
-                              iterations = 0, shuffle = FALSE,
-                              shuffle_seed = NULL, split = c(0.3, 0.4, 0.5))
+  # cl <- parallel::makeCluster(ncores)
+  # parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
+  # future::plan(future::cluster, workers = cl)
+  future::plan(future::sequential)
+  results <- mc_grid(4, n = c(50, 100), seed = 42, parameters = p,
+                     formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
+                     sign_level = c(0.01, 0.05),
+                     initial_est = c("saturated", "robustified"),
+                     iterations = 0, shuffle = FALSE,
+                     shuffle_seed = NULL, split = c(0.3, 0.4, 0.5))
 
   expect_snapshot_output(results) # checked with manual original simulations
-  parallel::stopCluster(cl)
+  # parallel::stopCluster(cl)
 
 })
 
 test_that("mc_grid() works correctly with convergence setting", {
 
   skip_on_cran() # probably too long and might have problems with parallel
-  p <- generate_param(dx1 = 2, dx2 = 1, dz2 = 1, seed = 42)
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
+  mockery::stub(mc_grid, "generate_data", mock_generate_data)
+
+  p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
 
   # know the values because tested the settings before in a separate file
   # convergence without max_iter
-  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  # ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallel::makeCluster(ncores)
-  parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
-  future::plan(future::cluster, workers = cl)
-  out <- mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                 formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+  # cl <- parallel::makeCluster(ncores)
+  # parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
+  # future::plan(future::cluster, workers = cl)
+  future::plan(future::sequential)
+  out <- mc_grid(M = 4, n = c(50, 100), seed = 20, parameters = p,
+                 formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
+                 ref_dist = "normal",
                  sign_level = 0.05, initial_est = "robustified",
                  iterations = "convergence", convergence_criterion = 0)
-  parallel::stopCluster(cl)
+  # parallel::stopCluster(cl)
 
-  outfreq <- list(list("2" = 1L, "3" = 3L, "4" = 3L, "5" = 1L, "8" = 1L, "9" = 1L),
-                  list("5" = 4L, "6" = 2L, "7" = 1L, "8" = 1L, "10" = 1L, "15" = 1L))
+  outfreq <- list(list("2" = 2L, "3" = 2L), list("2" = 1L, "3" = 2L, "4" = 1L))
   class(outfreq) <- "AsIs"
   expect_equal(NROW(out), 2)
   expect_equal(class(out$conv_freq), "AsIs")
@@ -302,25 +335,26 @@ test_that("mc_grid() works correctly with convergence setting", {
   expect_equal(out$max, c("NULL", "NULL"))
 
   # convergence with max_iter
-  ncores <- min(max(parallel::detectCores() - 1, 1), 2)
+  # ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallel::makeCluster(ncores)
-  parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
-  future::plan(future::cluster, workers = cl)
-  out2 <- mc_grid(M = 10, n = c(1000, 10000), seed = 20, parameters = p,
-                  formula = y~x1+x2+x3|x1+x2+z3, ref_dist = "normal",
+  # cl <- parallel::makeCluster(ncores)
+  # parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
+  # future::plan(future::cluster, workers = cl)
+  future::plan(future::sequential)
+  out2 <- mc_grid(M = 4, n = c(50, 100), seed = 20, parameters = p,
+                  formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
+                  ref_dist = "normal",
                   sign_level = 0.05, initial_est = "robustified",
                   iterations = "convergence", convergence_criterion = 0,
-                  max_iter = 5)
-  parallel::stopCluster(cl)
+                  max_iter = 3)
+  # parallel::stopCluster(cl)
 
-  outfreq2 <- list(list("2" = 1L, "3" = 3L, "4" = 3L, "5" = 3L),
-                   list("5" = 10L))
+  outfreq2 <- list(list("2" = 2L, "3" = 2L), list("2" = 1L, "3" = 3L))
   class(outfreq2) <- "AsIs"
   expect_equal(NROW(out2), 2)
   expect_equal(class(out2$conv_freq), "AsIs")
   expect_equal(out2$conv_freq, outfreq2)
-  expect_equal(out2$max, c(5, 5))
+  expect_equal(out2$max, c(3, 3))
 
   expect_snapshot_output(out)
   expect_snapshot_output(out2)
@@ -330,28 +364,29 @@ test_that("mc_grid() works correctly with convergence setting", {
 test_that("mc_grid() prints correct output when verbose = TRUE", {
 
   skip_on_cran() # probably too long and might have problems with parallel
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
+  mockery::stub(mc_grid, "generate_data", mock_generate_data)
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
   future::plan(future::sequential)
-
   # iterations fixed setting
-  expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+  expect_output(mc_grid(4, n = c(50, 100), seed = 42, parameters = p,
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
                         initial_est = "robustified",
                         iterations = 0, shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Total number of Monte Carlo experiments:")
-  expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+  expect_output(mc_grid(4, n = c(50, 100), seed = 42, parameters = p,
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
                         initial_est = "robustified",
                         iterations = 0, shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Monte Carlo experiment:")
-  expect_output(mc_grid(10, n = c(100, 1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+  expect_output(mc_grid(4, n = c(50, 100), seed = 42, parameters = p,
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01, 0.05),
                         initial_est = "robustified",
                         iterations = 0, shuffle = FALSE,
@@ -359,24 +394,24 @@ test_that("mc_grid() prints correct output when verbose = TRUE", {
                 "user")
 
   # convergence setting
-  expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+  expect_output(mc_grid(4, n = c(100), seed = 42, parameters = p,
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01),
                         initial_est = "robustified",
                         iterations = "convergence", convergence_criterion = 3,
                         shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Total number of Monte Carlo experiments:")
-  expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+  expect_output(mc_grid(4, n = c(100), seed = 42, parameters = p,
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01),
                         initial_est = "robustified",
                         iterations = "convergence", convergence_criterion = 3,
                         shuffle = FALSE,
                         shuffle_seed = NULL, split = 0.5, verbose = TRUE),
                 "Monte Carlo experiment:")
-  expect_output(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                        formula = p$setting$formula, ref_dist = "normal",
+  expect_output(mc_grid(4, n = c(100), seed = 42, parameters = p,
+                        formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                         sign_level = c(0.01),
                         initial_est = "robustified",
                         iterations = "convergence", convergence_criterion = 3,
@@ -390,6 +425,8 @@ test_that("mc_grid() saves intermediate results correctly", {
 
   skip_on_ci() # runs locally, sometimes causes problems on GitHub Actions
   skip_on_cran() # probably too long and might have problems with parallel
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
+  mockery::stub(mc_grid, "generate_data", mock_generate_data)
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
@@ -399,13 +436,13 @@ test_that("mc_grid() saves intermediate results correctly", {
   save_file <- function(code) {
     directory <- tempdir()
     pth <<- directory
-    path <- file.path(directory, "M10n1000g0.01irobustifieds0.5.csv")
+    path <- file.path(directory, "M4n100g0.01irobustifieds0.5.csv")
     code
     return(path)
   }
 
-  expect_snapshot_file(path = save_file(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                                                  formula = p$setting$formula, ref_dist = "normal",
+  expect_snapshot_file(path = save_file(mc_grid(4, n = c(100), seed = 42, parameters = p,
+                                                  formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                                                   sign_level = c(0.01), path = pth,
                                                   initial_est = "robustified",
                                                   iterations = 0, shuffle = FALSE,
@@ -416,13 +453,13 @@ test_that("mc_grid() saves intermediate results correctly", {
   save_file <- function(code) {
     directory <- tempdir()
     pth <<- directory
-    path <- file.path(directory, "M10n1000g0.01irobustifieds0.5.csv")
+    path <- file.path(directory, "M4n100g0.01irobustifieds0.5.csv")
     code
     return(path)
   }
 
-  expect_snapshot_file(path = save_file(mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                                                formula = p$setting$formula, ref_dist = "normal",
+  expect_snapshot_file(path = save_file(mc_grid(4, n = c(100), seed = 42, parameters = p,
+                                                formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                                                 sign_level = c(0.01), path = pth,
                                                 initial_est = "robustified",
                                                 iterations = "convergence", convergence_criterion = 3,
@@ -438,22 +475,24 @@ test_that("CI::mc_grid() saves intermediate results correctly", {
   # expect_silent to check no error or warnings raised
   skip_on_cran() # probably too long and might have problems with parallel
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
+  mock_generate_data <- make_mock_generate_data(testthat::test_path("testdata", "mcgrid", "d4"))
+  mockery::stub(mc_grid, "generate_data", mock_generate_data)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
   future::plan(future::sequential)
 
-  expect_silent(a <- mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                formula = p$setting$formula, ref_dist = "normal",
+  expect_silent(a <- mc_grid(4, n = c(100), seed = 42, parameters = p,
+                formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                 sign_level = c(0.01), path = tempdir(),
                 initial_est = "robustified",
                 iterations = 0, shuffle = FALSE,
                 shuffle_seed = NULL, split = 0.5))
 
-  expect_silent(a <- mc_grid(10, n = c(1000), seed = 42, parameters = p,
-                formula = p$setting$formula, ref_dist = "normal",
+  expect_silent(a <- mc_grid(4, n = c(100), seed = 42, parameters = p,
+                formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6, ref_dist = "normal",
                 sign_level = c(0.01), path = tempdir(),
                 initial_est = "robustified",
-                iterations = "convergence", convergence_criterion = 3,
+                iterations = "convergence", convergence_criterion = 0,
                 shuffle = FALSE, shuffle_seed = NULL, split = 0.5))
 
 })

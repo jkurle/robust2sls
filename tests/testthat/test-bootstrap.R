@@ -130,8 +130,9 @@ test_that("case_resampling() works correctly", {
 
   # setup
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
-  r <- outlier_detection(data = d, formula = p$setting$formula,
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
+  r <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", sign_level = 0.05,
                          initial_est = "robustified", iterations = 3)
 
@@ -148,7 +149,11 @@ test_that("case_resampling() works correctly", {
   set.seed(10)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallel::makeCluster(ncores)
+  cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
+  on.exit({
+    future::plan(future::sequential)
+    if (!is.null(cl)) parallel::stopCluster(cl)
+  }, add = TRUE)
   parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
   future::plan(future::cluster, workers = cl)
   cr11 <- case_resampling(robust2sls_object = r, R = 10, parallel = TRUE)
@@ -160,8 +165,9 @@ test_that("case_resampling() works correctly", {
   # only one coefficient by name
   cr41 <- case_resampling(robust2sls_object = r, R = 10, coef = "x2", m = 1,
                           parallel = TRUE)
-  stopCluster(cl)
   future::plan(future::sequential)
+  parallel::stopCluster(cl)
+  cl <- NULL
 
   # first, ensure that same results whether parallel or not
   expect_identical(cr1, cr11)
@@ -190,16 +196,16 @@ test_that("case_resampling() works correctly", {
   expect_identical(class(cr2$boot), "data.frame")
   expect_identical(class(cr3$boot), "data.frame")
   expect_identical(class(cr4$boot), "data.frame")
-  expect_identical(NCOL(cr1$boot), 9L)
-  expect_identical(NCOL(cr2$boot), 9L)
+  expect_identical(NCOL(cr1$boot), 8L)
+  expect_identical(NCOL(cr2$boot), 8L)
   expect_identical(NCOL(cr3$boot), 4L)
   expect_identical(NCOL(cr4$boot), 4L)
   expect_identical(NROW(cr1$boot), 44L)
   expect_identical(NROW(cr2$boot), 11L)
   expect_identical(NROW(cr3$boot), 11L)
   expect_identical(NROW(cr4$boot), 11L)
-  expect_identical(colnames(cr1$boot), c("X.Intercept.", "x1", "x2", "x3", "x4", "x5", "m", "gauge", "r"))
-  expect_identical(colnames(cr2$boot), c("X.Intercept.", "x1", "x2", "x3", "x4", "x5", "m", "gauge", "r"))
+  expect_identical(colnames(cr1$boot), c("X.Intercept.", "x2", "x3", "x4", "x5", "m", "gauge", "r"))
+  expect_identical(colnames(cr2$boot), c("X.Intercept.", "x2", "x3", "x4", "x5", "m", "gauge", "r"))
   expect_identical(colnames(cr3$boot), c("X.Intercept.", "m", "gauge", "r"))
   expect_identical(colnames(cr4$boot), c("x2", "m", "gauge", "r"))
   expect_type(cr1$resamples, "list")
@@ -231,18 +237,25 @@ test_that("case_resampling() works correctly", {
 
   # need to check saturated and convergence (both parallel and not)
   set.seed(10)
-  r <- outlier_detection(data = d, formula = p$setting$formula,
+  r <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", sign_level = 0.05,
                          initial_est = "saturated", iterations = "convergence",
                          convergence_criterion = 0.5, split = 0.5)
   cr5 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence")
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  future::plan(future::cluster, workers = ncores)
+  cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
+  on.exit({
+    future::plan(future::sequential)
+    if (!is.null(cl)) parallel::stopCluster(cl)
+  }, add = TRUE)
+  future::plan(future::cluster, workers = cl)
   set.seed(10)
   cr6 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence",
                          parallel = TRUE)
   future::plan(future::sequential)
+  parallel::stopCluster(cl)
+  cl <- NULL
 
   expect_snapshot_output(cr5)
   expect_snapshot_output(cr6)
@@ -255,11 +268,12 @@ test_that("extract_boot() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
-  r1 <- outlier_detection(data = d, formula = p$setting$formula,
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
+  r1 <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                          ref_dist = "normal", sign_level = 0.05,
                          initial_est = "robustified", iterations = 3)
-  r2 <- outlier_detection(data = d, formula = p$setting$formula,
+  r2 <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                           ref_dist = "normal", sign_level = 0.05,
                           initial_est = "robustified",
                           iterations = "convergence", convergence_criterion = 1)
@@ -283,9 +297,9 @@ test_that("extract_boot() works correctly", {
   expect_identical(NROW(ex1), as.integer(R+1))
   expect_identical(NROW(ex2), as.integer(R+1))
   expect_identical(NROW(ex3), as.integer(R+1))
-  expect_identical(NCOL(ex1), 9L)
-  expect_identical(NCOL(ex2), 9L)
-  expect_identical(NCOL(ex3), 9L)
+  expect_identical(NCOL(ex1), 8L)
+  expect_identical(NCOL(ex2), 8L)
+  expect_identical(NCOL(ex3), 8L)
   expect_identical(ex1$m, rep("m0", times = (R+1)))
   expect_identical(ex2$m, rep("m1", times = (R+1)))
   # for convergence, the recorded iteration m can vary across resamples
@@ -304,11 +318,12 @@ test_that("evaluate_boot() works correctly", {
   skip_on_cran()
 
   p <- generate_param(3, 2, 3, sigma = 2, intercept = TRUE, seed = 42)
-  d <- generate_data(parameters = p, n = 1000)$data
-  r1 <- outlier_detection(data = d, formula = p$setting$formula,
+  # d <- generate_data(parameters = p, n = 1000)$data
+  d <- readRDS(test_path("./testdata/testdata1.rds"))
+  r1 <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                           ref_dist = "normal", sign_level = 0.05,
                           initial_est = "robustified", iterations = 3)
-  r2 <- outlier_detection(data = d, formula = p$setting$formula,
+  r2 <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                           ref_dist = "normal", sign_level = 0.05,
                           initial_est = "robustified",
                           iterations = "convergence", convergence_criterion = 1)
@@ -333,11 +348,11 @@ test_that("evaluate_boot() works correctly", {
   expect_identical(NROW(ev2), 1L)
   expect_identical(NROW(ev3), 1L)
   expect_identical(NROW(ev4), 4L)
-  expect_identical(NCOL(ev0), 9L)
-  expect_identical(NCOL(ev1), 9L)
-  expect_identical(NCOL(ev2), 9L)
-  expect_identical(NCOL(ev3), 9L)
-  expect_identical(NCOL(ev4), 9L)
+  expect_identical(NCOL(ev0), 8L)
+  expect_identical(NCOL(ev1), 8L)
+  expect_identical(NCOL(ev2), 8L)
+  expect_identical(NCOL(ev3), 8L)
+  expect_identical(NCOL(ev4), 8L)
   expect_identical(ev0$m, 0)
   expect_identical(ev1$m, 1)
   expect_identical(ev2$m, 2)
@@ -354,7 +369,7 @@ test_that("evaluate_boot() works correctly", {
   expect_snapshot_output(ev4)
 
   # try saturated
-  r2 <- outlier_detection(data = d, formula = p$setting$formula,
+  r2 <- outlier_detection(data = d, formula = y ~ x2 + x3 + x4 + x5 | x2 + x3 + z4 + z5 + z6,
                           ref_dist = "normal", sign_level = 0.05,
                           initial_est = "saturated", iterations = 1)
   set.seed(10)
@@ -363,7 +378,7 @@ test_that("evaluate_boot() works correctly", {
 
   expect_identical(class(ev5), "data.frame")
   expect_identical(NROW(ev5), 1L)
-  expect_identical(NCOL(ev5), 9L)
+  expect_identical(NCOL(ev5), 8L)
   expect_identical(ev5$m, 1)
   expect_snapshot_output(ev5)
 
