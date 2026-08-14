@@ -97,7 +97,7 @@ test_that("multi_cutoff() works correctly", {
   gamma1 <- c(0.01, 0.02)
   library(doFuture, quietly = TRUE)
   registerDoFuture()
-  cl <- parallelly::makeClusterPSOCK(2)
+  cl <- parallelly::makeClusterPSOCK(2, rscript_libs = .libPaths())
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)

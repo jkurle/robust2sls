@@ -149,7 +149,7 @@ test_that("case_resampling() works correctly", {
   set.seed(10)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallelly::makeClusterPSOCK(ncores)
+  cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)
@@ -244,7 +244,7 @@ test_that("case_resampling() works correctly", {
   cr5 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence")
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallelly::makeClusterPSOCK(ncores)
+  cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)
