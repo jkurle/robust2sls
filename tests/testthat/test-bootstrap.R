@@ -150,32 +150,23 @@ test_that("case_resampling() works correctly", {
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
   print(.libPaths())
-  print(find.package("robust2sls"))
-  lib_robust2sls <- dirname(find.package("robust2sls"))
-  print(lib_robust2sls)
-  cl <- parallelly::makeClusterPSOCK(
-    ncores,
-    rscript_libs = unique(c(lib_robust2sls, .libPaths()))
-  )
+  print(sapply(.libPaths(), function(lib) {
+    file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
+  }))
+  cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)
   }, add = TRUE)
-  parallel::clusterCall(
-    cl = cl,
-    function(x) .libPaths(x),
-    unique(c(lib_robust2sls, .libPaths()))
-  )
+  parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
   future::plan(future::cluster, workers = cl)
   probe_future <- future::future({
     list(
       libs = .libPaths(),
-      pkg = find.package("robust2sls"),
-      pkg_exists = requireNamespace("robust2sls", quietly = TRUE),
       pkg_path = system.file(package = "robust2sls"),
-      meta = file.exists(system.file("Meta", "package.rds",
-                                     package = "robust2sls")),
-      desc = packageDescription("robust2sls")
+      meta = sapply(.libPaths(), function(lib) {
+        file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
+      })
     )
   })
   print(future::value(probe_future))
@@ -268,13 +259,10 @@ test_that("case_resampling() works correctly", {
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
   print(.libPaths())
-  print(find.package("robust2sls"))
-  lib_robust2sls <- dirname(find.package("robust2sls"))
-  print(lib_robust2sls)
-  cl <- parallelly::makeClusterPSOCK(
-    ncores,
-    rscript_libs = unique(c(lib_robust2sls, .libPaths()))
-  )
+  print(sapply(.libPaths(), function(lib) {
+    file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
+  }))
+  cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)
@@ -283,12 +271,11 @@ test_that("case_resampling() works correctly", {
   probe_future <- future::future({
     list(
       libs = .libPaths(),
-      pkg = find.package("robust2sls"),
       pkg_exists = requireNamespace("robust2sls", quietly = TRUE),
       pkg_path = system.file(package = "robust2sls"),
-      meta = file.exists(system.file("Meta", "package.rds",
-                                     package = "robust2sls")),
-      desc = packageDescription("robust2sls")
+      meta = sapply(.libPaths(), function(lib) {
+        file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
+      })
     )
   })
   print(future::value(probe_future))

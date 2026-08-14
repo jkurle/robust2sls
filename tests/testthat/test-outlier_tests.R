@@ -98,13 +98,10 @@ test_that("multi_cutoff() works correctly", {
   library(doFuture, quietly = TRUE)
   registerDoFuture()
   print(.libPaths())
-  print(find.package("robust2sls"))
-  lib_robust2sls <- dirname(find.package("robust2sls"))
-  print(lib_robust2sls)
-  cl <- parallelly::makeClusterPSOCK(
-    2,
-    rscript_libs = unique(c(lib_robust2sls, .libPaths()))
-  )
+  print(sapply(.libPaths(), function(lib) {
+    file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
+  }))
+  cl <- parallelly::makeClusterPSOCK(2, rscript_libs = .libPaths())
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)
@@ -113,12 +110,10 @@ test_that("multi_cutoff() works correctly", {
   probe_future <- future::future({
     list(
       libs = .libPaths(),
-      pkg = find.package("robust2sls"),
-      pkg_exists = requireNamespace("robust2sls", quietly = TRUE),
       pkg_path = system.file(package = "robust2sls"),
-      meta = file.exists(system.file("Meta", "package.rds",
-                                     package = "robust2sls")),
-      desc = packageDescription("robust2sls")
+      meta = sapply(.libPaths(), function(lib) {
+        file.exists(file.path(lib, "robust2sls", "Meta", "package.rds"))
+      })
     )
   })
   print(future::value(probe_future))
