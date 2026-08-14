@@ -493,14 +493,14 @@ test_that("iis_init() works corectly", {
   expect_warning(iis8 <- iis_init(data = d, formula = formula, gamma = gamma, overid = 0.01)) # not overid
 
   # snapshot outputs
-  expect_snapshot_output(iis1)
-  expect_snapshot_output(iis2)
-  expect_snapshot_output(iis3)
-  expect_snapshot_output(iis4)
-  expect_snapshot_output(iis5)
-  expect_snapshot_output(iis6)
-  expect_snapshot_output(iis7)
-  expect_snapshot_output(iis8)
+  expect_snapshot_output(norm_snap(iis1))
+  expect_snapshot_output(norm_snap(iis2))
+  expect_snapshot_output(norm_snap(iis3))
+  expect_snapshot_output(norm_snap(iis4))
+  expect_snapshot_output(norm_snap(iis5))
+  expect_snapshot_output(norm_snap(iis6))
+  expect_snapshot_output(norm_snap(iis7))
+  expect_snapshot_output(norm_snap(iis8))
 
 })
 

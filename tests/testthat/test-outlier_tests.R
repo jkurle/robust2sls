@@ -907,6 +907,13 @@ test_that("suptest() works correctly", {
 
   a <- suptest(models, alpha = 0.05, iteration = 0, p = c(0.1, 0.5, 0.9))
   b <- suptest(models, alpha = 0.1, iteration = 1)
+  # pvalue is simulated, can differ slightly by OS
+  expect_true(abs(a$pval - 0.08828) <= 0.01)
+  expect_true(abs(b$pval - 0.09846) <= 0.01)
+  expect_false(a$reject)
+  expect_true(b$reject)
+  a$pval <- NA_real_
+  b$pval <- NA_real_
   expect_snapshot_output(a)
   expect_snapshot_output(b)
 
@@ -944,7 +951,12 @@ test_that("suptest() works correctly", {
                          max_iter = 20)
   # so that notice if input changes, might not be change in suptest
   expect_snapshot_output(models)
+  # pvalue is simulated, can differ slightly by OS
   a <- suptest(models, alpha = 0.05, iteration = "convergence")
+  # pvalue is simulated, can differ slightly by OS
+  expect_true(abs(a$pval - 0.11954) <= 0.01)
+  expect_false(a$reject)
+  a$pval <- NA_real_
   expect_snapshot_output(a)
 
   # 0.01 converges at 4, 0.02 at 3, 0.03 at 3, 0.04 at 3, 0.05 at 6
