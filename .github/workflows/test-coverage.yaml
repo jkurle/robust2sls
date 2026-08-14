@@ -37,7 +37,9 @@ jobs:
         run: |
           testthat::set_max_fails(Inf)
           coverage <- covr::package_coverage(
-            function_exclusions = c("estimate_param$", "plot\\.robust2sls$")
+            function_exclusions = c("estimate_param$", "plot\\.robust2sls$"),
+            install_path = file.path(tempdir(), "covr-install"),
+            clean = FALSE
           )
           print(coverage)
           covr::codecov(coverage = coverage, quiet = FALSE)

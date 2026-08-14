@@ -111,7 +111,15 @@ test_that("multi_cutoff() works correctly", {
   }, add = TRUE)
   plan(cluster, workers = cl)
   probe_future <- future::future({
-    list(libs = .libPaths(), robust2sls = find.package("robust2sls"))
+    list(
+      libs = .libPaths(),
+      pkg = find.package("robust2sls"),
+      pkg_exists = requireNamespace("robust2sls", quietly = TRUE),
+      pkg_path = system.file(package = "robust2sls"),
+      meta = file.exists(system.file("Meta", "package.rds",
+                                     package = "robust2sls")),
+      desc = packageDescription("robust2sls")
+    )
   })
   print(future::value(probe_future))
   a0 <- multi_cutoff(gamma = gamma1, data = d, formula = f, ref_dist = "normal",

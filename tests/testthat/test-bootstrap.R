@@ -168,7 +168,15 @@ test_that("case_resampling() works correctly", {
   )
   future::plan(future::cluster, workers = cl)
   probe_future <- future::future({
-    list(libs = .libPaths(), robust2sls = find.package("robust2sls"))
+    list(
+      libs = .libPaths(),
+      pkg = find.package("robust2sls"),
+      pkg_exists = requireNamespace("robust2sls", quietly = TRUE),
+      pkg_path = system.file(package = "robust2sls"),
+      meta = file.exists(system.file("Meta", "package.rds",
+                                     package = "robust2sls")),
+      desc = packageDescription("robust2sls")
+    )
   })
   print(future::value(probe_future))
   cr11 <- case_resampling(robust2sls_object = r, R = 10, parallel = TRUE)
@@ -273,7 +281,15 @@ test_that("case_resampling() works correctly", {
   }, add = TRUE)
   future::plan(future::cluster, workers = cl)
   probe_future <- future::future({
-    list(libs = .libPaths(), robust2sls = find.package("robust2sls"))
+    list(
+      libs = .libPaths(),
+      pkg = find.package("robust2sls"),
+      pkg_exists = requireNamespace("robust2sls", quietly = TRUE),
+      pkg_path = system.file(package = "robust2sls"),
+      meta = file.exists(system.file("Meta", "package.rds",
+                                     package = "robust2sls")),
+      desc = packageDescription("robust2sls")
+    )
   })
   print(future::value(probe_future))
   set.seed(10)
