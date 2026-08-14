@@ -149,13 +149,28 @@ test_that("case_resampling() works correctly", {
   set.seed(10)
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
+  print(.libPaths())
+  print(find.package("robust2sls"))
+  lib_robust2sls <- dirname(find.package("robust2sls"))
+  print(lib_robust2sls)
+  cl <- parallelly::makeClusterPSOCK(
+    ncores,
+    rscript_libs = unique(c(lib_robust2sls, .libPaths()))
+  )
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)
   }, add = TRUE)
-  parallel::clusterCall(cl = cl, function(x) .libPaths(x), .libPaths())
+  parallel::clusterCall(
+    cl = cl,
+    function(x) .libPaths(x),
+    unique(c(lib_robust2sls, .libPaths()))
+  )
   future::plan(future::cluster, workers = cl)
+  probe_future <- future::future({
+    list(libs = .libPaths(), robust2sls = find.package("robust2sls"))
+  })
+  print(future::value(probe_future))
   cr11 <- case_resampling(robust2sls_object = r, R = 10, parallel = TRUE)
   # only one iteration
   cr21 <- case_resampling(robust2sls_object = r, R = 10, m = 1, parallel = TRUE)
@@ -244,12 +259,23 @@ test_that("case_resampling() works correctly", {
   cr5 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence")
   ncores <- min(max(parallel::detectCores() - 1, 1), 2)
   doFuture::registerDoFuture()
-  cl <- parallelly::makeClusterPSOCK(ncores, rscript_libs = .libPaths())
+  print(.libPaths())
+  print(find.package("robust2sls"))
+  lib_robust2sls <- dirname(find.package("robust2sls"))
+  print(lib_robust2sls)
+  cl <- parallelly::makeClusterPSOCK(
+    ncores,
+    rscript_libs = unique(c(lib_robust2sls, .libPaths()))
+  )
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)
   }, add = TRUE)
   future::plan(future::cluster, workers = cl)
+  probe_future <- future::future({
+    list(libs = .libPaths(), robust2sls = find.package("robust2sls"))
+  })
+  print(future::value(probe_future))
   set.seed(10)
   cr6 <- case_resampling(robust2sls_object = r, R = 10, m = "convergence",
                          parallel = TRUE)

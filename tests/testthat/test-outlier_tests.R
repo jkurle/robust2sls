@@ -97,12 +97,23 @@ test_that("multi_cutoff() works correctly", {
   gamma1 <- c(0.01, 0.02)
   library(doFuture, quietly = TRUE)
   registerDoFuture()
-  cl <- parallelly::makeClusterPSOCK(2, rscript_libs = .libPaths())
+  print(.libPaths())
+  print(find.package("robust2sls"))
+  lib_robust2sls <- dirname(find.package("robust2sls"))
+  print(lib_robust2sls)
+  cl <- parallelly::makeClusterPSOCK(
+    2,
+    rscript_libs = unique(c(lib_robust2sls, .libPaths()))
+  )
   on.exit({
     future::plan(future::sequential)
     if (!is.null(cl)) parallel::stopCluster(cl)
   }, add = TRUE)
   plan(cluster, workers = cl)
+  probe_future <- future::future({
+    list(libs = .libPaths(), robust2sls = find.package("robust2sls"))
+  })
+  print(future::value(probe_future))
   a0 <- multi_cutoff(gamma = gamma1, data = d, formula = f, ref_dist = "normal",
                      initial_est = "robustified", iterations = 0)
   plan(sequential)
